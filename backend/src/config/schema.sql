@@ -3,9 +3,6 @@
 -- Agency: D-GROW Marketing Agency
 -- =========================================================
 
-CREATE DATABASE IF NOT EXISTS dgrow_invoice_db;
-USE dgrow_invoice_db;
-
 -- 1. Roles Table
 CREATE TABLE IF NOT EXISTS roles (
   id INT AUTO_INCREMENT PRIMARY KEY,

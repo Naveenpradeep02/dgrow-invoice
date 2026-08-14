@@ -9,11 +9,11 @@ let sqliteDb = null;
 
 // Initial setup helper
 async function initDatabase() {
-  const host = process.env.DB_HOST || 'localhost';
-  const user = process.env.DB_USER || 'root';
-  const password = process.env.DB_PASSWORD || '';
-  const database = process.env.DB_NAME || 'dgrow_invoice_db';
-  const port = process.env.DB_PORT || 3306;
+  const host = process.env.DB_HOST;
+  const user = process.env.DB_USER;
+  const password = process.env.DB_PASSWORD;
+  const database = process.env.DB_NAME;
+  const port = process.env.DB_PORT;
 
   try {
     // Attempt MySQL connection
@@ -36,7 +36,7 @@ async function initDatabase() {
       const schemaSql = fs.readFileSync(schemaPath, 'utf8');
       await connection.query(schemaSql);
     }
-    
+
     // Add preset_services_json column if missing
     try {
       await connection.query("ALTER TABLE clients ADD COLUMN preset_services_json TEXT NULL");

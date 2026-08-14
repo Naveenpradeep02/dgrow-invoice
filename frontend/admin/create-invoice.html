@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Invoice - D-GROW Invoice System</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item active"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item"><a href="audit.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> Audit Trail</a></li>
+        <li class="nav-item"><a href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</a></li>
+      </ul>
+      <div class="sidebar-user">
+        <div class="user-info"><p id="sidebarUserName">Admin</p><span id="sidebarUserRole">ADMIN</span></div>
+        <button class="btn-logout" onclick="handleLogout()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Create New Invoice</h1>
+          <p>Generate a professional GST or Non-GST invoice with itemized services.</p>
+        </div>
+      </div>
+
+      <form id="createInvoiceForm">
+        <div class="card">
+          <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; color:var(--primary);">1. Invoice Header & Type</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Invoice Type</label>
+              <select id="invoice_type" class="form-select" onchange="onInvoiceTypeChange()">
+                <option value="GST">GST Invoice (INV00..)</option>
+                <option value="GST_CLIENT">GST Invoice for Client (INC00..)</option>
+                <option value="NON_GST">Non-GST Invoice (IND00..)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Invoice Number</label>
+              <input type="text" id="invoice_number" class="form-input" readonly style="font-weight:700; background-color:rgba(0,0,0,0.02);">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Invoice Date</label>
+              <input type="date" id="invoice_date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Due Date</label>
+              <input type="date" id="due_date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Place of Supply</label>
+              <select id="place_of_supply" class="form-select">
+                <option value="Tamil Nadu">Tamil Nadu - Intra-state (CGST + SGST)</option>
+                <option value="Karnataka">Karnataka - Inter-state (IGST)</option>
+                <option value="Maharashtra">Maharashtra - Inter-state (IGST)</option>
+                <option value="Delhi">Delhi - Inter-state (IGST)</option>
+                <option value="Other State">Other State - Inter-state (IGST)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Payment Terms</label>
+              <input type="text" id="payment_terms_text" class="form-input" value="100% payment in advance">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; color:var(--primary);">2. Select Client</h3>
+          <div class="form-group">
+            <label class="form-label">Client Company</label>
+            <select id="client_id" class="form-select" required>
+              <option value="">Loading clients...</option>
+            </select>
+          </div>
+          <div id="clientPreviewBox" style="display:none; padding:1rem; background-color:var(--bg-dark); border-radius:var(--radius-md); border:1px dashed var(--border-color); margin-top:0.75rem;">
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+            <h3 style="font-size: 1.1rem; color:var(--primary);">3. Service Line Items</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addInvoiceItemRow()">＋ Add Item</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table" style="min-width:700px;">
+              <thead>
+                <tr>
+                  <th style="width:34%;">Service & Sub-Services Details</th>
+                  <th style="width:12%;">SAC Code</th>
+                  <th style="width:9%;">Qty</th>
+                  <th style="width:14%;">Rate (₹)</th>
+                  <th class="gst-col" style="width:9%;">GST %</th>
+                  <th style="width:14%;">Amount (₹)</th>
+                  <th style="width:8%;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="itemsTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:2rem; margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--border-color);">
+            <div>
+              <div class="form-group">
+                <label class="form-label">Invoice Notes</label>
+                <textarea id="notes" class="form-textarea" rows="3" placeholder="Thanks for your business."></textarea>
+              </div>
+            </div>
+            <div>
+              <div style="background-color:#f8fafc; padding:1.25rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                  <span class="text-muted">Sub Total:</span>
+                  <strong id="summarySubtotal">₹0</strong>
+                </div>
+                <div id="summaryCgstRow" style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                  <span class="text-muted">CGST 9%:</span>
+                  <span id="summaryCgst">₹0</span>
+                </div>
+                <div id="summarySgstRow" style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                  <span class="text-muted">SGST 9%:</span>
+                  <span id="summarySgst">₹0</span>
+                </div>
+                <div id="summaryIgstRow" style="display:none; justify-content:space-between; margin-bottom:0.5rem;">
+                  <span class="text-muted">IGST 18%:</span>
+                  <span id="summaryIgst">₹0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding-top:0.75rem; border-top:1px solid var(--border-color); font-size:1.2rem;">
+                  <strong style="color:var(--text-main);">Grand Total:</strong>
+                  <strong id="summaryGrandTotal" style="color:var(--primary);">₹0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:1rem; margin-bottom:3rem;">
+          <a href="invoices.html" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary" style="padding:0.75rem 2rem;">Save & Issue Invoice</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/invoice.js"></script>
+  <script>
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('invoice_date').value = today;
+    document.getElementById('due_date').value = today;
+  </script>
+</body>
+</html>

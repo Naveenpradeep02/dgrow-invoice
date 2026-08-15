@@ -38,8 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function getAppPathPrefix() {
-  if (window.location.pathname.includes('/frontend/')) {
-    return '/frontend';
+  const path = window.location.pathname;
+  const match = path.match(/^(.*?)(\/(?:admin|client|auditor|login\.html|index\.html|$))/i);
+  if (match && match[1]) {
+    return match[1].replace(/\/+$/, '');
   }
   return '';
 }

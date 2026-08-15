@@ -5,11 +5,6 @@
 # Enable Rewrite Engine
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
-
-    # If the request starts with /frontend/, redirect to root path
-    RewriteCond %{REQUEST_URI} ^/frontend/(.*)$ [NC]
-    RewriteRule ^frontend/(.*)$ /$1 [R=301,L]
 
     # Serve existing files and directories directly
     RewriteCond %{REQUEST_FILENAME} -f [OR]

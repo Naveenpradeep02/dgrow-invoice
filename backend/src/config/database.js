@@ -62,6 +62,13 @@ async function initDatabase() {
       // Column already exists
     }
 
+    // Ensure invoice_type column accommodates GST, GST_CLIENT, and NON_GST
+    try {
+      await connection.query("ALTER TABLE invoices MODIFY COLUMN invoice_type VARCHAR(20) DEFAULT 'GST'");
+    } catch (e) {
+      // Error adjusting column
+    }
+
     connection.release();
     console.log(`[DB] Successfully connected to MySQL database '${database}'`);
   } catch (err) {

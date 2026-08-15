@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS invoice_sequences (
 CREATE TABLE IF NOT EXISTS invoices (
   id INT AUTO_INCREMENT PRIMARY KEY,
   invoice_number VARCHAR(50) NOT NULL UNIQUE,
-  invoice_type ENUM('GST', 'NON_GST') DEFAULT 'GST',
+  invoice_type ENUM('GST', 'GST_CLIENT', 'NON_GST') DEFAULT 'GST',
   client_id INT NOT NULL,
   client_snapshot_json LONGTEXT NOT NULL,
   place_of_supply VARCHAR(100) DEFAULT 'Tamil Nadu (33)',

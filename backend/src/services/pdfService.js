@@ -225,7 +225,7 @@ function generateInvoicePDF(res, invoiceData) {
   doc.text(`₹${formatMoney(invoice.subtotal)}`, 450, rightY, { width: 105, align: 'right' });
   rightY += 14;
 
-  if (invoice.invoice_type === 'GST') {
+  if (invoice.invoice_type === 'GST' || invoice.invoice_type === 'GST_CLIENT') {
     if (invoice.cgst_amount > 0) {
       doc.text(`CGST ${invoice.cgst_rate}%`, 370, rightY);
       doc.text(`₹${formatMoney(invoice.cgst_amount)}`, 450, rightY, { width: 105, align: 'right' });

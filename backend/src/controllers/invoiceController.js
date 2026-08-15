@@ -340,15 +340,47 @@ async function createInvoice(req, res) {
 
     // Transaction execution
     const newInvoiceId = await db.transaction(async (tx) => {
-      // Fetch and increment sequence
-      const seq = await tx.execute('SELECT * FROM invoice_sequences WHERE id = 1');
-      const prefix = seq[0] ? seq[0].prefix : 'INV';
-      const lastNum = seq[0] ? seq[0].last_number : 0;
-      const nextNum = lastNum + 1;
+      // Determine prefix based on invoice_type
+      let prefix = 'INV';
+      let searchPattern = 'INV%';
+
+      if (invoice_type === 'GST_CLIENT') {
+        prefix = 'INC';
+        searchPattern = 'INC%';
+      } else if (invoice_type === 'NON_GST') {
+        prefix = 'IND';
+        searchPattern = 'IND%';
+      } else {
+        prefix = 'INV';
+        searchPattern = 'INV%';
+      }
+
+      // Fetch existing invoices for this prefix to calculate next sequence accurately
+      const rows = await tx.execute('SELECT invoice_number FROM invoices WHERE invoice_number LIKE ?', [searchPattern]);
+      let maxNum = 0;
+      if (rows && rows.length > 0) {
+        rows.forEach(r => {
+          if (r.invoice_number) {
+            const numStr = r.invoice_number.replace(/^[A-Z]+/, '');
+            const n = parseInt(numStr, 10);
+            if (!isNaN(n) && n > maxNum) {
+              maxNum = n;
+            }
+          }
+        });
+      }
+
+      const nextNum = maxNum + 1;
       const padded = String(nextNum).padStart(4, '0');
       const invoiceNumber = `${prefix}${padded}`;
 
-      await tx.execute('UPDATE invoice_sequences SET last_number = ? WHERE id = 1', [nextNum]);
+      if (prefix === 'INV') {
+        try {
+          await tx.execute('UPDATE invoice_sequences SET last_number = ? WHERE id = 1', [nextNum]);
+        } catch (seqErr) {
+          // Sequence table update
+        }
+      }
 
       const sqlInv = `
         INSERT INTO invoices (

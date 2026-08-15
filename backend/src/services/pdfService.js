@@ -45,6 +45,32 @@ function hasValidGSTIN(clientGstin, agencyGstin = '') {
   return true;
 }
 
+function formatAddress3Lines(client = {}) {
+  const rawAddr = (client.address || '').trim().replace(/,\s*$/, '');
+  const cityPin = [client.city, client.pincode].filter(Boolean).join(' - ');
+  const stateStr = (client.state || 'Tamil Nadu').replace(/\s*\(\d+\)/g, '').trim();
+  const line3 = [cityPin, stateStr ? `${stateStr}, India.` : 'India.'].filter(Boolean).join(', ');
+
+  if (!rawAddr) {
+    return [line3].filter(Boolean);
+  }
+
+  if (rawAddr.includes('\n')) {
+    return [...rawAddr.split('\n').map(l => l.trim()).filter(Boolean), line3];
+  }
+
+  const parts = rawAddr.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length <= 2 || rawAddr.length < 40) {
+    const l1 = rawAddr.endsWith(',') ? rawAddr : rawAddr + ',';
+    return [l1, line3];
+  }
+
+  const mid = Math.ceil(parts.length / 2);
+  const line1 = parts.slice(0, mid).join(', ') + ',';
+  const line2 = parts.slice(mid).join(', ') + ',';
+  return [line1, line2, line3];
+}
+
 function generateInvoicePDF(res, invoiceData) {
   const { invoice, items = [], company = {}, terms = {} } = invoiceData;
 
@@ -105,11 +131,11 @@ function generateInvoicePDF(res, invoiceData) {
   doc.text('Place of Supply', 300, y);
   doc.font('Helvetica').text(': ' + (invoice.place_of_supply || 'Tamil Nadu').replace(/\s*\(\d+\)/g, ''), 380, y);
 
-  // Bill To Box Header
-  // --- BILL TO SECTION ---
+  // Billed To Box Header
+  // --- BILLED TO SECTION ---
   y += 62;
   doc.rect(30, y, 535, 18).fill('#f1f5f9').strokeColor('#d1d5db').lineWidth(0.5).stroke();
-  doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('Bill To', 38, y + 4);
+  doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('Billed To', 38, y + 4);
 
   const client = invoice.client_snapshot || {};
   
@@ -117,22 +143,13 @@ function generateInvoicePDF(res, invoiceData) {
   let boxY = y + 18;
 
   // Left Column
-  doc.fontSize(8.5).fillColor('#111827');
-  doc.font('Helvetica').text('Dear,', 38, leftY);
-  leftY += 12;
-  
   doc.font('Helvetica-Bold').fontSize(9).fillColor('#000000').text(client.company_name || 'Client Name', 38, leftY);
   leftY += 13;
 
   doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#111827').text('Address:', 38, leftY);
   leftY += 12;
 
-  let fullAddrStr = `${client.address || ''}`;
-  if (client.city || client.pincode) {
-    fullAddrStr += `\n${client.city || ''}${client.pincode ? '-' + client.pincode + '.' : ''}`;
-  }
-  fullAddrStr += `\n${(client.state || 'Tamil Nadu').replace(/\s*\(\d+\)/g, '')}, India.`;
-
+  const fullAddrStr = formatAddress3Lines(client).join('\n');
   doc.font('Helvetica').fontSize(8.5).fillColor('#1f2937').text(fullAddrStr, 38, leftY, { width: 300, lineGap: 2 });
 
   // Right Column

@@ -50,6 +50,32 @@ function hasValidGSTIN(clientGstin, agencyGstin = '') {
   return true;
 }
 
+function formatAddress3Lines(client = {}) {
+  const rawAddr = (client.address || '').trim().replace(/,\s*$/, '');
+  const cityPin = [client.city, client.pincode].filter(Boolean).join(' - ');
+  const stateStr = (client.state || 'Tamil Nadu').replace(/\s*\(\d+\)/g, '').trim();
+  const line3 = [cityPin, stateStr ? `${stateStr}, India.` : 'India.'].filter(Boolean).join(', ');
+
+  if (!rawAddr) {
+    return [line3].filter(Boolean);
+  }
+
+  if (rawAddr.includes('\n')) {
+    return [...rawAddr.split('\n').map(l => l.trim()).filter(Boolean), line3];
+  }
+
+  const parts = rawAddr.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length <= 2 || rawAddr.length < 40) {
+    const l1 = rawAddr.endsWith(',') ? rawAddr : rawAddr + ',';
+    return [l1, line3];
+  }
+
+  const mid = Math.ceil(parts.length / 2);
+  const line1 = parts.slice(0, mid).join(', ') + ',';
+  const line2 = parts.slice(mid).join(', ') + ',';
+  return [line1, line2, line3];
+}
+
 function renderSubDetailRowHTML(text = '') {
   return `
     <div class="subdetail-row" style="display:flex; align-items:center; gap:0.35rem; margin-top:0.25rem;">
@@ -824,19 +850,14 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
         </div>
       </div>
 
-      <!-- Bill To -->
+      <!-- Billed To -->
       <div class="inv-bill-to">
-        <div class="inv-bill-header">Bill To</div>
+        <div class="inv-bill-header">Billed To</div>
         <div class="inv-bill-body">
           <div class="inv-bill-left">
-            <div class="inv-client-person">Dear,</div>
             <div class="inv-client-name">${client.company_name || 'Client Name'}</div>
             <div class="inv-client-address-title"><strong>Address:</strong></div>
-            <div class="inv-client-address-text">
-              ${client.address ? `${client.address}<br>` : ''}
-              ${client.city || ''}${client.pincode ? '-' + client.pincode + '.' : ''}<br>
-              ${(client.state || 'Tamil Nadu').replace(/\s*\(\d+\)/g, '')}, India.
-            </div>
+            <div class="inv-client-address-text">${formatAddress3Lines(client).join('<br>')}</div>
           </div>
           <div class="inv-bill-right">
             <div><strong>Mobile Number:</strong> ${client.mobile || ''}</div>

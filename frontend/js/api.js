@@ -1,8 +1,10 @@
 // D-GROW API Helper & Utilities
 
-// If served directly from Express on port 5000 locally, use relative '/api', otherwise use the live backend URL
-const isLocalExpress = window.location.hostname === 'localhost' && window.location.port === '5000';
-const API_BASE = isLocalExpress ? '/api' : 'https://dgrow-invoice.onrender.com/api';
+// API Base URL detection for local development (Live Server port 5500 / Express port 5000) and production (Render)
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE = isLocalhost
+  ? (window.location.port === '5000' ? '/api' : 'http://localhost:5000/api')
+  : 'https://dgrow-invoice.onrender.com/api';
 
 function getToken() {
   return localStorage.getItem('dgrow_token');

@@ -790,7 +790,7 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
   if (!container) return;
 
   const client = invoice.client_snapshot || {};
-  const isGST = invoice.invoice_type === 'GST';
+  const isGST = (invoice.invoice_type === 'GST' || invoice.invoice_type === 'GST_CLIENT');
 
   container.innerHTML = `
     <div class="invoice-sheet" id="printableInvoice">

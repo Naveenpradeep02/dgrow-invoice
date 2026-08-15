@@ -1,0 +1,19 @@
+# ----------------------------------------------------------------------
+# D-GROW Marketing Agency Invoice Portal - Root .htaccess
+# ----------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # If frontend folder exists, rewrite root requests to frontend/
+    RewriteCond %{REQUEST_URI} !^/frontend/
+    RewriteCond %{DOCUMENT_ROOT}/frontend/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/frontend/$1 -d
+    RewriteRule ^(.*)$ frontend/$1 [L]
+
+    # Redirect root to login.html or frontend/login.html
+    RewriteRule ^$ frontend/login.html [L]
+</IfModule>
+
+Options -Indexes

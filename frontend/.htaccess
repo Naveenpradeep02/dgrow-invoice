@@ -1,0 +1,71 @@
+# ----------------------------------------------------------------------
+# D-GROW Marketing Agency Invoice Portal - Hostinger .htaccess
+# ----------------------------------------------------------------------
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # If the request starts with /frontend/, redirect to root path
+    RewriteCond %{REQUEST_URI} ^/frontend/(.*)$ [NC]
+    RewriteRule ^frontend/(.*)$ /$1 [R=301,L]
+
+    # Serve existing files and directories directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Default entry points
+    DirectoryIndex index.html login.html
+</IfModule>
+
+# ----------------------------------------------------------------------
+# Security & Headers
+# ----------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Disable Directory Browsing
+Options -Indexes
+
+# ----------------------------------------------------------------------
+# MIME Types & Charset
+# ----------------------------------------------------------------------
+AddDefaultCharset UTF-8
+<IfModule mod_mime.c>
+    AddType text/html .html
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType application/json .json
+    AddType image/png .png
+    AddType image/jpeg .jpg .jpeg
+    AddType image/svg+xml .svg
+    AddType application/pdf .pdf
+</IfModule>
+
+# ----------------------------------------------------------------------
+# Browser Caching
+# ----------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+# ----------------------------------------------------------------------
+# Gzip Compression
+# ----------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json
+</IfModule>

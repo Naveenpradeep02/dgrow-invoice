@@ -1,7 +1,8 @@
 // D-GROW API Helper & Utilities
 
-const isLiveServer = window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:';
-const API_BASE = isLiveServer ? 'http://localhost:5000/api' : '/api';
+// If served directly from Express on port 5000 locally, use relative '/api', otherwise use the live backend URL
+const isLocalExpress = window.location.hostname === 'localhost' && window.location.port === '5000';
+const API_BASE = isLocalExpress ? '/api' : 'https://dgrow-invoice.onrender.com/api';
 
 function getToken() {
   return localStorage.getItem('dgrow_token');
@@ -39,19 +40,27 @@ async function apiFetch(endpoint, options = {}) {
       headers
     });
 
-    const data = await res.json();
+    const contentType = res.headers.get('content-type') || '';
+    let data;
+    if (contentType.includes('application/json')) {
+      data = await res.json();
+    } else {
+      const text = await res.text();
+      data = { message: res.ok ? text : `Server returned status ${res.status}` };
+    }
 
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) {
-        if (window.location.pathname !== '/login.html') {
+        if (!window.location.pathname.includes('/login.html')) {
           showToast(data.message || 'Session expired. Please login again.', 'error');
           setTimeout(() => {
             clearAuthSession();
-            window.location.href = '/login.html';
+            const prefix = window.location.pathname.includes('/frontend/') ? '/frontend' : '';
+            window.location.href = `${prefix}/login.html`;
           }, 1200);
         }
       }
-      throw new Error(data.message || 'API request failed');
+      throw new Error(data.message || `Request failed (${res.status})`);
     }
 
     return data;

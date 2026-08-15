@@ -37,8 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuthGuard();
 });
 
+function getAppPathPrefix() {
+  if (window.location.pathname.includes('/frontend/')) {
+    return '/frontend';
+  }
+  return '';
+}
+
 function redirectUserByRole(role) {
-  const prefix = (window.location.port === '5500' || window.location.port === '5501') ? '/frontend' : '';
+  const prefix = getAppPathPrefix();
   if (role === 'ADMIN') {
     window.location.href = `${prefix}/admin/dashboard.html`;
   } else if (role === 'CLIENT') {
@@ -53,7 +60,7 @@ function redirectUserByRole(role) {
 function checkAuthGuard() {
   const user = getUser();
   const path = window.location.pathname;
-  const prefix = (window.location.port === '5500' || window.location.port === '5501') ? '/frontend' : '';
+  const prefix = getAppPathPrefix();
 
   if (path === '/' || path === '/index.html' || path === '/frontend/' || path === '/frontend/index.html') {
     if (user) {
@@ -94,7 +101,7 @@ function checkAuthGuard() {
 }
 
 function handleLogout() {
-  const prefix = (window.location.port === '5500' || window.location.port === '5501') ? '/frontend' : '';
+  const prefix = getAppPathPrefix();
   clearAuthSession();
   window.location.href = `${prefix}/login.html`;
 }

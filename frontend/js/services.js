@@ -13,7 +13,7 @@ async function loadServices() {
   if (!tbody) return;
 
   try {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading services...</td></tr>';
+    tbody.innerHTML = renderTableLoader(5, 'Loading services...');
     const res = await apiFetch('/services');
 
     if (!res.services || res.services.length === 0) {

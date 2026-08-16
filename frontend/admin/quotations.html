@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotations & Estimates - D-GROW Invoice System</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="../css/invoice.css">
+  <style>
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-md, 8px);
+      padding: 1.15rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .stat-card .stat-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-card .stat-value {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: var(--text-main, #0f172a);
+      line-height: 1.2;
+    }
+    .stat-card .stat-meta {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    /* Badges */
+    .status-badge-draft { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .status-badge-sent { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .status-badge-approved { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .status-badge-converted { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .status-badge-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    .client-type-lead {
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #ffedd5;
+      font-size: 0.7rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .client-type-onboarded {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #dcfce7;
+      font-size: 0.7rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .icon-action-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-action-btn:hover {
+      background: #f1f5f9;
+      color: var(--primary, #e11d48);
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .negotiate-pill-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+    }
+
+    /* Modal Perfect Alignment System */
+    .modal-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(15, 23, 42, 0.65) !important;
+      backdrop-filter: blur(4px) !important;
+      z-index: 99999 !important;
+      display: none !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 1.25rem !important;
+      box-sizing: border-box !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+    .modal-overlay.active {
+      display: flex !important;
+    }
+    .modal-box {
+      background: #ffffff !important;
+      border-radius: 10px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 720px !important;
+      max-height: 88vh !important;
+      margin: auto !important;
+      padding: 1.25rem 1.5rem !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+
+    .modal-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.65rem;
+    }
+    .modal-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.65rem;
+    }
+    .modal-grid-2 > *, .modal-grid-3 > * {
+      min-width: 0 !important;
+    }
+
+    .modal-box .form-input,
+    .modal-box .form-select,
+    .modal-box textarea {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Print styling */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printableQuotation, #printableQuotation * {
+        visibility: visible;
+      }
+      #printableQuotation {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item active"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
+        <li class="nav-item"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item"><a href="salary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Salary</a></li>
+        <li class="nav-item"><a href="miscellaneous.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Miscellaneous</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search quotations, leads, clients..." id="globalQuickSearch" onkeydown="handleGlobalSearch(event)">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell with Dropdown -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)" title="Notifications">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount">2</span>
+            </button>
+            
+            <div class="nav-dropdown-menu notif-dropdown-menu" id="notifDropdownMenu">
+              <div class="notif-header">
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <h4 style="margin:0; font-size:0.92rem; font-weight:700; color:var(--text-main);">Notifications</h4>
+                  <span class="badge" style="background:#fee2e2; color:#dc2626; font-size:0.7rem; font-weight:700; padding:0.15rem 0.45rem;">2 Proposals</span>
+                </div>
+                <button type="button" class="notif-clear-btn" onclick="clearAllNotifications()">Mark all read</button>
+              </div>
+              <div class="notif-list" id="topbarNotifList">
+                <div class="notif-item unread">
+                  <div class="notif-icon invoice">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg>
+                  </div>
+                  <div class="notif-body">
+                    <p class="notif-title">Quotation Proposal Sent</p>
+                    <span class="notif-desc">QUO002 submitted to Zenith Retail Brands</span>
+                    <span class="notif-time">Today</span>
+                  </div>
+                </div>
+                <div class="notif-item unread">
+                  <div class="notif-icon payment">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8M8 8h.01M16 16h.01"/></svg>
+                  </div>
+                  <div class="notif-body">
+                    <p class="notif-title">Negotiation Discount Updated</p>
+                    <span class="notif-desc">8% discount approved for Apex Tech Labs</span>
+                    <span class="notif-time">1 hr ago</span>
+                  </div>
+                </div>
+              </div>
+              <div class="notif-footer">
+                <a href="notifications.html" style="display:inline-flex; align-items:center; justify-content:center; gap:0.35rem; width:100%;">Show all notifications →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile Dropdown Menu with Logout -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" id="userProfileToggleBtn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle">
+                <span id="topbarUserInitials">AD</span>
+              </div>
+              <div class="topbar-user-text">
+                <span class="user-name" id="topbarUserName">D-GROW Admin</span>
+                <span class="user-role-badge" id="topbarUserRole">ADMIN</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <div class="nav-dropdown-menu profile-dropdown-menu" id="profileDropdownMenu">
+              <div class="profile-dropdown-header">
+                <div class="profile-avatar-large">
+                  <span id="dropdownAvatarInitials">AD</span>
+                </div>
+                <div class="profile-header-info">
+                  <strong id="dropdownUserName">D-GROW Admin</strong>
+                  <span id="dropdownUserEmail">admin@dgrow.com</span>
+                  <span class="badge badge-paid" style="margin-top:0.25rem; font-size:0.7rem; align-self:flex-start;" id="dropdownUserRole">ADMIN ROLE</span>
+                </div>
+              </div>
+              
+              <div class="profile-dropdown-body">
+                <a href="settings.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Agency Settings
+                </a>
+                <a href="audit.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                  Audit Trail
+                </a>
+              </div>
+
+              <div class="profile-dropdown-footer">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="logout()" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Logout Securely
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Quotations & Lead Proposals</h1>
+          <p>Create quotations for non-onboarded leads, negotiate percentages, and convert approved estimates directly to Invoices while onboarding clients.</p>
+        </div>
+        <div class="page-actions">
+          <button type="button" class="btn btn-primary" onclick="openCreateQuotationModal()" style="display:inline-flex; align-items:center; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + Create New Quotation
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Overview -->
+      <div class="metrics-grid">
+        <div class="stat-card">
+          <div class="stat-title">Total Active Proposals</div>
+          <div class="stat-value" id="statTotalQuotations">0</div>
+          <div class="stat-meta">All proposal estimates</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Pipeline Proposal Value</div>
+          <div class="stat-value" id="statTotalPipeline" style="color:var(--primary, #e11d48);">₹0</div>
+          <div class="stat-meta">Total active estimates</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Converted & Onboarded</div>
+          <div class="stat-value" id="statApprovedQuotations" style="color:#15803d;">0</div>
+          <div class="stat-meta" id="statApprovedValue">₹0 converted to tax invoices</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Pending / In Negotiation</div>
+          <div class="stat-value" id="statPendingQuotations" style="color:#d97706;">0</div>
+          <div class="stat-meta">Awaiting client agreement</div>
+        </div>
+      </div>
+
+      <!-- Quotations Filter & Search Bar -->
+      <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:260px;">
+            <input type="text" id="quoteSearchInput" class="form-input" placeholder="Search by Quote # (QUO00...), client name, or service..." oninput="applyQuotationFilters()" style="width:100%;">
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <select id="quoteStatusFilter" class="form-select" onchange="applyQuotationFilters()">
+              <option value="">All Statuses</option>
+              <option value="DRAFT">Draft</option>
+              <option value="SENT">Sent to Client</option>
+              <option value="NEGOTIATING">In Negotiation</option>
+              <option value="APPROVED">Approved</option>
+              <option value="CONVERTED">Converted to Invoice</option>
+              <option value="REJECTED">Rejected / Expired</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quotations Table Card -->
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-responsive">
+          <table class="table" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">QUOTE #</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">CLIENT / PROSPECT</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">DATE & VALIDITY</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">SERVICES & SCOPE</th>
+                <th style="padding:0.75rem 1rem; text-align:right; font-size:0.75rem; font-weight:700; color:#475569;">QUOTE AMOUNT</th>
+                <th style="padding:0.75rem 1rem; text-align:center; font-size:0.75rem; font-weight:700; color:#475569;">STATUS</th>
+                <th style="padding:0.75rem 1rem; text-align:right; font-size:0.75rem; font-weight:700; color:#475569;">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="quotationsTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create / Edit Quotation Modal with Non-Onboarded Client Creation -->
+  <div class="modal-overlay" id="quotationModal">
+    <div class="modal-box">
+      <div class="modal-header" style="margin-bottom:1rem; padding-bottom:0.65rem; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700;" id="quotationModalTitle">Create Project Quotation</h3>
+        <button type="button" class="icon-action-btn" onclick="closeQuotationModal()" title="Close" style="border:none;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="quotationForm" onsubmit="handleSaveQuotation(event)">
+        <input type="hidden" id="modalQuoteEditId" value="">
+
+        <div style="display:flex; flex-direction:column; gap:0.85rem;">
+          
+          <!-- Client Selection / Non-onboarded client creation toggle -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.85rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.4rem;">
+              <span style="font-size:0.82rem; font-weight:700; color:var(--text-main, #0f172a);">Client / Lead Selection:</span>
+              <div style="display:flex; gap:0.5rem;">
+                <button type="button" id="btnModeExisting" class="btn btn-sm btn-primary" onclick="switchClientSelectionMode('EXISTING')" style="font-size:0.75rem;">Existing Client</button>
+                <button type="button" id="btnModeNewLead" class="btn btn-sm btn-secondary" onclick="switchClientSelectionMode('NEW_LEAD')" style="font-size:0.75rem;">+ New Non-Onboarded Lead</button>
+              </div>
+            </div>
+
+            <div id="sectionExistingClient" style="display:block;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label required" style="font-size:0.8rem;">Select Client</label>
+                <select id="modalQuoteClientSelect" class="form-select">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <!-- New Non-onboarded lead fields -->
+            <div id="sectionNewLeadClient" style="display:none; margin-top:0.5rem; padding-top:0.5rem; border-top:1px dashed #cbd5e1;">
+              <div class="modal-grid-2" style="margin-bottom:0.6rem;">
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label required" style="font-size:0.78rem;">Company / Client Name</label>
+                  <input type="text" id="newLeadCompany" class="form-input" placeholder="e.g. Acme Tech Innovations">
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label" style="font-size:0.78rem;">Contact Person</label>
+                  <input type="text" id="newLeadPerson" class="form-input" placeholder="e.g. Rahul Sharma">
+                </div>
+              </div>
+
+              <div class="modal-grid-3" style="margin-bottom:0.6rem;">
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label required" style="font-size:0.78rem;">Mobile / WhatsApp</label>
+                  <input type="tel" id="newLeadMobile" class="form-input" placeholder="9876543210">
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label" style="font-size:0.78rem;">Email Address</label>
+                  <input type="email" id="newLeadEmail" class="form-input" placeholder="contact@company.com">
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label" style="font-size:0.78rem;">GSTIN (Optional)</label>
+                  <input type="text" id="newLeadGstin" class="form-input" placeholder="33AAAAA0000A1Z5">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.78rem;">Address & City</label>
+                <input type="text" id="newLeadAddress" class="form-input" placeholder="Office No, Street, City, Pincode">
+              </div>
+            </div>
+          </div>
+
+          <!-- Quote Meta -->
+          <div class="modal-grid-2">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Quote Number</label>
+              <input type="text" id="modalQuoteNumber" class="form-input" required readonly style="font-weight:700; font-family:monospace; background:#f8fafc; color:#0284c7;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Quote Date</label>
+              <input type="date" id="modalQuoteDate" class="form-input" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Valid Until</label>
+              <input type="date" id="modalQuoteValidUntil" class="form-input" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Status</label>
+              <select id="modalQuoteStatus" class="form-select" required>
+                <option value="SENT" selected>Sent to Client</option>
+                <option value="DRAFT">Draft</option>
+                <option value="NEGOTIATING">In Negotiation</option>
+                <option value="APPROVED">Approved</option>
+                <option value="CONVERTED">Converted to Invoice</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Services / Line Items Section -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.85rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+              <span style="font-size:0.82rem; font-weight:700; color:var(--text-main, #0f172a);">Quotation Line Items & Scope:</span>
+              <button type="button" class="btn btn-sm btn-secondary" onclick="addQuoteLineItem()" style="font-size:0.75rem;">+ Add Line Item</button>
+            </div>
+
+            <div id="quoteLineItemsContainer" style="display:flex; flex-direction:column; gap:0.5rem;">
+              <!-- Dynamic line items -->
+            </div>
+          </div>
+
+          <!-- Negotiation & Discounts Section -->
+          <div class="negotiate-pill-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <strong style="font-size:0.82rem; color:#92400e; display:inline-flex; align-items:center; gap:0.35rem;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8M8 8h.01M16 16h.01"/></svg>
+                Client Negotiation & Discount Adjustment:
+              </strong>
+            </div>
+
+            <div class="modal-grid-3" style="align-items:center;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.75rem; color:#92400e;">Negotiation Discount (%)</label>
+                <input type="number" id="modalQuoteNegotiationPercent" class="form-input" min="0" max="100" step="0.5" value="0" placeholder="e.g. 10%" oninput="handleNegotiationPercentChange()">
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.75rem; color:#92400e;">Discount Amount (₹)</label>
+                <input type="number" id="modalQuoteNegotiationAmount" class="form-input" min="0" step="1" value="0" placeholder="e.g. 5000" oninput="handleNegotiationAmountChange()">
+              </div>
+              <div style="font-size:0.78rem; color:#78350f;">
+                Negotiated Deduction: <strong id="quoteModalDiscountDisplay" style="color:#b45309;">-₹0</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Totals Calculation Summary -->
+          <div class="modal-grid-2" style="align-items:flex-start;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.8rem;">GST Tax Rate</label>
+              <select id="modalQuoteGstRate" class="form-select" onchange="calculateQuotationTotals()">
+                <option value="18">18% GST (Standard)</option>
+                <option value="0">0% (Exempted / Zero Tax)</option>
+                <option value="5">5% GST</option>
+                <option value="12">12% GST</option>
+              </select>
+            </div>
+            <div style="background:#f1f5f9; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; text-align:right;">
+              <div style="font-size:0.78rem; color:#64748b; margin-bottom:0.2rem;">Original Base Subtotal: <strong id="quoteModalOriginalSubtotal" style="color:#0f172a;">₹0</strong></div>
+              <div style="font-size:0.78rem; color:#b45309; margin-bottom:0.2rem;" id="quoteModalDiscountRow">Negotiation Discount: <strong id="quoteModalDiscountSummary">-₹0</strong></div>
+              <div style="font-size:0.78rem; color:#64748b; margin-bottom:0.2rem;">Taxable Subtotal: <strong id="quoteModalSubtotal" style="color:#0f172a;">₹0</strong></div>
+              <div style="font-size:0.78rem; color:#64748b; margin-bottom:0.2rem;">GST Tax (18%): <strong id="quoteModalGst" style="color:#0f172a;">₹0</strong></div>
+              <div style="font-size:1.05rem; font-weight:800; color:#15803d; border-top:1px solid #cbd5e1; padding-top:0.3rem;">Final Proposal Total: <span id="quoteModalGrandTotal">₹0</span></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.8rem;">Terms & Conditions / Scope Notes</label>
+            <textarea id="modalQuoteNotes" class="form-input" rows="2" placeholder="e.g. 50% advance upon contract signing. Remaining 50% upon final milestone delivery."></textarea>
+          </div>
+
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <button type="button" class="btn btn-secondary" onclick="closeQuotationModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Quotation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Convert to Invoice & Onboard Client Modal -->
+  <div class="modal-overlay" id="convertInvoiceModal">
+    <div class="modal-box">
+      <div class="modal-header" style="margin-bottom:1rem; padding-bottom:0.65rem; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div style="background:#dcfce7; color:#15803d; width:32px; height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#0f172a;">Convert Quotation to Invoice & Onboard</h3>
+            <span style="font-size:0.76rem; color:#64748b;" id="convModalSubtitle">Verify client information, bill mode, and payment terms</span>
+          </div>
+        </div>
+        <button type="button" class="icon-action-btn" onclick="closeConvertInvoiceModal()" title="Close" style="border:none;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="convertInvoiceForm" onsubmit="handleExecuteInvoiceConversion(event)">
+        <input type="hidden" id="convQuoteId" value="">
+
+        <!-- Step 1: Client Verification & Edit -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.85rem; margin-bottom:0.85rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; flex-wrap:wrap; gap:0.4rem;">
+            <strong style="font-size:0.84rem; color:#0f172a; display:inline-flex; align-items:center; gap:0.35rem;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              1. Client Verification & Master Directory Info:
+            </strong>
+            <label style="display:inline-flex; align-items:center; gap:0.35rem; font-size:0.76rem; font-weight:700; color:#15803d; cursor:pointer;">
+              <input type="checkbox" id="convAutoOnboardCheck" checked style="accent-color:#15803d;">
+              Onboard Client as Active
+            </label>
+          </div>
+
+          <div class="modal-grid-2" style="margin-bottom:0.5rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.76rem;">Company / Client Name</label>
+              <input type="text" id="convClientName" class="form-input" required style="font-weight:600;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.76rem;">Contact Person</label>
+              <input type="text" id="convContactPerson" class="form-input">
+            </div>
+          </div>
+
+          <div class="modal-grid-3" style="margin-bottom:0.5rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.76rem;">Mobile / WhatsApp</label>
+              <input type="tel" id="convMobile" class="form-input" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.76rem;">Email Address</label>
+              <input type="email" id="convEmail" class="form-input">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.76rem;">GSTIN Number</label>
+              <input type="text" id="convGstin" class="form-input" placeholder="33OUUPS5195G1ZJ">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.76rem;">Billing Address & Location</label>
+            <input type="text" id="convAddress" class="form-input">
+          </div>
+        </div>
+
+        <!-- Step 2: Bill Mode, GST & Payment Terms -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.85rem; margin-bottom:0.85rem;">
+          <strong style="font-size:0.84rem; color:#0f172a; display:block; margin-bottom:0.6rem;">
+            2. Bill Mode, GST & Payment Schedule:
+          </strong>
+
+          <div class="modal-grid-3" style="margin-bottom:0.65rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.76rem;">Bill Mode / Invoice Type</label>
+              <select id="convInvoiceType" class="form-select" onchange="recalculateConvTotals()">
+                <option value="GST">GST Invoice (INV00.. / 18% Tax)</option>
+                <option value="GST_CLIENT">Client GST Invoice (INC00..)</option>
+                <option value="NON_GST">Non-GST Invoice (IND00.. / Zero Tax)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.76rem;">Payment Term / Mode</label>
+              <select id="convPaymentTerms" class="form-select">
+                <option value="SINGLE">Single Full Payment (100% in advance)</option>
+                <option value="SPLIT_50_50">50% Advance + 50% Final Delivery</option>
+                <option value="SPLIT_3_PAYMENTS">40% Advance / 30% Milestone / 30% Final</option>
+                <option value="DUE_7_DAYS">Payment Due in 7 Days</option>
+                <option value="DUE_15_DAYS">Payment Due in 15 Days</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.76rem;">Place of Supply</label>
+              <select id="convPlaceOfSupply" class="form-select">
+                <option value="Tamil Nadu">Tamil Nadu (CGST+SGST)</option>
+                <option value="Karnataka">Karnataka (IGST)</option>
+                <option value="Maharashtra">Maharashtra (IGST)</option>
+                <option value="Delhi">Delhi (IGST)</option>
+                <option value="Other State">Other State (IGST)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-grid-2">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.76rem;">Invoice Date</label>
+              <input type="date" id="convInvoiceDate" class="form-input" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.76rem;">Invoice Payment Due Date</label>
+              <input type="date" id="convDueDate" class="form-input" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Financial Summary & Scope Overview -->
+        <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:0.85rem; margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+            <span style="font-size:0.82rem; font-weight:700; color:#0f172a;">Invoice Line Items & Amount Breakdown:</span>
+            <span id="convItemsCount" style="font-size:0.75rem; color:#64748b;">2 services</span>
+          </div>
+
+          <div id="convItemsList" style="font-size:0.78rem; color:#334155; margin-bottom:0.6rem; padding:0.4rem 0.6rem; background:#fff; border-radius:4px; border:1px solid #e2e8f0; max-height:80px; overflow-y:auto;">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; font-size:0.8rem; border-top:1px solid #cbd5e1; padding-top:0.5rem;">
+            <div>
+              <div style="color:#64748b; margin-bottom:0.15rem;">Base Subtotal: <strong id="convBaseSubtotal" style="color:#0f172a;">₹0</strong></div>
+              <div style="color:#b45309;" id="convDiscountRow">Negotiation Discount: <strong id="convDiscountAmount">-₹0</strong></div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:#64748b; margin-bottom:0.15rem;">GST Amount: <strong id="convGstAmount" style="color:#0f172a;">₹0</strong></div>
+              <div style="font-size:1rem; font-weight:900; color:#15803d;">Final Grand Total: <span id="convGrandTotal">₹0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <button type="button" class="btn btn-secondary" onclick="closeConvertInvoiceModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d); border:none; display:inline-flex; align-items:center; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm, Onboard & Generate Invoice
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Negotiation Modal -->
+  <div class="modal-overlay" id="quickNegotiationModal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header" style="margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.1rem; font-weight:700;" id="quickNegTitle">Update Negotiation</h3>
+        <button type="button" class="icon-action-btn" onclick="closeQuickNegotiationModal()" title="Close" style="border:none;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <input type="hidden" id="quickNegQuoteId" value="">
+      
+      <div style="margin-bottom:1rem;">
+        <p style="font-size:0.85rem; color:#475569; margin:0 0 0.5rem 0;">Update negotiation percentage or discount for client <strong id="quickNegClientName" style="color:#0f172a;"></strong>:</p>
+        
+        <div style="background:#fffbeb; padding:0.75rem; border-radius:6px; border:1px solid #fde68a; margin-bottom:0.75rem;">
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.25rem;">
+            <span>Original Base Subtotal:</span>
+            <strong id="quickNegOriginalAmount">₹0</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.25rem; color:#b45309;">
+            <span>Discount Applied:</span>
+            <strong id="quickNegDiscountAmount">-₹0</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.92rem; font-weight:800; color:#15803d; border-top:1px solid #fde68a; padding-top:0.35rem;">
+            <span>New Final Total (with GST):</span>
+            <span id="quickNegFinalTotal">₹0</span>
+          </div>
+        </div>
+
+        <div class="modal-grid-2" style="margin-bottom:0.75rem;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.78rem;">Negotiation (%)</label>
+            <input type="number" id="quickNegPercentInput" class="form-input" min="0" max="100" step="0.5" oninput="handleQuickNegPercentChange()">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.78rem;">Discount (₹)</label>
+            <input type="number" id="quickNegAmountInput" class="form-input" min="0" step="1" oninput="handleQuickNegAmountChange()">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="font-size:0.78rem;">Negotiation Note / Discussion Summary</label>
+          <input type="text" id="quickNegNoteInput" class="form-input" placeholder="e.g. Approved 10% discount on 3-month upfront commitment">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeQuickNegotiationModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveQuickNegotiation()">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exact Invoice-Layout Preview Modal -->
+  <div class="modal-overlay" id="exactInvoicePreviewModal">
+    <div class="modal-box" style="max-width: 900px; background:#334155 !important; padding:1.25rem !important;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:1rem;">
+        <div style="color:#ffffff; font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:0.55rem; white-space:nowrap;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>Quotation Document Preview</span>
+        </div>
+        <div style="display:inline-flex; align-items:center; gap:0.5rem;">
+          <!-- Print / PDF Icon Button -->
+          <button type="button" class="btn btn-primary" onclick="printCurrentQuotation()" style="width:36px; height:36px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px;" title="Print / Save PDF">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </button>
+          <!-- Close Icon Button -->
+          <button type="button" class="btn btn-secondary" onclick="closeExactInvoicePreview()" style="width:36px; height:36px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; background:#ffffff; color:#0f172a; border:none;" title="Close">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="exactQuotationSheetHolder" style="display:flex; justify-content:center;">
+        <!-- Rendered with .invoice-sheet exact layout -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    const todayISO = new Date().toISOString().split('T')[0];
+    function getFutureDateISO(daysAhead) {
+      const d = new Date();
+      d.setDate(d.getDate() + daysAhead);
+      return d.toISOString().split('T')[0];
+    }
+
+    let clientSelectionMode = 'EXISTING'; // 'EXISTING' or 'NEW_LEAD'
+    let allAvailableClients = [];
+
+    // Master Quotations List
+    let quotationsList = [
+      {
+        id: 1,
+        quoteNumber: 'QUO001',
+        client: 'Apex Tech Labs',
+        contactPerson: 'Karthik Raja',
+        mobile: '9840192834',
+        email: 'karthik@apexlabs.com',
+        address: 'No 45, Tech Park Phase 2, OMR, Chennai - 600096',
+        gstin: '33AAACT9921B1Z2',
+        isLead: true, // Non-onboarded prospect
+        date: todayISO,
+        validUntil: getFutureDateISO(15),
+        items: [
+          { description: 'Full-Funnel Performance Marketing Strategy', subDetails: ['Meta Ads Campaign Setup', 'Audience Research & Pixel Setup'], hsnSac: '998311', qty: 1, rate: 35000 },
+          { description: 'Content & High-ROAS Video Creative Production', subDetails: ['4 UGC Ad Creatives', 'Scriptwriting & Hook Editing'], hsnSac: '998312', qty: 1, rate: 25000 }
+        ],
+        negotiationPercent: 8,
+        negotiationAmount: 4800,
+        gstRate: 18,
+        notes: 'Includes 8% negotiation discount on 3-month growth retainer.',
+        status: 'NEGOTIATING'
+      },
+      {
+        id: 2,
+        quoteNumber: 'QUO002',
+        client: 'Zenith Retail Brands',
+        contactPerson: 'Meera Nambiar',
+        mobile: '9790123991',
+        email: 'growth@zenithbrands.in',
+        address: '12/4 Anna Salai, Mount Road, Chennai - 600002',
+        gstin: '33AABCF8812E1Z8',
+        isLead: true,
+        date: todayISO,
+        validUntil: getFutureDateISO(20),
+        items: [
+          { description: 'E-commerce Search Engine Optimization (SEO)', subDetails: ['Technical SEO Audit', 'Keyword Strategy', 'Product Schema Setup'], hsnSac: '998314', qty: 1, rate: 40000 }
+        ],
+        negotiationPercent: 0,
+        negotiationAmount: 0,
+        gstRate: 18,
+        notes: 'Valid for 20 days. 50% advance upon contract signing.',
+        status: 'SENT'
+      },
+      {
+        id: 3,
+        quoteNumber: 'QUO003',
+        client: 'Marks Biotech',
+        contactPerson: 'Dr. Ramesh Kumar',
+        mobile: '9444109822',
+        email: 'info@marksbiotech.com',
+        address: 'Plot 88, Guindy Industrial Estate, Chennai - 600032',
+        gstin: '33OUUPS5195G1ZJ',
+        isLead: false, // Already active client
+        date: '2026-08-05',
+        validUntil: '2026-08-20',
+        items: [
+          { description: 'Quarterly Lead Gen & Brand Awareness Campaign', subDetails: ['Google Search Ads', 'LinkedIn B2B Outreach'], hsnSac: '998311', qty: 1, rate: 50000 }
+        ],
+        negotiationPercent: 5,
+        negotiationAmount: 2500,
+        gstRate: 18,
+        notes: 'Converted to Official Tax Invoice #DG-INV-2026-091.',
+        status: 'CONVERTED'
+      }
+    ];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadClientsDirectory();
+      const stored = localStorage.getItem('dgrow_quotations_v2');
+      if (stored) {
+        try { 
+          quotationsList = JSON.parse(stored); 
+        } catch(e){}
+      } else {
+        saveQuotationsStorage();
+      }
+
+      applyQuotationFilters();
+    });
+
+    function handleGlobalSearch(e) {
+      if (e.key === 'Enter') {
+        const val = e.target.value;
+        if (val) {
+          document.getElementById('quoteSearchInput').value = val;
+          applyQuotationFilters();
+        }
+      }
+    }
+
+    function saveQuotationsStorage() {
+      localStorage.setItem('dgrow_quotations_v2', JSON.stringify(quotationsList));
+      updateQuotationMetrics();
+    }
+
+    async function loadClientsDirectory() {
+      allAvailableClients = [];
+      try {
+        if (typeof apiFetch === 'function') {
+          const res = await apiFetch('/clients');
+          if (res && res.clients && res.clients.length > 0) {
+            allAvailableClients = res.clients;
+          }
+        }
+      } catch (e) {}
+
+      if (allAvailableClients.length === 0) {
+        allAvailableClients = [
+          { id: 101, company_name: 'Marks Biotech', contact_person: 'Dr. Ramesh', mobile: '9444109822', email: 'info@marksbiotech.com', address: 'Plot 88, Guindy Industrial Estate, Chennai - 600032', gstin: '33OUUPS5195G1ZJ', status: 'ACTIVE' },
+          { id: 102, company_name: 'Acme Corporation', contact_person: 'John Doe', mobile: '9840192800', email: 'billing@acme.com', address: '12 MG Road, Chennai - 600001', gstin: '33AAACM1234F1Z5', status: 'ACTIVE' },
+          { id: 103, company_name: 'TechNova Global', contact_person: 'Priya Sundar', mobile: '9790123800', email: 'accounts@technova.com', address: '45 IT Highway, Chennai - 600113', gstin: '33AABCT9988G1Z1', status: 'ACTIVE' }
+        ];
+      }
+
+      populateClientDropdown();
+    }
+
+    function populateClientDropdown() {
+      const select = document.getElementById('modalQuoteClientSelect');
+      if (!select) return;
+
+      select.innerHTML = allAvailableClients.map(c => `
+        <option value="${escapeAttr(c.company_name)}">
+          ${escapeHtml(c.company_name)} ${c.status === 'LEAD' ? '(Lead / Prospect)' : '(Active Client)'}
+        </option>
+      `).join('');
+    }
+
+    function generateNextQuotationNumber() {
+      let maxNum = 0;
+      quotationsList.forEach(q => {
+        if (q.quoteNumber && q.quoteNumber.startsWith('QUO')) {
+          const numPart = parseInt(q.quoteNumber.replace('QUO', ''), 10);
+          if (!isNaN(numPart) && numPart > maxNum) maxNum = numPart;
+        }
+      });
+      const nextNum = maxNum + 1;
+      return 'QUO' + String(nextNum).padStart(3, '0');
+    }
+
+    function switchClientSelectionMode(mode) {
+      clientSelectionMode = mode;
+      const btnExisting = document.getElementById('btnModeExisting');
+      const btnNewLead = document.getElementById('btnModeNewLead');
+      const secExisting = document.getElementById('sectionExistingClient');
+      const secNewLead = document.getElementById('sectionNewLeadClient');
+
+      if (mode === 'EXISTING') {
+        btnExisting.className = 'btn btn-sm btn-primary';
+        btnNewLead.className = 'btn btn-sm btn-secondary';
+        secExisting.style.display = 'block';
+        secNewLead.style.display = 'none';
+      } else {
+        btnExisting.className = 'btn btn-sm btn-secondary';
+        btnNewLead.className = 'btn btn-sm btn-primary';
+        secExisting.style.display = 'none';
+        secNewLead.style.display = 'block';
+      }
+    }
+
+    function openCreateQuotationModal() {
+      document.getElementById('quotationForm').reset();
+      document.getElementById('modalQuoteEditId').value = '';
+      document.getElementById('quotationModalTitle').textContent = 'Create Project Quotation';
+      document.getElementById('modalQuoteDate').value = todayISO;
+      document.getElementById('modalQuoteValidUntil').value = getFutureDateISO(15);
+      
+      const quoteNum = generateNextQuotationNumber();
+      document.getElementById('modalQuoteNumber').value = quoteNum;
+      document.getElementById('modalQuoteStatus').value = 'SENT';
+      document.getElementById('modalQuoteGstRate').value = '18';
+      document.getElementById('modalQuoteNegotiationPercent').value = '0';
+      document.getElementById('modalQuoteNegotiationAmount').value = '0';
+      document.getElementById('modalQuoteNotes').value = '1. 50% advance required upon work approval.\n2. Timeline: Project kickoff within 2 business days of advance.';
+
+      switchClientSelectionMode('EXISTING');
+
+      // Clear & add 1 default line item
+      const container = document.getElementById('quoteLineItemsContainer');
+      container.innerHTML = '';
+      addQuoteLineItem('Digital Marketing & Growth Retainer', 'Full Campaign Management & Creative Hook Strategy', '998311', 1, 30000);
+
+      calculateQuotationTotals();
+      document.getElementById('quotationModal').classList.add('active');
+    }
+
+    function closeQuotationModal() {
+      document.getElementById('quotationModal').classList.remove('active');
+    }
+
+    function addQuoteLineItem(desc = '', subDetailsStr = '', hsn = '998311', qty = 1, rate = 0) {
+      const container = document.getElementById('quoteLineItemsContainer');
+      const rowId = Date.now() + Math.random().toString(36).substring(2, 6);
+      
+      const div = document.createElement('div');
+      div.className = 'quote-line-row';
+      div.id = 'row_' + rowId;
+      div.style.cssText = 'background:#ffffff; border:1px solid #e2e8f0; border-radius:6px; padding:0.6rem; display:flex; flex-direction:column; gap:0.4rem;';
+
+      div.innerHTML = `
+        <div style="display:grid; grid-template-columns: 2fr 1fr 0.7fr 1fr 32px; gap:0.5rem; align-items:center;">
+          <input type="text" class="form-input quote-item-desc" placeholder="Service Name (e.g. SEO & Brand Optimization)" value="${escapeAttr(desc)}" required style="font-size:0.82rem; font-weight:600;">
+          <input type="text" class="form-input quote-item-hsn" placeholder="HSN/SAC" value="${escapeAttr(hsn)}" style="font-size:0.8rem; text-align:center;">
+          <input type="number" class="form-input quote-item-qty" placeholder="Qty" value="${qty}" min="1" oninput="calculateQuotationTotals()" required style="font-size:0.82rem; text-align:center;">
+          <input type="number" class="form-input quote-item-rate" placeholder="Rate (₹)" value="${rate}" min="0" oninput="calculateQuotationTotals()" required style="font-size:0.82rem; font-weight:700; text-align:right;">
+          <button type="button" class="icon-action-btn" onclick="removeQuoteLineItem('row_${rowId}')" style="color:#dc2626; border-color:#fecaca; background:#fee2e2;" title="Remove Item">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.4rem;">
+          <span style="font-size:0.75rem; color:#64748b; font-weight:600;">Details:</span>
+          <input type="text" class="form-input quote-item-subdetails" placeholder="Specific deliverables (comma separated, e.g. Keyword Research, On-Page SEO, 4 UGC Creatives)" value="${escapeAttr(subDetailsStr)}" style="font-size:0.78rem; flex:1;">
+        </div>
+      `;
+      container.appendChild(div);
+      calculateQuotationTotals();
+    }
+
+    function removeQuoteLineItem(rowId) {
+      const el = document.getElementById(rowId);
+      if (el) el.remove();
+      calculateQuotationTotals();
+    }
+
+    function getBaseSubtotal() {
+      const rows = document.querySelectorAll('.quote-line-row');
+      let baseSubtotal = 0;
+      rows.forEach(r => {
+        const qty = parseFloat(r.querySelector('.quote-item-qty')?.value) || 0;
+        const rate = parseFloat(r.querySelector('.quote-item-rate')?.value) || 0;
+        baseSubtotal += (qty * rate);
+      });
+      return baseSubtotal;
+    }
+
+    function handleNegotiationPercentChange() {
+      const baseSubtotal = getBaseSubtotal();
+      const percent = parseFloat(document.getElementById('modalQuoteNegotiationPercent').value) || 0;
+      const discount = Math.round((baseSubtotal * percent) / 100);
+      document.getElementById('modalQuoteNegotiationAmount').value = discount;
+      calculateQuotationTotals();
+    }
+
+    function handleNegotiationAmountChange() {
+      const baseSubtotal = getBaseSubtotal();
+      const discount = parseFloat(document.getElementById('modalQuoteNegotiationAmount').value) || 0;
+      const percent = baseSubtotal > 0 ? ((discount / baseSubtotal) * 100).toFixed(1) : 0;
+      document.getElementById('modalQuoteNegotiationPercent').value = percent;
+      calculateQuotationTotals();
+    }
+
+    function calculateQuotationTotals() {
+      const baseSubtotal = getBaseSubtotal();
+      const discount = parseFloat(document.getElementById('modalQuoteNegotiationAmount')?.value) || 0;
+      const taxableSubtotal = Math.max(0, baseSubtotal - discount);
+
+      const gstRate = parseFloat(document.getElementById('modalQuoteGstRate')?.value) || 0;
+      const gstAmount = (taxableSubtotal * gstRate) / 100;
+      const grandTotal = taxableSubtotal + gstAmount;
+
+      document.getElementById('quoteModalOriginalSubtotal').textContent = '₹' + baseSubtotal.toLocaleString('en-IN');
+      document.getElementById('quoteModalDiscountSummary').textContent = '-₹' + discount.toLocaleString('en-IN');
+      document.getElementById('quoteModalDiscountDisplay').textContent = '-₹' + discount.toLocaleString('en-IN');
+      document.getElementById('quoteModalSubtotal').textContent = '₹' + taxableSubtotal.toLocaleString('en-IN');
+      document.getElementById('quoteModalGst').textContent = '₹' + Math.round(gstAmount).toLocaleString('en-IN');
+      document.getElementById('quoteModalGrandTotal').textContent = '₹' + Math.round(grandTotal).toLocaleString('en-IN');
+
+      const discRow = document.getElementById('quoteModalDiscountRow');
+      if (discRow) discRow.style.display = discount > 0 ? 'block' : 'none';
+    }
+
+    async function handleSaveQuotation(e) {
+      e.preventDefault();
+      const editId = document.getElementById('modalQuoteEditId').value;
+      const quoteNumber = document.getElementById('modalQuoteNumber').value.trim();
+      const date = document.getElementById('modalQuoteDate').value;
+      const validUntil = document.getElementById('modalQuoteValidUntil').value;
+      const status = document.getElementById('modalQuoteStatus').value;
+      const gstRate = parseFloat(document.getElementById('modalQuoteGstRate').value) || 0;
+      const negotiationPercent = parseFloat(document.getElementById('modalQuoteNegotiationPercent').value) || 0;
+      const negotiationAmount = parseFloat(document.getElementById('modalQuoteNegotiationAmount').value) || 0;
+      const notes = document.getElementById('modalQuoteNotes').value.trim();
+
+      let client = '';
+      let contactPerson = '';
+      let mobile = '';
+      let email = '';
+      let address = '';
+      let gstin = '';
+      let isLead = false;
+
+      if (clientSelectionMode === 'NEW_LEAD') {
+        client = document.getElementById('newLeadCompany').value.trim();
+        contactPerson = document.getElementById('newLeadPerson').value.trim();
+        mobile = document.getElementById('newLeadMobile').value.trim();
+        email = document.getElementById('newLeadEmail').value.trim();
+        address = document.getElementById('newLeadAddress').value.trim();
+        gstin = document.getElementById('newLeadGstin').value.trim();
+        isLead = true;
+
+        if (!client || !mobile) {
+          alert('Please enter Company Name and Mobile Number for the new lead.');
+          return;
+        }
+
+        // Save new lead client to database / localStorage
+        try {
+          if (typeof apiFetch === 'function') {
+            await apiFetch('/clients', {
+              method: 'POST',
+              body: {
+                company_name: client,
+                contact_person: contactPerson,
+                mobile: mobile,
+                email: email,
+                address: address,
+                gstin: gstin,
+                status: 'LEAD',
+                onboarding_date: null
+              }
+            });
+          }
+        } catch(err) {}
+
+        // Add to local memory
+        allAvailableClients.unshift({
+          id: Date.now(),
+          company_name: client,
+          contact_person: contactPerson,
+          mobile: mobile,
+          email: email,
+          address: address,
+          gstin: gstin,
+          status: 'LEAD'
+        });
+        populateClientDropdown();
+
+      } else {
+        client = document.getElementById('modalQuoteClientSelect').value;
+        const matched = allAvailableClients.find(c => c.company_name === client);
+        if (matched) {
+          contactPerson = matched.contact_person || '';
+          mobile = matched.mobile || '';
+          email = matched.email || '';
+          address = matched.address || '';
+          gstin = matched.gstin || '';
+          isLead = (matched.status === 'LEAD');
+        }
+      }
+
+      const items = [];
+      document.querySelectorAll('.quote-line-row').forEach(r => {
+        const description = r.querySelector('.quote-item-desc')?.value.trim();
+        const subDetailsStr = r.querySelector('.quote-item-subdetails')?.value.trim();
+        const hsnSac = r.querySelector('.quote-item-hsn')?.value.trim() || '998311';
+        const qty = parseFloat(r.querySelector('.quote-item-qty')?.value) || 1;
+        const rate = parseFloat(r.querySelector('.quote-item-rate')?.value) || 0;
+        
+        const subDetails = subDetailsStr ? subDetailsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+        if (description) {
+          items.push({ description, subDetails, hsnSac, qty, rate });
+        }
+      });
+
+      if (items.length === 0) {
+        alert('Please add at least one service item to the quotation.');
+        return;
+      }
+
+      if (editId) {
+        const idx = quotationsList.findIndex(q => q.id === parseInt(editId));
+        if (idx !== -1) {
+          quotationsList[idx] = { 
+            ...quotationsList[idx], 
+            client, contactPerson, mobile, email, address, gstin, isLead,
+            quoteNumber, date, validUntil, status, gstRate, negotiationPercent, negotiationAmount, notes, items 
+          };
+          showToast(`Quotation ${quoteNumber} updated successfully!`, 'success');
+        }
+      } else {
+        const newQuote = {
+          id: Date.now(),
+          quoteNumber,
+          client,
+          contactPerson,
+          mobile,
+          email,
+          address,
+          gstin,
+          isLead,
+          date,
+          validUntil,
+          items,
+          negotiationPercent,
+          negotiationAmount,
+          gstRate,
+          notes,
+          status
+        };
+        quotationsList.unshift(newQuote);
+        showToast(`Quotation ${quoteNumber} created for ${client}!`, 'success');
+      }
+
+      saveQuotationsStorage();
+      applyQuotationFilters();
+      closeQuotationModal();
+    }
+
+    function openEditQuotation(id) {
+      const q = quotationsList.find(item => item.id === id);
+      if (!q) return;
+
+      document.getElementById('modalQuoteEditId').value = q.id;
+      document.getElementById('quotationModalTitle').textContent = 'Edit Quotation: ' + q.quoteNumber;
+      document.getElementById('modalQuoteNumber').value = q.quoteNumber;
+      document.getElementById('modalQuoteDate').value = q.date;
+      document.getElementById('modalQuoteValidUntil').value = q.validUntil;
+      document.getElementById('modalQuoteStatus').value = q.status;
+      document.getElementById('modalQuoteGstRate').value = q.gstRate || '18';
+      document.getElementById('modalQuoteNegotiationPercent').value = q.negotiationPercent || '0';
+      document.getElementById('modalQuoteNegotiationAmount').value = q.negotiationAmount || '0';
+      document.getElementById('modalQuoteNotes').value = q.notes || '';
+
+      switchClientSelectionMode('EXISTING');
+      document.getElementById('modalQuoteClientSelect').value = q.client;
+
+      const container = document.getElementById('quoteLineItemsContainer');
+      container.innerHTML = '';
+      if (q.items && q.items.length > 0) {
+        q.items.forEach(it => {
+          const subStr = Array.isArray(it.subDetails) ? it.subDetails.join(', ') : (it.subDetails || '');
+          addQuoteLineItem(it.description, subStr, it.hsnSac || '998311', it.qty, it.rate);
+        });
+      } else {
+        addQuoteLineItem('Service Item', '', '998311', 1, 0);
+      }
+
+      calculateQuotationTotals();
+      document.getElementById('quotationModal').classList.add('active');
+    }
+
+    // Quick Negotiation Popup
+    function openQuickNegotiation(id) {
+      const q = quotationsList.find(item => item.id === id);
+      if (!q) return;
+
+      document.getElementById('quickNegQuoteId').value = q.id;
+      document.getElementById('quickNegTitle').textContent = `Negotiate Quote: ${q.quoteNumber}`;
+      document.getElementById('quickNegClientName').textContent = q.client;
+      document.getElementById('quickNegPercentInput').value = q.negotiationPercent || 0;
+      document.getElementById('quickNegAmountInput').value = q.negotiationAmount || 0;
+      document.getElementById('quickNegNoteInput').value = '';
+
+      updateQuickNegTotals(q);
+      document.getElementById('quickNegotiationModal').classList.add('active');
+    }
+
+    function closeQuickNegotiationModal() {
+      document.getElementById('quickNegotiationModal').classList.remove('active');
+    }
+
+    function updateQuickNegTotals(q) {
+      const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+      const disc = parseFloat(document.getElementById('quickNegAmountInput').value) || 0;
+      const taxable = Math.max(0, baseSubtotal - disc);
+      const gst = (taxable * (q.gstRate || 18)) / 100;
+      const grandTotal = Math.round(taxable + gst);
+
+      document.getElementById('quickNegOriginalAmount').textContent = '₹' + baseSubtotal.toLocaleString('en-IN');
+      document.getElementById('quickNegDiscountAmount').textContent = '-₹' + disc.toLocaleString('en-IN');
+      document.getElementById('quickNegFinalTotal').textContent = '₹' + grandTotal.toLocaleString('en-IN');
+    }
+
+    function handleQuickNegPercentChange() {
+      const id = parseInt(document.getElementById('quickNegQuoteId').value);
+      const q = quotationsList.find(item => item.id === id);
+      if (!q) return;
+
+      const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+      const percent = parseFloat(document.getElementById('quickNegPercentInput').value) || 0;
+      const discount = Math.round((baseSubtotal * percent) / 100);
+      document.getElementById('quickNegAmountInput').value = discount;
+      updateQuickNegTotals(q);
+    }
+
+    function handleQuickNegAmountChange() {
+      const id = parseInt(document.getElementById('quickNegQuoteId').value);
+      const q = quotationsList.find(item => item.id === id);
+      if (!q) return;
+
+      const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+      const discount = parseFloat(document.getElementById('quickNegAmountInput').value) || 0;
+      const percent = baseSubtotal > 0 ? ((discount / baseSubtotal) * 100).toFixed(1) : 0;
+      document.getElementById('quickNegPercentInput').value = percent;
+      updateQuickNegTotals(q);
+    }
+
+    function saveQuickNegotiation() {
+      const id = parseInt(document.getElementById('quickNegQuoteId').value);
+      const q = quotationsList.find(item => item.id === id);
+      if (!q) return;
+
+      const percent = parseFloat(document.getElementById('quickNegPercentInput').value) || 0;
+      const amount = parseFloat(document.getElementById('quickNegAmountInput').value) || 0;
+      const note = document.getElementById('quickNegNoteInput').value.trim();
+
+      q.negotiationPercent = percent;
+      q.negotiationAmount = amount;
+      q.status = 'NEGOTIATING';
+      if (note) {
+        q.notes = (q.notes ? q.notes + '\n• Negotiation: ' : '• Negotiation: ') + note;
+      }
+
+      saveQuotationsStorage();
+      applyQuotationFilters();
+      closeQuickNegotiationModal();
+      showToast(`Negotiation updated (${percent}% discount applied) for ${q.quoteNumber}!`, 'success');
+    }
+
+    // OPEN CONVERT TO INVOICE & ONBOARD CLIENT POPUP MODAL
+    function openConvertInvoiceModal(id) {
+      const q = quotationsList.find(item => item.id === id);
+      if (!q) return;
+
+      document.getElementById('convQuoteId').value = q.id;
+      document.getElementById('convModalSubtitle').textContent = `Quotation ${q.quoteNumber} → Official Tax Invoice`;
+
+      // Fill client fields
+      document.getElementById('convClientName').value = q.client || '';
+      document.getElementById('convContactPerson').value = q.contactPerson || '';
+      document.getElementById('convMobile').value = q.mobile || '';
+      document.getElementById('convEmail').value = q.email || '';
+      document.getElementById('convGstin').value = q.gstin || '';
+      document.getElementById('convAddress').value = q.address || 'Chennai, Tamil Nadu, India.';
+      document.getElementById('convAutoOnboardCheck').checked = true;
+
+      // Invoice configuration defaults
+      document.getElementById('convInvoiceType').value = (q.gstRate && q.gstRate > 0) ? 'GST' : 'NON_GST';
+      document.getElementById('convPaymentTerms').value = 'SINGLE';
+      document.getElementById('convPlaceOfSupply').value = 'Tamil Nadu';
+      document.getElementById('convInvoiceDate').value = todayISO;
+      document.getElementById('convDueDate').value = getFutureDateISO(7);
+
+      // Line items list preview
+      const itemsListDiv = document.getElementById('convItemsList');
+      itemsListDiv.innerHTML = q.items.map((it, idx) => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.2rem;">
+          <span><strong>${idx + 1}.</strong> ${escapeHtml(it.description)} (x${it.qty})</span>
+          <span>₹${(it.qty * it.rate).toLocaleString('en-IN')}</span>
+        </div>
+      `).join('');
+      document.getElementById('convItemsCount').textContent = `${q.items.length} service item(s)`;
+
+      recalculateConvTotals();
+      document.getElementById('convertInvoiceModal').classList.add('active');
+    }
+
+    function closeConvertInvoiceModal() {
+      document.getElementById('convertInvoiceModal').classList.remove('active');
+    }
+
+    function recalculateConvTotals() {
+      const quoteId = parseInt(document.getElementById('convQuoteId').value);
+      const q = quotationsList.find(item => item.id === quoteId);
+      if (!q) return;
+
+      const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+      const discount = q.negotiationAmount || 0;
+      const taxable = Math.max(0, baseSubtotal - discount);
+
+      const invType = document.getElementById('convInvoiceType').value;
+      const isGST = (invType === 'GST' || invType === 'GST_CLIENT');
+      const gstAmount = isGST ? (taxable * (q.gstRate || 18)) / 100 : 0;
+      const grandTotal = Math.round(taxable + gstAmount);
+
+      document.getElementById('convBaseSubtotal').textContent = '₹' + baseSubtotal.toLocaleString('en-IN');
+      document.getElementById('convDiscountAmount').textContent = '-₹' + discount.toLocaleString('en-IN');
+      document.getElementById('convGstAmount').textContent = isGST ? ('₹' + Math.round(gstAmount).toLocaleString('en-IN') + ' (18%)') : '₹0 (Zero Tax)';
+      document.getElementById('convGrandTotal').textContent = '₹' + grandTotal.toLocaleString('en-IN');
+
+      const discRow = document.getElementById('convDiscountRow');
+      if (discRow) discRow.style.display = discount > 0 ? 'block' : 'none';
+    }
+
+    // EXECUTE INVOICE CONVERSION & ONBOARDING
+    async function handleExecuteInvoiceConversion(e) {
+      e.preventDefault();
+      const quoteId = parseInt(document.getElementById('convQuoteId').value);
+      const q = quotationsList.find(item => item.id === quoteId);
+      if (!q) return;
+
+      const clientName = document.getElementById('convClientName').value.trim();
+      const contactPerson = document.getElementById('convContactPerson').value.trim();
+      const mobile = document.getElementById('convMobile').value.trim();
+      const email = document.getElementById('convEmail').value.trim();
+      const gstin = document.getElementById('convGstin').value.trim();
+      const address = document.getElementById('convAddress').value.trim();
+      const autoOnboard = document.getElementById('convAutoOnboardCheck').checked;
+
+      const invType = document.getElementById('convInvoiceType').value;
+      const paymentTerms = document.getElementById('convPaymentTerms').value;
+      const placeOfSupply = document.getElementById('convPlaceOfSupply').value;
+      const invoiceDate = document.getElementById('convInvoiceDate').value;
+      const dueDate = document.getElementById('convDueDate').value;
+
+      // 1. Update client in directory / API
+      let clientId = null;
+      try {
+        const existing = allAvailableClients.find(c => c.company_name.toLowerCase() === clientName.toLowerCase());
+        if (existing && existing.id) {
+          clientId = existing.id;
+          if (typeof apiFetch === 'function') {
+            await apiFetch(`/clients/${existing.id}`, {
+              method: 'PUT',
+              body: {
+                company_name: clientName,
+                contact_person: contactPerson,
+                mobile: mobile,
+                email: email,
+                gstin: gstin,
+                address: address,
+                status: autoOnboard ? 'ACTIVE' : existing.status,
+                onboarding_date: autoOnboard ? todayISO : existing.onboarding_date
+              }
+            });
+          }
+          existing.status = autoOnboard ? 'ACTIVE' : existing.status;
+          existing.contact_person = contactPerson;
+          existing.mobile = mobile;
+          existing.email = email;
+          existing.gstin = gstin;
+          existing.address = address;
+        } else {
+          // Create new client record in master directory
+          clientId = Date.now();
+          if (typeof apiFetch === 'function') {
+            const res = await apiFetch('/clients', {
+              method: 'POST',
+              body: {
+                company_name: clientName,
+                contact_person: contactPerson,
+                mobile: mobile,
+                email: email,
+                gstin: gstin,
+                address: address,
+                status: autoOnboard ? 'ACTIVE' : 'LEAD',
+                onboarding_date: autoOnboard ? todayISO : null
+              }
+            });
+            if (res && res.client && res.client.id) clientId = res.client.id;
+          }
+          allAvailableClients.unshift({
+            id: clientId,
+            company_name: clientName,
+            contact_person: contactPerson,
+            mobile: mobile,
+            email: email,
+            gstin: gstin,
+            address: address,
+            status: autoOnboard ? 'ACTIVE' : 'LEAD'
+          });
+        }
+      } catch(err) {
+        console.error('Error syncing client:', err);
+      }
+
+      // 2. Update quotation status to CONVERTED
+      q.status = 'CONVERTED';
+      q.client = clientName;
+      q.contactPerson = contactPerson;
+      q.mobile = mobile;
+      q.email = email;
+      q.gstin = gstin;
+      q.address = address;
+      q.isLead = !autoOnboard;
+
+      saveQuotationsStorage();
+      applyQuotationFilters();
+      closeConvertInvoiceModal();
+
+      showToast(`Quotation ${q.quoteNumber} converted! Client "${clientName}" ONBOARDED successfully!`, 'success');
+
+      // 3. Redirect to Create Invoice with prefilled data
+      setTimeout(() => {
+        window.location.href = `create-invoice.html?from_quote=${q.id}&client=${encodeURIComponent(clientName)}`;
+      }, 1000);
+    }
+
+    function deleteQuotation(id) {
+      if (confirm('Are you sure you want to delete this quotation?')) {
+        quotationsList = quotationsList.filter(q => q.id !== id);
+        saveQuotationsStorage();
+        applyQuotationFilters();
+        showToast('Quotation deleted', 'info');
+      }
+    }
+
+    // Official Exact Invoice-Layout Generator
+    function previewExactQuotation(id) {
+      const q = quotationsList.find(item => item.id === id);
+      if (!q) return;
+
+      const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+      const discount = q.negotiationAmount || 0;
+      const taxableSubtotal = Math.max(0, baseSubtotal - discount);
+      const gstAmount = (taxableSubtotal * (q.gstRate || 18)) / 100;
+      const grandTotal = Math.round(taxableSubtotal + gstAmount);
+
+      const itemsHtml = q.items.map((it, idx) => {
+        const subList = Array.isArray(it.subDetails) ? it.subDetails : (it.subDetails ? String(it.subDetails).split(',') : []);
+        return `
+          <tr>
+            <td style="text-align:center; font-weight:700;">${idx + 1}</td>
+            <td style="font-weight:700; color:#111827; vertical-align:top;">${escapeHtml(it.description)}</td>
+            <td style="text-align:center; vertical-align:top; color:#4b5563;">${escapeHtml(it.hsnSac || '998311')}</td>
+            <td style="vertical-align:top;">
+              ${subList.length > 0 ? `
+                <ul class="inv-details-list">
+                  ${subList.map(d => `<li>${escapeHtml(d.trim())}</li>`).join('')}
+                </ul>
+              ` : `<span style="color:#9ca3af;">-</span>`}
+            </td>
+            <td style="text-align:right; font-weight:700; color:#111827; vertical-align:top;">₹${(it.qty * it.rate).toLocaleString('en-IN')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const sheetHtml = `
+        <div class="invoice-sheet" id="printableQuotation" style="background:#fff; margin:0 auto; box-shadow:0 8px 30px rgba(0,0,0,0.12);">
+          <!-- Agency Header -->
+          <div class="inv-agency-header">
+            <div class="inv-brand-left">
+              <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height: 48px; max-width: 200px; object-fit: contain;">
+              <div class="inv-agency-details" style="margin-left: 10px;">
+                <h2>D-GROW MARKETING AGENCY</h2>
+                <p><strong>GSTIN Number:</strong> 33OUUPS5195G1ZJ</p>
+                <p><strong>Address:</strong> SF No: 14/3, Plot No. 141, Radha Ave Main Rd, Ganga Nagar, Valasaravakkam, Chennai - 600087</p>
+                <p><strong>Contact No:</strong> +91 97901 23456</p>
+                <p><strong>Email:</strong> dgrowdigital@gmail.com</p>
+              </div>
+            </div>
+            <div class="inv-title-right">
+              <h1 style="font-size:24px; color:#0284c7;">TAX QUOTATION</h1>
+              <span style="font-size:11px; font-weight:bold; color:#64748b; letter-spacing:0.5px;">ESTIMATE & PROPOSAL</span>
+            </div>
+          </div>
+
+          <!-- Quotation Info -->
+          <div class="inv-info-section">
+            <div>
+              <div class="inv-info-row"><span class="inv-info-label"># Quote No</span><span class="inv-info-val">: <strong>${escapeHtml(q.quoteNumber)}</strong></span></div>
+              <div class="inv-info-row"><span class="inv-info-label">Quote Date</span><span class="inv-info-val">: ${escapeHtml(q.date)}</span></div>
+              <div class="inv-info-row"><span class="inv-info-label">Valid Until</span><span class="inv-info-val">: ${escapeHtml(q.validUntil)}</span></div>
+              <div class="inv-info-row"><span class="inv-info-label">Status</span><span class="inv-info-val">: <strong>${escapeHtml(q.status)}</strong></span></div>
+            </div>
+            <div>
+              <div class="inv-info-row"><span class="inv-info-label">Place of Supply</span><span class="inv-info-val">: Tamil Nadu (33)</span></div>
+              <div class="inv-info-row"><span class="inv-info-label">Payment Terms</span><span class="inv-info-val">: 50% Advance Upon Signing</span></div>
+            </div>
+          </div>
+
+          <!-- Billed To / Client Snapshot -->
+          <div class="inv-bill-to">
+            <div class="inv-bill-header">Quotation Prepared For</div>
+            <div class="inv-bill-body">
+              <div class="inv-bill-left">
+                <div class="inv-client-name">${escapeHtml(q.client)}</div>
+                <div class="inv-client-address-title"><strong>Address:</strong></div>
+                <div class="inv-client-address-text">${escapeHtml(q.address || 'Chennai, Tamil Nadu, India.')}</div>
+              </div>
+              <div class="inv-bill-right">
+                <div><strong>Contact Person:</strong> ${escapeHtml(q.contactPerson || '-')}</div>
+                <div style="margin-top:2px;"><strong>Mobile:</strong> ${escapeHtml(q.mobile || '-')}</div>
+                <div style="margin-top:2px;"><strong>Email:</strong> ${escapeHtml(q.email || '-')}</div>
+                ${q.gstin ? `<div style="margin-top:4px;"><strong>GSTIN:</strong> ${escapeHtml(q.gstin)}</div>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Table -->
+          <table class="inv-items-table">
+            <thead>
+              <tr>
+                <th style="width:40px; text-align:center;">No</th>
+                <th style="width:170px;">Service</th>
+                <th style="width:85px; text-align:center;">HSN/SAC</th>
+                <th>Deliverables / Scope Details</th>
+                <th style="width:120px; text-align:right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <!-- Totals & Words -->
+          <div class="inv-totals-grid">
+            <div class="inv-words-box">
+              <div class="inv-words-title">Total In Words</div>
+              <div class="inv-words-text">Indian Rupees ${grandTotal.toLocaleString('en-IN')} Only.</div>
+              ${q.notes ? `<div style="margin-top:8px; font-size:9.5px; color:#475569;"><strong>Notes / Negotiation:</strong><br>${escapeHtml(q.notes).replace(/\n/g, '<br>')}</div>` : ''}
+            </div>
+            <div>
+              <table class="inv-totals-table">
+                <tr><td class="total-label">Base Sub Total</td><td class="total-amount">₹${baseSubtotal.toLocaleString('en-IN')}</td></tr>
+                ${discount > 0 ? `
+                  <tr style="color:#b45309;"><td class="total-label">Negotiation Discount (${q.negotiationPercent || 0}%)</td><td class="total-amount">-₹${discount.toLocaleString('en-IN')}</td></tr>
+                  <tr><td class="total-label">Taxable Subtotal</td><td class="total-amount">₹${taxableSubtotal.toLocaleString('en-IN')}</td></tr>
+                ` : ''}
+                <tr><td class="total-label">CGST (9%)</td><td class="total-amount">₹${Math.round(gstAmount / 2).toLocaleString('en-IN')}</td></tr>
+                <tr><td class="total-label">SGST (9%)</td><td class="total-amount">₹${Math.round(gstAmount / 2).toLocaleString('en-IN')}</td></tr>
+                <tr class="inv-grand-total-row"><td>Total Proposal Value</td><td style="text-align:right;">₹${grandTotal.toLocaleString('en-IN')}</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Footer Grid -->
+          <div class="inv-footer-grid">
+            <div class="inv-terms-col">
+              <div class="inv-terms-title">Terms & Conditions</div>
+              <div class="inv-term-item"><strong>Scope of Work</strong><p>1. Services include the specific digital marketing services & deliverables mentioned above.</p></div>
+              <div class="inv-term-item"><strong>Payment Terms</strong><p>1. 50% advance payment upon quote approval. Remaining 50% on milestone delivery.</p></div>
+              <div class="inv-term-item"><strong>Validity</strong><p>1. This proposal is valid for 15 days from the date of issue.</p></div>
+            </div>
+            <div>
+              <div class="inv-payment-box">
+                <div class="inv-payment-title">Bank & Payment Details:</div>
+                <div class="inv-payment-row"><span class="inv-payment-label">Ac Number</span><span>: 50200084920192</span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">IFSC Code</span><span>: HDFC0001234</span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">Banking Name</span><span>: D-GROW MARKETING</span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">Bank Name</span><span>: HDFC Bank Ltd</span></div>
+                <div class="inv-payment-row" style="margin-top:3px;"><span class="inv-payment-label">GPay / UPI</span><span>: <strong>9790123456@upi</strong></span></div>
+              </div>
+              <div class="inv-signature-block" style="text-align:center; margin-top:6px;">
+                <div style="margin:2px 0; display:flex; justify-content:center; align-items:center;">
+                  <img src="../assets/seel.png" onerror="this.onerror=null; this.src='assets/seel.png'; if(!this.complete) this.src='/assets/seel.png';" alt="Official Seal & Signature" style="max-height:70px; max-width:160px; object-fit:contain; display:block; margin:0 auto;">
+                </div>
+                <div class="inv-sig-title">Authorized Signatory</div>
+                <div class="inv-sig-subtitle">D-GROW Marketing Agency</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('exactQuotationSheetHolder').innerHTML = sheetHtml;
+      document.getElementById('exactInvoicePreviewModal').classList.add('active');
+    }
+
+    function closeExactInvoicePreview() {
+      document.getElementById('exactInvoicePreviewModal').classList.remove('active');
+    }
+
+    function printCurrentQuotation() {
+      window.print();
+    }
+
+    function applyQuotationFilters() {
+      const search = (document.getElementById('quoteSearchInput')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('quoteStatusFilter')?.value;
+
+      const filtered = quotationsList.filter(q => {
+        const matchesSearch = !search || 
+          q.quoteNumber.toLowerCase().includes(search) || 
+          q.client.toLowerCase().includes(search) ||
+          (q.contactPerson && q.contactPerson.toLowerCase().includes(search)) ||
+          q.items.some(it => it.description.toLowerCase().includes(search));
+
+        const matchesStatus = !statusFilter || q.status === statusFilter;
+        return matchesSearch && matchesStatus;
+      });
+
+      renderQuotationsTable(filtered);
+      updateQuotationMetrics();
+    }
+
+    function renderQuotationsTable(records) {
+      const tbody = document.getElementById('quotationsTableBody');
+      if (!tbody) return;
+
+      if (records.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-muted, #64748b);">
+              No quotations found matching the selected criteria.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = records.map(q => {
+        const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+        const discount = q.negotiationAmount || 0;
+        const taxable = Math.max(0, baseSubtotal - discount);
+        const gstAmount = (taxable * (q.gstRate || 18)) / 100;
+        const grandTotal = Math.round(taxable + gstAmount);
+
+        let statusClass = 'status-badge-draft';
+        if (q.status === 'SENT') statusClass = 'status-badge-sent';
+        if (q.status === 'NEGOTIATING') statusClass = 'status-badge-sent';
+        if (q.status === 'APPROVED') statusClass = 'status-badge-approved';
+        if (q.status === 'CONVERTED') statusClass = 'status-badge-converted';
+        if (q.status === 'REJECTED') statusClass = 'status-badge-rejected';
+
+        const servicesStr = q.items.map(it => it.description).join(', ');
+
+        return `
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:0.75rem 1rem; vertical-align:middle;">
+              <strong style="color:var(--primary, #e11d48); font-family:monospace; font-size:0.92rem;">${escapeHtml(q.quoteNumber)}</strong>
+            </td>
+            <td style="padding:0.75rem 1rem; vertical-align:middle;">
+              <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.15rem;">
+                <strong style="color:#0f172a; font-size:0.9rem;">${escapeHtml(q.client)}</strong>
+                ${q.isLead ? `<span class="client-type-lead">Non-Onboarded Lead</span>` : `<span class="client-type-onboarded">Onboarded</span>`}
+              </div>
+              <span style="font-size:0.78rem; color:#64748b;">${escapeHtml(q.contactPerson || '')} ${q.mobile ? '• ' + escapeHtml(q.mobile) : ''}</span>
+            </td>
+            <td style="padding:0.75rem 1rem; vertical-align:middle;">
+              <span style="font-size:0.82rem; color:#334155; font-weight:600; display:block;">${escapeHtml(q.date)}</span>
+              <span style="font-size:0.73rem; color:#64748b;">Valid: ${escapeHtml(q.validUntil)}</span>
+            </td>
+            <td style="padding:0.75rem 1rem; vertical-align:middle; max-width:220px;">
+              <div style="font-size:0.82rem; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeAttr(servicesStr)}">
+                ${escapeHtml(servicesStr)}
+              </div>
+            </td>
+            <td style="padding:0.75rem 1rem; vertical-align:middle; text-align:right;">
+              <strong style="color:#15803d; font-size:1.05rem; font-weight:900;">₹${grandTotal.toLocaleString('en-IN')}</strong>
+              ${discount > 0 ? `
+                <div style="font-size:0.72rem; color:#b45309; font-weight:600;">
+                  -${q.negotiationPercent}% (-₹${discount.toLocaleString('en-IN')})
+                </div>
+              ` : ''}
+            </td>
+            <td style="padding:0.75rem 1rem; vertical-align:middle; text-align:center;">
+              <span class="badge ${statusClass}" style="font-size:0.75rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:4px;">${escapeHtml(q.status)}</span>
+            </td>
+            <td style="padding:0.75rem 1rem; vertical-align:middle; text-align:right;">
+              <div style="display:inline-flex; align-items:center; justify-content:flex-end; gap:0.35rem;">
+                <!-- View Official Invoice-Layout Preview -->
+                <button type="button" class="icon-action-btn" onclick="previewExactQuotation(${q.id})" style="color:#0284c7;" title="View Official Quotation Preview">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                
+                <!-- Quick Negotiation Button -->
+                <button type="button" class="icon-action-btn" onclick="openQuickNegotiation(${q.id})" style="color:#d97706;" title="Update Negotiation Percentage & Discount">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8M8 8h.01M16 16h.01"/></svg>
+                </button>
+
+                <!-- Convert to Invoice & Onboard Client Modal Trigger -->
+                ${q.status !== 'CONVERTED' ? `
+                  <button type="button" class="icon-action-btn" onclick="openConvertInvoiceModal(${q.id})" style="color:#16a34a;" title="Convert to Invoice & Onboard Client">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </button>
+                ` : ''}
+
+                <!-- Edit Quotation -->
+                <button type="button" class="icon-action-btn" onclick="openEditQuotation(${q.id})" title="Edit Full Quotation">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+
+                <!-- Delete Quotation -->
+                <button type="button" class="icon-action-btn" onclick="deleteQuotation(${q.id})" style="color:#dc2626;" title="Delete Quotation">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateQuotationMetrics() {
+      let totalPipeline = 0;
+      let approvedVal = 0;
+      let approvedCount = 0;
+      let pendingCount = 0;
+
+      quotationsList.forEach(q => {
+        const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+        const discount = q.negotiationAmount || 0;
+        const taxable = Math.max(0, baseSubtotal - discount);
+        const total = Math.round(taxable + ((taxable * (q.gstRate || 18)) / 100));
+        totalPipeline += total;
+
+        if (q.status === 'APPROVED' || q.status === 'CONVERTED') {
+          approvedCount++;
+          approvedVal += total;
+        } else if (q.status === 'DRAFT' || q.status === 'SENT' || q.status === 'NEGOTIATING') {
+          pendingCount++;
+        }
+      });
+
+      document.getElementById('statTotalQuotations').textContent = quotationsList.length;
+      document.getElementById('statTotalPipeline').textContent = '₹' + totalPipeline.toLocaleString('en-IN');
+      document.getElementById('statApprovedQuotations').textContent = approvedCount;
+      document.getElementById('statApprovedValue').textContent = '₹' + approvedVal.toLocaleString('en-IN') + ' converted value';
+      document.getElementById('statPendingQuotations').textContent = pendingCount;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/"/g, '&quot;');
+    }
+    function showToast(msg, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px;
+        background: ${type === 'success' ? '#15803d' : '#0f172a'};
+        color: white; padding: 0.75rem 1.25rem; border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999;
+        font-size: 0.88rem; font-weight: 600; animation: slideUp 0.3s ease;
+      `;
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3500);
+    }
+  </script>
+</body>
+</html>

@@ -14,7 +14,7 @@ async function loadAuditLogs() {
   const action = document.getElementById('filterAction')?.value || '';
 
   try {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading audit logs...</td></tr>';
+    tbody.innerHTML = renderTableLoader(7, 'Loading audit logs...');
     const query = new URLSearchParams({ entity_type: entityType, action }).toString();
     const res = await apiFetch(`/audit-logs?${query}`);
 

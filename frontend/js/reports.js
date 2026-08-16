@@ -83,7 +83,7 @@ async function loadSalesReport() {
   if (!container) return;
 
   try {
-    container.innerHTML = '<tr><td colspan="9" class="text-center">Loading sales report...</td></tr>';
+    container.innerHTML = renderTableLoader(9, 'Loading sales report...');
     const query = getReportFilterQueryParams();
     const res = await apiFetch(`/reports/sales${query}`);
 
@@ -116,7 +116,7 @@ async function loadGstReport() {
   if (!container) return;
 
   try {
-    container.innerHTML = '<tr><td colspan="9" class="text-center">Loading GST report...</td></tr>';
+    container.innerHTML = renderTableLoader(9, 'Loading GST report...');
     const query = getReportFilterQueryParams();
     const res = await apiFetch(`/reports/gst${query}`);
 
@@ -163,7 +163,7 @@ async function loadOutstandingReport() {
   if (!container) return;
 
   try {
-    container.innerHTML = '<tr><td colspan="7" class="text-center">Loading outstanding report...</td></tr>';
+    container.innerHTML = renderTableLoader(7, 'Loading outstanding report...');
     const res = await apiFetch('/reports/outstanding');
 
     if (!res.outstanding || res.outstanding.length === 0) {

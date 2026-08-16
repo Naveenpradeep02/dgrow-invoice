@@ -50,6 +50,17 @@ function hasValidGSTIN(clientGstin, agencyGstin = '') {
   return true;
 }
 
+function addDaysToDate(dateStr, days = 0) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '-';
+  d.setDate(d.getDate() + parseInt(days || 0, 10));
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 function formatAddress3Lines(client = {}) {
   const rawAddr = (client.address || '').trim().replace(/,\s*$/, '');
   const cityPin = [client.city, client.pincode].filter(Boolean).join(' - ');
@@ -81,7 +92,9 @@ function renderSubDetailRowHTML(text = '') {
     <div class="subdetail-row" style="display:flex; align-items:center; gap:0.35rem; margin-top:0.25rem;">
       <span style="color:#2563eb; font-weight:bold; font-size:0.85rem; line-height:1;">•</span>
       <input type="text" class="form-input subdetail-input" value="${escapeAttr(text)}" placeholder="Sub-detail (e.g. Local SEO)" style="font-size:0.8rem; padding:0.25rem 0.5rem; flex:1;">
-      <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#ef4444; font-size:0.9rem; cursor:pointer; padding:0 0.25rem; font-weight:bold;" title="Remove sub-detail">✕</button>
+      <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:0 0.25rem; display:inline-flex; align-items:center;" title="Remove sub-detail">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
   `;
 }
@@ -110,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function onAuditorDateFilterChange() {
+function applyInvoiceFilters() {
   const monthEl = document.getElementById('filterMonth');
   const yearEl = document.getElementById('filterYear');
   
@@ -126,20 +139,24 @@ function onAuditorDateFilterChange() {
   let toDate = '';
 
   if (month && year) {
-    const lastDay = new Date(year, parseInt(month), 0).getDate();
-    fromDate = `${year}-${month}-01`;
-    toDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+    const lastDay = new Date(parseInt(year, 10), parseInt(month, 10), 0).getDate();
+    fromDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    toDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   } else if (year) {
     fromDate = `${year}-01-01`;
     toDate = `${year}-12-31`;
   } else if (month) {
     const currYear = new Date().getFullYear();
-    const lastDay = new Date(currYear, parseInt(month), 0).getDate();
-    fromDate = `${currYear}-${month}-01`;
-    toDate = `${currYear}-${month}-${String(lastDay).padStart(2, '0')}`;
+    const lastDay = new Date(currYear, parseInt(month, 10), 0).getDate();
+    fromDate = `${currYear}-${String(month).padStart(2, '0')}-01`;
+    toDate = `${currYear}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   }
 
   loadInvoicesList(fromDate, toDate);
+}
+
+function onAuditorDateFilterChange() {
+  applyInvoiceFilters();
 }
 
 // --- INVOICES LIST PAGE ---
@@ -154,7 +171,7 @@ async function loadInvoicesList(fromDateOverride = '', toDateOverride = '') {
   const to_date = toDateOverride || document.getElementById('filterToDate')?.value || '';
 
   try {
-    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;">Loading invoices...</td></tr>';
+    tbody.innerHTML = renderTableLoader(8, 'Loading invoices...');
     
     const params = new URLSearchParams();
     if (search) params.append('search', search);
@@ -163,11 +180,43 @@ async function loadInvoicesList(fromDateOverride = '', toDateOverride = '') {
     if (from_date) params.append('from_date', from_date);
     if (to_date) params.append('to_date', to_date);
 
-    const res = await apiFetch(`/invoices?${params.toString()}`);
+    const res = await apiFetch('/invoices?' + params.toString());
 
-    if (!res.invoices || res.invoices.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem;">No invoices found.</td></tr>';
+    if (!res || !res.invoices || res.invoices.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem;">No invoices found for the selected filters.</td></tr>';
+      if (document.getElementById('summaryBilled')) document.getElementById('summaryBilled').textContent = formatINR(0);
+      if (document.getElementById('summaryPaid')) document.getElementById('summaryPaid').textContent = formatINR(0);
+      if (document.getElementById('summaryPending')) document.getElementById('summaryPending').textContent = formatINR(0);
+      if (document.getElementById('summaryCount')) document.getElementById('summaryCount').textContent = '0 Invoices';
       return;
+    }
+
+    // Calculate live revenue stats for the displayed list
+    let sumBilled = 0;
+    let sumPaid = 0;
+    let validCount = 0;
+
+    res.invoices.forEach(inv => {
+      if (inv.status !== 'CANCELLED') {
+        sumBilled += parseFloat(inv.grand_total || 0);
+        sumPaid += parseFloat(inv.paid_amount || 0);
+        validCount++;
+      }
+    });
+
+    const sumPending = Math.max(0, sumBilled - sumPaid);
+
+    if (document.getElementById('summaryBilled')) {
+      document.getElementById('summaryBilled').textContent = formatINR(sumBilled);
+    }
+    if (document.getElementById('summaryPaid')) {
+      document.getElementById('summaryPaid').textContent = formatINR(sumPaid);
+    }
+    if (document.getElementById('summaryPending')) {
+      document.getElementById('summaryPending').textContent = formatINR(sumPending);
+    }
+    if (document.getElementById('summaryCount')) {
+      document.getElementById('summaryCount').textContent = `${res.invoices.length} Invoices (${validCount} Active)`;
     }
 
     const user = getUser();
@@ -183,23 +232,23 @@ async function loadInvoicesList(fromDateOverride = '', toDateOverride = '') {
         <td>${formatINR(inv.paid_amount)}</td>
         <td><span class="badge badge-${inv.status.toLowerCase()}">${inv.status.replace('_', ' ')}</span></td>
         <td>
-          <div style="display:flex; gap:0.4rem;">
-            <a href="invoice-view.html?id=${inv.id}" class="btn btn-secondary btn-sm">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              View
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <a href="invoice-view.html?id=${inv.id}" class="btn btn-secondary btn-sm" title="View Invoice" style="padding:0.35rem 0.55rem; display:inline-flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </a>
-            <a href="${API_BASE}/invoices/${inv.id}/pdf?token=${getToken()}" target="_blank" class="btn btn-secondary btn-sm">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              PDF
+            <a href="${API_BASE}/invoices/${inv.id}/pdf?token=${getToken()}" target="_blank" class="btn btn-secondary btn-sm" title="Download PDF" style="padding:0.35rem 0.55rem; display:inline-flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </a>
-            ${(isAdmin && inv.status !== 'PAID' && inv.status !== 'CANCELLED') ? `
-              <button onclick="handleQuickPaymentDone(${inv.id}, '${inv.invoice_number}', ${inv.grand_total - inv.paid_amount})" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #16a34a, #15803d); border:none; display:inline-flex; align-items:center; gap:0.25rem;" title="Mark Payment Done">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Payment Done
-              </button>
-            ` : ''}
             ${(isAdmin && inv.status !== 'CANCELLED') ? `
-              <button onclick="handleCancelInvoice(${inv.id}, '${inv.invoice_number}')" class="btn btn-danger btn-sm">Cancel</button>
+              <a href="create-invoice.html?id=${inv.id}" class="btn btn-secondary btn-sm" title="Edit Invoice" style="padding:0.35rem 0.55rem; display:inline-flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </a>
+            ` : ''}
+            ${(isAdmin && inv.status !== 'PAID' && inv.status !== 'CANCELLED') ? `
+              <button onclick="handleQuickPaymentDone(${inv.id}, '${inv.invoice_number}', ${inv.grand_total - inv.paid_amount})" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #16a34a, #15803d); border:none; display:inline-flex; align-items:center; gap:0.25rem; padding:0.35rem 0.75rem;" title="Record Payment">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Pay
+              </button>
             ` : ''}
           </div>
         </td>
@@ -216,96 +265,101 @@ function ensureQuickPaymentModalExists() {
 
   const modalHtml = `
     <div class="modal-overlay" id="quickPaymentModal">
-      <div class="modal-box" style="max-width: 520px;">
-        <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
-          <div style="display:flex; align-items:center; gap:0.5rem;">
-            <div style="width:36px; height:36px; border-radius:50%; background:rgba(22,163,74,0.12); color:#16a34a; display:flex; align-items:center; justify-content:center;">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div class="modal-box" style="max-width: 520px; border-radius: 14px; padding: 1.25rem 1.4rem;">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 0.85rem;">
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <div style="width:34px; height:34px; border-radius:8px; background:rgba(22,163,74,0.12); color:#16a34a; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
             <div>
-              <h3 style="margin:0; font-size:1.15rem; color:var(--text-color);">Confirm Payment Receipt</h3>
-              <p style="margin:0; font-size:0.8rem; color:var(--text-muted);" id="qpmSubTitle">Invoice details</p>
+              <h3 style="margin:0; font-size:1.1rem; color:var(--text-color); font-weight:700;">Record Payment Receipt</h3>
+              <p style="margin:0; font-size:0.75rem; color:var(--text-muted);" id="qpmSubTitle">Invoice details</p>
             </div>
           </div>
-          <button class="modal-close" type="button" onclick="closeQuickPaymentModal()">&times;</button>
+          <button class="modal-close" type="button" onclick="closeQuickPaymentModal()" style="font-size:1.25rem;">&times;</button>
         </div>
         
         <form id="quickPaymentForm" onsubmit="submitQuickPayment(event)">
           <input type="hidden" id="qpmInvoiceId">
 
-          <div style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.85rem 1rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center;">
+          <div style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.65rem 0.9rem; margin-bottom:0.85rem; display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Invoice Number</span>
-              <h4 style="margin:0.2rem 0 0 0; color:var(--primary-color); font-size:1.1rem;" id="qpmInvoiceNumberText">INV0001</h4>
+              <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Invoice Number</span>
+              <h4 style="margin:0.15rem 0 0 0; color:var(--primary-color); font-size:1.05rem;" id="qpmInvoiceNumberText">INV0001</h4>
             </div>
             <div style="text-align:right;">
-              <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Remaining Balance</span>
-              <h4 style="margin:0.2rem 0 0 0; color:#16a34a; font-size:1.2rem;" id="qpmBalanceText">₹0</h4>
+              <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Remaining Balance</span>
+              <h4 style="margin:0.15rem 0 0 0; color:#16a34a; font-size:1.15rem;" id="qpmBalanceText">₹0</h4>
             </div>
           </div>
 
+          <!-- Dynamic Client Split Payment Schedule (if applicable) -->
+          <div id="qpmSplitScheduleSection" style="display:none;"></div>
+
           <!-- Received Where / How selector -->
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label class="form-label" style="font-weight:600; margin-bottom:0.4rem; display:block;">
-              Where / How was Payment Received? <span style="color:#ef4444;">*</span>
+          <div class="form-group" style="margin-bottom:0.85rem;">
+            <label class="form-label" style="font-weight:600; font-size:0.82rem; margin-bottom:0.35rem; display:flex; justify-content:space-between; align-items:center;">
+              <span>Payment Mode <span style="color:#ef4444;">*</span></span>
+              <span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">Select received channel</span>
             </label>
             
             <input type="hidden" id="qpmPaymentMode" value="UPI">
 
             <div class="payment-mode-selector">
               <div class="payment-mode-pill active" data-mode="UPI" onclick="selectPaymentModePill('UPI')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                <span>📱 UPI / QR</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M9 7h6M9 11h6"/></svg>
+                <span>UPI / QR</span>
               </div>
 
               <div class="payment-mode-pill" data-mode="Bank Transfer" onclick="selectPaymentModePill('Bank Transfer')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 10 12 15 21 10"/></svg>
-                <span>🏦 Bank</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3l9 7H3z"/></svg>
+                <span>Bank</span>
               </div>
 
               <div class="payment-mode-pill" data-mode="Cash" onclick="selectPaymentModePill('Cash')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
-                <span>💵 Cash</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+                <span>Cash</span>
               </div>
 
               <div class="payment-mode-pill" data-mode="Cheque" onclick="selectPaymentModePill('Cheque')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-                <span>📄 Cheque</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h10M7 14h5M15 14l2 2 3-3"/></svg>
+                <span>Cheque</span>
               </div>
 
               <div class="payment-mode-pill" data-mode="Card" onclick="selectPaymentModePill('Card')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                <span>💳 Card</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M6 15h4"/></svg>
+                <span>Card</span>
               </div>
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
-            <div class="form-group">
-              <label class="form-label" style="font-weight:600;">Amount Received (₹) <span style="color:#ef4444;">*</span></label>
-              <input type="number" step="0.01" id="qpmAmount" class="form-input" required style="font-weight:600; font-size:1.05rem;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-weight:600; font-size:0.8rem; margin-bottom:0.25rem;">Amount Received (₹) <span style="color:#ef4444;">*</span></label>
+              <input type="number" step="0.01" id="qpmAmount" class="form-input" required style="font-weight:700; font-size:0.95rem; padding:0.45rem 0.65rem;">
             </div>
 
-            <div class="form-group">
-              <label class="form-label" style="font-weight:600;">Payment Date <span style="color:#ef4444;">*</span></label>
-              <input type="date" id="qpmDate" class="form-input" required>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-weight:600; font-size:0.8rem; margin-bottom:0.25rem;">Payment Date <span style="color:#ef4444;">*</span></label>
+              <input type="date" id="qpmDate" class="form-input" required style="font-size:0.85rem; padding:0.45rem 0.65rem;">
             </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label" style="font-size:0.8rem; margin-bottom:0.25rem;">Transaction / UTR Reference No. <span style="color:var(--text-muted); font-weight:normal;">(Optional)</span></label>
+            <input type="text" id="qpmReference" class="form-input" placeholder="e.g. UPI/6239104817 or Bank UTR" style="font-size:0.85rem; padding:0.45rem 0.65rem;">
           </div>
 
           <div class="form-group" style="margin-bottom:1rem;">
-            <label class="form-label">Transaction / UTR Reference No. <span style="color:var(--text-muted); font-weight:normal;">(Optional)</span></label>
-            <input type="text" id="qpmReference" class="form-input" placeholder="e.g. UPI/6239104817 or UTR123456">
+            <label class="form-label" style="font-size:0.8rem; margin-bottom:0.25rem;">Notes / Remarks <span style="color:var(--text-muted); font-weight:normal;">(Optional)</span></label>
+            <input type="text" id="qpmNotes" class="form-input" placeholder="e.g. Full payment received in Agency Account" style="font-size:0.85rem; padding:0.45rem 0.65rem;">
           </div>
 
-          <div class="form-group" style="margin-bottom:1.5rem;">
-            <label class="form-label">Notes / Remarks <span style="color:var(--text-muted); font-weight:normal;">(Optional)</span></label>
-            <input type="text" id="qpmNotes" class="form-input" placeholder="e.g. Full payment received in Agency Account">
-          </div>
-
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem; border-top:1px solid var(--border-color); padding-top:1rem;">
-            <button type="button" class="btn btn-secondary" onclick="closeQuickPaymentModal()">Cancel</button>
-            <button type="submit" id="qpmSubmitBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #16a34a, #15803d); border:none; padding:0.6rem 1.25rem; font-weight:600;">
-              ✓ Confirm Payment Received
+          <div style="display:flex; justify-content:flex-end; gap:0.6rem; border-top:1px solid var(--border-color); padding-top:0.85rem;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeQuickPaymentModal()" style="padding:0.45rem 1rem;">Cancel</button>
+            <button type="submit" id="qpmSubmitBtn" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #16a34a, #15803d); border:none; padding:0.45rem 1.25rem; font-weight:600; display:inline-flex; align-items:center; gap:0.35rem;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirm Payment Received
             </button>
           </div>
         </form>
@@ -335,7 +389,7 @@ function closeQuickPaymentModal() {
   if (modal) modal.classList.remove('active');
 }
 
-function handleQuickPaymentDone(id, invNum, balanceAmount) {
+async function handleQuickPaymentDone(id, invNum, balanceAmount) {
   ensureQuickPaymentModalExists();
 
   const amount = balanceAmount > 0 ? balanceAmount : 0;
@@ -343,7 +397,7 @@ function handleQuickPaymentDone(id, invNum, balanceAmount) {
   document.getElementById('qpmInvoiceId').value = id;
   document.getElementById('qpmInvoiceNumberText').textContent = invNum;
   document.getElementById('qpmSubTitle').textContent = `Record payment details for Invoice ${invNum}`;
-  document.getElementById('qpmBalanceText').textContent = `₹${formatINR(amount)}`;
+  document.getElementById('qpmBalanceText').textContent = formatINR(amount);
   document.getElementById('qpmAmount').value = amount;
   document.getElementById('qpmDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('qpmReference').value = '';
@@ -351,7 +405,168 @@ function handleQuickPaymentDone(id, invNum, balanceAmount) {
 
   selectPaymentModePill('UPI');
 
+  const splitSection = document.getElementById('qpmSplitScheduleSection');
+  if (splitSection) splitSection.style.display = 'none';
+
   document.getElementById('quickPaymentModal').classList.add('active');
+
+  // Fetch full invoice details to check if client has split payment schedule
+  try {
+    const res = await apiFetch(`/invoices/${id}`);
+    if (res && res.success && res.invoice) {
+      renderQuickPaymentSplitPills(res.invoice);
+    }
+  } catch (err) {
+    console.error('Error loading invoice split details for modal:', err);
+  }
+}
+
+function renderQuickPaymentSplitPills(invoice) {
+  const splitSection = document.getElementById('qpmSplitScheduleSection');
+  if (!splitSection) return;
+
+  const client = invoice.client_snapshot || {};
+  let schedule = null;
+
+  if (client.payment_schedule_json) {
+    try {
+      schedule = typeof client.payment_schedule_json === 'string' ? JSON.parse(client.payment_schedule_json) : client.payment_schedule_json;
+    } catch (e) {}
+  }
+
+  const isSplit = client.payment_terms_type === 'SPLIT' || client.payment_terms_type === '3_PAYMENTS' || (schedule && Array.isArray(schedule.milestones) && schedule.milestones.length > 0);
+
+  if (!isSplit || !schedule || !Array.isArray(schedule.milestones) || schedule.milestones.length === 0) {
+    splitSection.style.display = 'none';
+    return;
+  }
+
+  const grandTotal = parseFloat(invoice.grand_total || 0);
+  const paidAmount = parseFloat(invoice.paid_amount || 0);
+  const balanceAmount = parseFloat(invoice.balance_amount || 0);
+  const invoiceDateStr = invoice.invoice_date;
+
+  let cumulativeThreshold = 0;
+  let defaultSelectSet = false;
+
+  const milestonePillsHTML = schedule.milestones.map((m, idx) => {
+    const percent = parseFloat(m.percent || 0);
+    const stageAmount = Math.round((percent / 100) * grandTotal);
+    cumulativeThreshold += stageAmount;
+    
+    // Check if this milestone has already been covered by previous payments
+    const isPaid = paidAmount >= cumulativeThreshold;
+    const stageNum = idx + 1;
+    const dueFormatted = addDaysToDate(invoiceDateStr, m.due_days || 0);
+    
+    // Calculate pending for this specific stage
+    let stagePending = stageAmount;
+    if (paidAmount >= cumulativeThreshold) {
+      stagePending = 0;
+    } else if (paidAmount > (cumulativeThreshold - stageAmount)) {
+      stagePending = cumulativeThreshold - paidAmount;
+    }
+
+    const isActive = !isPaid && !defaultSelectSet;
+    if (isActive) {
+      defaultSelectSet = true;
+      // Auto-set the amount to this next due stage
+      document.getElementById('qpmAmount').value = stagePending;
+      document.getElementById('qpmNotes').value = `Payment for ${invoice.invoice_number} - Due Stage #${stageNum} (${m.milestone || 'Milestone'})`;
+    }
+
+    if (isPaid) {
+      return `
+        <div class="qpm-due-pill paid" title="Fully Paid: ${escapeAttr(m.milestone || `Stage ${stageNum}`)}">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:0.78rem; color:#16a34a;">Due ${stageNum} (${percent}%)</strong>
+            <span style="font-size:0.62rem; color:#16a34a; font-weight:700; background:#dcfce7; padding:0.1rem 0.35rem; border-radius:4px;">PAID</span>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; text-decoration:line-through; color:var(--text-muted);">${formatINR(stageAmount)}</div>
+          <div style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted);">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>${dueFormatted}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="qpm-due-pill ${isActive ? 'active' : ''}" 
+           data-stage="${stageNum}" 
+           data-amount="${stagePending}" 
+           title="${escapeAttr(m.milestone || `Stage ${stageNum}`)}"
+           onclick="selectQuickPaymentDuePill(this, ${stagePending}, ${stageNum}, '${escapeAttr(m.milestone || `Stage ${stageNum}`)}')">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong style="font-size:0.78rem; color:var(--text-main);">Due ${stageNum} (${percent}%)</strong>
+          <span class="badge badge-issued" style="font-size:0.62rem; padding:0.1rem 0.35rem;">DUE</span>
+        </div>
+        <div style="font-size:0.95rem; font-weight:700; color:var(--primary);">${formatINR(stagePending)}</div>
+        <div style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:#b91c1c; font-weight:600;">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>${dueFormatted}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Full remaining balance pill
+  const fullPillHTML = `
+    <div class="qpm-due-pill ${!defaultSelectSet ? 'active' : ''}" data-stage="FULL" data-amount="${balanceAmount}" title="Full Remaining Amount" onclick="selectQuickPaymentDuePill(this, ${balanceAmount}, 0, 'Full Remaining Balance')">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong style="font-size:0.78rem; color:var(--text-main);">Full Balance</strong>
+        <span style="font-size:0.62rem; color:#475569; font-weight:700; background:#f1f5f9; padding:0.1rem 0.35rem; border-radius:4px;">100%</span>
+      </div>
+      <div style="font-size:0.95rem; font-weight:700; color:#16a34a;">${formatINR(balanceAmount)}</div>
+      <div style="display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text-muted);">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Clear all dues</span>
+      </div>
+    </div>
+  `;
+
+  splitSection.innerHTML = `
+    <div class="qpm-split-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+        <span style="font-size:0.8rem; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:0.35rem;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Client Split Payment Schedule:
+        </span>
+        <span style="font-size:0.72rem; color:var(--text-muted);">Click a due to auto-fill</span>
+      </div>
+      <div class="qpm-split-grid">
+        ${milestonePillsHTML}
+        ${fullPillHTML}
+      </div>
+    </div>
+  `;
+
+  splitSection.style.display = 'block';
+}
+
+function selectQuickPaymentDuePill(pillElement, amount, stageNum, stageTitle) {
+  const invNum = document.getElementById('qpmInvoiceNumberText')?.textContent || '';
+  
+  // Set Amount Received
+  const amountInput = document.getElementById('qpmAmount');
+  if (amountInput) amountInput.value = amount;
+
+  // Set Notes
+  const notesInput = document.getElementById('qpmNotes');
+  if (notesInput) {
+    if (stageNum > 0) {
+      notesInput.value = `Payment for ${invNum} - Due Stage #${stageNum} (${stageTitle})`;
+    } else {
+      notesInput.value = `Full remaining payment received for ${invNum}`;
+    }
+  }
+
+  // Update active pill styling
+  const pills = document.querySelectorAll('#qpmSplitScheduleSection .qpm-due-pill');
+  pills.forEach(p => p.classList.remove('active'));
+  if (pillElement && !pillElement.classList.contains('paid')) {
+    pillElement.classList.add('active');
+  }
 }
 
 async function submitQuickPayment(e) {
@@ -388,7 +603,7 @@ async function submitQuickPayment(e) {
     });
 
     closeQuickPaymentModal();
-    showToast(`✓ Payment of ₹${formatINR(amount)} received via ${payment_mode} for ${invNum}!`, 'success');
+    showToast(`✓ Payment of ${formatINR(amount)} received via ${payment_mode} for ${invNum}!`, 'success');
 
     if (typeof loadInvoicesList === 'function') {
       loadInvoicesList();
@@ -418,6 +633,29 @@ async function handleCancelInvoice(id, invNum) {
   }
 }
 
+function parseItemDetails(item) {
+  const fullText = (item.description || item.name || '').trim();
+  const lines = fullText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  
+  let serviceName = '';
+  let subDetails = [];
+
+  if (lines.length > 1) {
+    serviceName = lines[0];
+    subDetails = lines.slice(1);
+  } else if (fullText.includes(':')) {
+    const parts = fullText.split(':');
+    serviceName = parts[0].trim();
+    subDetails = parts.slice(1).join(':').split(/[,;]/).map(s => s.trim()).filter(s => s.length > 0);
+  } else {
+    serviceName = fullText || '';
+    subDetails = [];
+  }
+
+  const cleanSubDetails = subDetails.map(d => d.replace(/^[•\-\*\+]\s*/, '').trim()).filter(d => d.length > 0);
+  return { serviceName, subDetails: cleanSubDetails };
+}
+
 // --- CREATE / EDIT INVOICE PAGE ---
 async function initCreateInvoicePage() {
   try {
@@ -428,7 +666,7 @@ async function initCreateInvoicePage() {
       apiFetch('/services')
     ]);
 
-    if (seqRes.success) {
+    if (seqRes.success && document.getElementById('invoice_number')) {
       document.getElementById('invoice_number').value = seqRes.invoice_number;
     }
 
@@ -437,32 +675,195 @@ async function initCreateInvoicePage() {
 
     // Populate Client Select
     const clientSelect = document.getElementById('client_id');
-    clientSelect.innerHTML = '<option value="">-- Select Client --</option>' +
-      availableClients.map(c => `<option value="${c.id}">${c.company_name} (${c.email})</option>`).join('');
-
-    // Setup initial row if empty
-    if (currentItems.length === 0) {
-      addInvoiceItemRow();
+    if (clientSelect) {
+      clientSelect.innerHTML = '<option value="">-- Select Client --</option>' +
+        availableClients.map(c => `<option value="${c.id}">${c.company_name} (${c.email})</option>`).join('');
     }
 
     // Toggle GST visibility on change
-    document.getElementById('invoice_type').addEventListener('change', onInvoiceTypeChange);
-    document.getElementById('place_of_supply').addEventListener('change', updateInvoiceCalculations);
-    document.getElementById('client_id').addEventListener('change', handleClientSelect);
-
-    // Initial invoice number fetch
-    fetchNextInvoiceNumber(document.getElementById('invoice_type')?.value || 'GST');
+    document.getElementById('invoice_type')?.addEventListener('change', onInvoiceTypeChange);
+    document.getElementById('place_of_supply')?.addEventListener('change', updateInvoiceCalculations);
+    document.getElementById('client_id')?.addEventListener('change', handleClientSelect);
 
     // Form submit
-    document.getElementById('createInvoiceForm').addEventListener('submit', handleSaveInvoice);
+    document.getElementById('createInvoiceForm')?.addEventListener('submit', handleSaveInvoice);
+
+    // Check if in edit mode (URL has ?id=...) or from quotation (?from_quote=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('id');
+    const fromQuoteId = urlParams.get('from_quote');
+    const fromClient = urlParams.get('client');
+
+    if (editId) {
+      await loadInvoiceDataForEdit(editId);
+    } else if (fromQuoteId) {
+      await loadQuotationDataForInvoice(fromQuoteId, fromClient);
+      fetchNextInvoiceNumber(document.getElementById('invoice_type')?.value || 'GST');
+    } else {
+      // Setup initial row if empty
+      if (currentItems.length === 0) {
+        addInvoiceItemRow();
+      }
+      fetchNextInvoiceNumber(document.getElementById('invoice_type')?.value || 'GST');
+    }
   } catch (err) {
     showToast('Failed to initialize invoice generator: ' + err.message, 'error');
   }
 }
 
+async function loadQuotationDataForInvoice(quoteId, clientName) {
+  try {
+    let quote = null;
+    const stored = localStorage.getItem('dgrow_quotations_v2') || localStorage.getItem('dgrow_quotations_v1');
+    if (stored) {
+      const list = JSON.parse(stored);
+      quote = list.find(q => String(q.id) === String(quoteId) || q.quoteNumber === quoteId);
+    }
+
+    if (quote) {
+      // Select matching client
+      const clientSelect = document.getElementById('client_id');
+      if (clientSelect) {
+        const foundClient = availableClients.find(c => c.company_name.toLowerCase() === (quote.client || clientName || '').toLowerCase());
+        if (foundClient) {
+          clientSelect.value = foundClient.id;
+          renderClientPreviewOnly(foundClient.id);
+        }
+      }
+
+      // Populate items
+      const itemsTableBody = document.getElementById('itemsTableBody');
+      if (itemsTableBody && Array.isArray(quote.items) && quote.items.length > 0) {
+        itemsTableBody.innerHTML = '';
+        quote.items.forEach(it => {
+          const desc = it.description || '';
+          const subDetails = Array.isArray(it.subDetails) ? it.subDetails : (it.subDetails ? String(it.subDetails).split(',') : []);
+          const fullDesc = subDetails.length > 0 ? `${desc}\n${subDetails.join('\n')}` : desc;
+          
+          addInvoiceItemRow({
+            name: fullDesc,
+            description: fullDesc,
+            hsn_sac: it.hsnSac || '998311',
+            quantity: it.qty || 1,
+            rate: it.rate || 0,
+            gst_rate: quote.gstRate || 18
+          });
+        });
+      }
+
+      if (document.getElementById('notes')) {
+        document.getElementById('notes').value = `Generated from Quotation ${quote.quoteNumber}. ${quote.notes || ''}`;
+      }
+
+      updateInvoiceCalculations();
+      showToast(`Prefilled from Quotation ${quote.quoteNumber}!`, 'success');
+    }
+  } catch(e) {
+    console.error('Error loading quotation for invoice:', e);
+  }
+}
+
+async function loadInvoiceDataForEdit(id) {
+  try {
+    const res = await apiFetch(`/invoices/${id}`);
+    if (!res || !res.success || !res.invoice) {
+      showToast('Invoice not found', 'error');
+      return;
+    }
+
+    const inv = res.invoice;
+
+    if (document.getElementById('editInvoiceId')) {
+      document.getElementById('editInvoiceId').value = inv.id;
+    }
+    if (document.getElementById('invoicePageTitle')) {
+      document.getElementById('invoicePageTitle').textContent = `Edit Invoice (${inv.invoice_number})`;
+    }
+    if (document.getElementById('invoicePageSubTitle')) {
+      document.getElementById('invoicePageSubTitle').textContent = `Editing invoice issued for ${inv.company_name}`;
+    }
+    if (document.getElementById('saveInvoiceSubmitBtn')) {
+      document.getElementById('saveInvoiceSubmitBtn').textContent = 'Update Invoice';
+    }
+
+    // Set header fields
+    if (document.getElementById('invoice_type')) {
+      document.getElementById('invoice_type').value = inv.invoice_type || 'GST';
+    }
+    if (document.getElementById('invoice_number')) {
+      document.getElementById('invoice_number').value = inv.invoice_number;
+    }
+    if (document.getElementById('invoice_date') && inv.invoice_date) {
+      const d = new Date(inv.invoice_date);
+      document.getElementById('invoice_date').value = !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : inv.invoice_date;
+    }
+    if (document.getElementById('due_date') && inv.due_date) {
+      const d = new Date(inv.due_date);
+      document.getElementById('due_date').value = !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : inv.due_date;
+    }
+    if (document.getElementById('place_of_supply')) {
+      document.getElementById('place_of_supply').value = inv.place_of_supply || 'Tamil Nadu';
+    }
+    if (document.getElementById('payment_terms_text')) {
+      document.getElementById('payment_terms_text').value = inv.payment_terms_text || 'Within 7 days of invoice date';
+    }
+    if (document.getElementById('notes')) {
+      document.getElementById('notes').value = inv.notes || '';
+    }
+
+    // Set client
+    const clientSelect = document.getElementById('client_id');
+    if (clientSelect) {
+      clientSelect.value = inv.client_id;
+      renderClientPreviewOnly(inv.client_id);
+    }
+
+    // Set items
+    const itemsTableBody = document.getElementById('itemsTableBody');
+    if (itemsTableBody) {
+      itemsTableBody.innerHTML = '';
+      if (Array.isArray(inv.items) && inv.items.length > 0) {
+        inv.items.forEach(item => {
+          addInvoiceItemRow(item);
+        });
+      } else {
+        addInvoiceItemRow();
+      }
+    }
+
+    updateInvoiceCalculations();
+  } catch (err) {
+    showToast('Failed to load invoice for editing: ' + err.message, 'error');
+  }
+}
+
+function renderClientPreviewOnly(clientId) {
+  const client = availableClients.find(c => String(c.id) === String(clientId));
+  const previewBox = document.getElementById('clientPreviewBox');
+
+  if (client && previewBox) {
+    previewBox.style.display = 'block';
+    previewBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <p><strong>${client.company_name}</strong> (${client.contact_person || ''})</p>
+          <p style="font-size:0.8rem; color:var(--text-muted);">${client.address}, ${client.city || ''}, ${client.state || ''} - ${client.pincode || ''}</p>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Mobile: ${client.mobile} | Email: ${client.email} ${hasValidGSTIN(client.gstin) ? `| GSTIN: <strong>${client.gstin}</strong>` : ''}</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.35rem; align-items:flex-end;">
+          ${(client.payment_terms_type === 'SPLIT' || client.payment_terms_type === '3_PAYMENTS') ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Split Milestones</span>` : `<span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">Single Full Pay</span>`}
+        </div>
+      </div>
+    `;
+  }
+}
+
 async function onInvoiceTypeChange() {
   const type = document.getElementById('invoice_type')?.value || 'GST';
-  await fetchNextInvoiceNumber(type);
+  const editId = document.getElementById('editInvoiceId')?.value;
+  if (!editId) {
+    await fetchNextInvoiceNumber(type);
+  }
   updateInvoiceCalculations();
 }
 
@@ -491,7 +892,10 @@ function handleClientSelect(e) {
           <p style="font-size:0.8rem; color:var(--text-muted);">${client.address}, ${client.city || ''}, ${client.state || ''} - ${client.pincode || ''}</p>
           <p style="font-size:0.8rem; color:var(--text-muted);">Mobile: ${client.mobile} | Email: ${client.email} ${hasValidGSTIN(client.gstin) ? `| GSTIN: <strong>${client.gstin}</strong>` : ''}</p>
         </div>
-        ${(client.preset_services_json) ? `<span class="badge badge-paid" style="font-size:0.75rem;">⚡ Presets Available</span>` : ''}
+        <div style="display:flex; flex-direction:column; gap:0.35rem; align-items:flex-end;">
+          ${(client.payment_terms_type === '3_PAYMENTS' || client.payment_terms_type === 'SPLIT') ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; font-size:0.75rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Split Milestones</span>` : `<span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">Single Full Pay</span>`}
+          ${(client.preset_services_json) ? `<span class="badge badge-paid" style="font-size:0.75rem; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Presets Available</span>` : ''}
+        </div>
       </div>
     `;
 
@@ -557,9 +961,9 @@ function addInvoiceItemRow(serviceData = null) {
       </div>
 
       <!-- Add Sub-detail Button -->
-      <button type="button" class="btn btn-secondary btn-sm" onclick="addSubDetailLine(this)" style="margin-top:0.4rem; padding:0.2rem 0.5rem; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.25rem;">
-        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        ＋ Add Sub-detail Line
+      <button type="button" class="btn btn-secondary btn-sm" onclick="addSubDetailLine(this)" style="margin-top:0.4rem; padding:0.2rem 0.5rem; font-size:0.75rem; display:inline-flex; align-items:center; gap:0.3rem;">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Sub-detail Line
       </button>
     </td>
     <td><input type="text" class="form-input item-sac" value="${serviceData ? (serviceData.hsn_sac || '-') : '-'}" style="width:85px; text-align:center;"></td>
@@ -567,7 +971,11 @@ function addInvoiceItemRow(serviceData = null) {
     <td><input type="number" class="form-input item-rate" value="${serviceData ? serviceData.rate : 0}" step="0.01" oninput="updateInvoiceCalculations()" style="width:105px;"></td>
     <td class="gst-col"><input type="number" class="form-input item-gst" value="${serviceData ? serviceData.gst_rate : 18}" step="0.1" oninput="updateInvoiceCalculations()" style="width:65px;"></td>
     <td><strong class="item-amount">₹0</strong></td>
-    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeInvoiceItemRow(this)">✕</button></td>
+    <td>
+      <button type="button" class="btn btn-danger btn-sm" onclick="removeInvoiceItemRow(this)" style="padding:0.3rem 0.5rem; display:inline-flex; align-items:center; justify-content:center;" title="Remove Line Item">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </td>
   `;
 
   container.appendChild(tr);
@@ -737,34 +1145,56 @@ async function handleSaveInvoice(e) {
     return;
   }
 
+  const editId = document.getElementById('editInvoiceId')?.value;
   const btn = form.querySelector('button[type="submit"]');
   btn.disabled = true;
-  btn.textContent = 'Saving Invoice...';
+  btn.textContent = editId ? 'Updating Invoice...' : 'Saving Invoice...';
 
   try {
-    const res = await apiFetch('/invoices', {
-      method: 'POST',
-      body: JSON.stringify({
-        client_id,
-        invoice_type,
-        invoice_date,
-        due_date,
-        place_of_supply,
-        payment_terms_text,
-        notes,
-        items,
-        status: 'ISSUED'
-      })
-    });
+    if (editId) {
+      await apiFetch(`/invoices/${editId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          client_id,
+          invoice_type,
+          invoice_date,
+          due_date,
+          place_of_supply,
+          payment_terms_text,
+          notes,
+          items
+        })
+      });
 
-    showToast(res.message, 'success');
-    setTimeout(() => {
-      window.location.href = `invoice-view.html?id=${res.invoiceId}`;
-    }, 800);
+      showToast('Invoice updated successfully', 'success');
+      setTimeout(() => {
+        window.location.href = `invoice-view.html?id=${editId}`;
+      }, 800);
+    } else {
+      const res = await apiFetch('/invoices', {
+        method: 'POST',
+        body: JSON.stringify({
+          client_id,
+          invoice_type,
+          invoice_date,
+          due_date,
+          place_of_supply,
+          payment_terms_text,
+          notes,
+          items,
+          status: 'ISSUED'
+        })
+      });
+
+      showToast(res.message, 'success');
+      setTimeout(() => {
+        window.location.href = `invoice-view.html?id=${res.invoiceId}`;
+      }, 800);
+    }
   } catch (err) {
     showToast(err.message, 'error');
     btn.disabled = false;
-    btn.textContent = 'Save & Issue Invoice';
+    btn.textContent = editId ? 'Update Invoice' : 'Save & Issue Invoice';
   }
 }
 
@@ -776,6 +1206,11 @@ async function initInvoiceViewPage() {
   const pdfBtn = document.getElementById('btnDownloadPDF');
   if (pdfBtn) {
     pdfBtn.href = `${API_BASE}/invoices/${id}/pdf?token=${getToken()}`;
+  }
+
+  const container = document.getElementById('invoiceSheetContainer');
+  if (container) {
+    container.innerHTML = renderDataLoader('Loading invoice details...', 'lg');
   }
 
   try {
@@ -823,7 +1258,7 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
       <!-- Agency Header -->
       <div class="inv-agency-header">
         <div class="inv-brand-left">
-          <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height: 60px; max-width: 220px; object-fit: contain;">
+          <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height: 48px; max-width: 200px; object-fit: contain;">
           <div class="inv-agency-details" style="margin-left: 10px;">
             <h2>${company.company_name || 'D-GROW MARKETING AGENCY'}</h2>
             <p><strong>GSTIN Number:</strong> ${company.gstin || '33OUUPS5195G1ZJ'}</p>
@@ -904,7 +1339,7 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
         <div class="inv-words-box">
           <div class="inv-words-title">Total In Words</div>
           <div class="inv-words-text">${invoice.amount_in_words || 'Rupees Only.'}</div>
-          ${invoice.notes ? `<div style="margin-top:10px;"><strong>Notes:</strong> ${invoice.notes}</div>` : ''}
+          ${invoice.notes ? `<div style="margin-top:8px; font-size:9.5px;"><strong>Notes:</strong> ${invoice.notes}</div>` : ''}
         </div>
         <div>
           <table class="inv-totals-table">
@@ -936,13 +1371,13 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
             <div class="inv-payment-row"><span class="inv-payment-label">Banking Name</span><span>: ${company.banking_name || ''}</span></div>
             <div class="inv-payment-row"><span class="inv-payment-label">Bank Name</span><span>: ${company.bank_name || ''}</span></div>
             <div class="inv-payment-row"><span class="inv-payment-label">Branch</span><span>: ${company.branch_name || ''}</span></div>
-            <div class="inv-payment-row" style="margin-top:4px;"><span class="inv-payment-label">GPay</span><span>: <strong>${company.gpay_number || ''}</strong></span></div>
+            <div class="inv-payment-row" style="margin-top:3px;"><span class="inv-payment-label">GPay</span><span>: <strong>${company.gpay_number || ''}</strong></span></div>
           </div>
-          <div class="inv-signature-block" style="text-align:center; margin-top:12px;">
-            <div style="margin:4px 0; display:flex; justify-content:center; align-items:center;">
-              <img src="../assets/seel.png" onerror="this.onerror=null; this.src='assets/seel.png'; if(!this.complete) this.src='/assets/seel.png';" alt="Official Seal & Signature" style="max-height:100px; max-width:190px; object-fit:contain; display:block; margin:0 auto;">
+          <div class="inv-signature-block" style="text-align:center; margin-top:6px;">
+            <div style="margin:2px 0; display:flex; justify-content:center; align-items:center;">
+              <img src="../assets/seel.png" onerror="this.onerror=null; this.src='assets/seel.png'; if(!this.complete) this.src='/assets/seel.png';" alt="Official Seal & Signature" style="max-height:72px; max-width:160px; object-fit:contain; display:block; margin:0 auto;">
             </div>
-            <div class="inv-signature-label" style="font-size:9px; color:#6b7280; font-weight:600; margin-top:2px;">Authorized Signature</div>
+            <div class="inv-signature-label" style="font-size:8.5px; color:#6b7280; font-weight:600; margin-top:1px;">Authorized Signature</div>
           </div>
         </div>
       </div>

@@ -18,13 +18,89 @@
         <li class="nav-item active"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Financial Invoices</a></li>
         <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Tax & Sales Reports</a></li>
       </ul>
-      <div class="sidebar-user">
-        <div class="user-info"><p id="sidebarUserName">Auditor</p><span id="sidebarUserRole">AUDITOR</span></div>
-        <button class="btn-logout" onclick="handleLogout()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
-      </div>
     </aside>
 
     <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search invoices, clients, reports..." id="globalQuickSearch" onkeydown="handleGlobalSearch(event)">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell with Dropdown -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)" title="Notifications">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount">1</span>
+            </button>
+            
+            <div class="nav-dropdown-menu notif-dropdown-menu" id="notifDropdownMenu">
+              <div class="notif-header">
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <h4 style="margin:0; font-size:0.92rem; font-weight:700; color:var(--text-main);">Audit Notifications</h4>
+                  <span class="badge" style="background:#fee2e2; color:#dc2626; font-size:0.7rem; font-weight:700; padding:0.15rem 0.45rem;">1 New</span>
+                </div>
+                <button type="button" class="notif-clear-btn" onclick="clearAllNotifications()">Mark all read</button>
+              </div>
+              <div class="notif-list" id="topbarNotifList">
+                <div class="notif-item unread">
+                  <div class="notif-icon invoice">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                  </div>
+                  <div class="notif-body">
+                    <p class="notif-title">Audit Log Updated</p>
+                    <span class="notif-desc">Financial records ready for verification</span>
+                    <span class="notif-time">Today</span>
+                  </div>
+                </div>
+              </div>
+              <div class="notif-footer">
+                <a href="notifications.html" style="display:inline-flex; align-items:center; justify-content:center; gap:0.35rem; width:100%;">Show all notifications →</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="topbar-divider"></div>
+
+          <!-- User Profile Dropdown Menu with Logout -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" id="userProfileToggleBtn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                <span id="topbarUserInitials">AU</span>
+              </div>
+              <div class="topbar-user-text">
+                <span class="user-name" id="topbarUserName">Auditor</span>
+                <span class="user-role-badge" id="topbarUserRole" style="color:#0284c7;">AUDITOR</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <div class="nav-dropdown-menu profile-dropdown-menu" id="profileDropdownMenu">
+              <div class="profile-dropdown-header">
+                <div class="profile-avatar-large" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                  <span id="dropdownAvatarInitials">AU</span>
+                </div>
+                <div class="profile-header-info">
+                  <strong id="dropdownUserName">Auditor</strong>
+                  <span id="dropdownUserEmail">auditor@dgrow.com</span>
+                  <span class="badge" style="background:#e0f2fe; color:#0369a1; margin-top:0.25rem; font-size:0.7rem; align-self:flex-start;" id="dropdownUserRole">AUDITOR ROLE</span>
+                </div>
+              </div>
+              
+              <div class="profile-dropdown-footer">
+                <button type="button" class="profile-logout-btn" onclick="handleLogout()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Sign Out / Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
       <div class="page-header">
         <div class="page-title">
           <h1>Invoice Audit Inspection</h1>

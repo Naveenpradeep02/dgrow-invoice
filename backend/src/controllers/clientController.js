@@ -55,7 +55,11 @@ async function createClient(req, res) {
       pan,
       billing_address,
       shipping_address,
-      preset_services_json
+      preset_services_json,
+      onboarding_date,
+      status = 'ACTIVE',
+      payment_terms_type = 'SINGLE',
+      payment_schedule_json
     } = req.body;
 
     if (!company_name || !mobile || !email || !address) {
@@ -63,11 +67,12 @@ async function createClient(req, res) {
     }
 
     const presetJson = typeof preset_services_json === 'object' ? JSON.stringify(preset_services_json) : (preset_services_json || null);
+    const scheduleJson = typeof payment_schedule_json === 'object' ? JSON.stringify(payment_schedule_json) : (payment_schedule_json || null);
 
     const result = await db.query(
       `INSERT INTO clients 
-      (company_name, contact_person, mobile, email, address, city, state, pincode, gstin, pan, billing_address, shipping_address, preset_services_json)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (company_name, contact_person, mobile, email, address, city, state, pincode, gstin, pan, billing_address, shipping_address, preset_services_json, onboarding_date, status, payment_terms_type, payment_schedule_json)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         company_name,
         contact_person || null,
@@ -81,7 +86,11 @@ async function createClient(req, res) {
         pan || null,
         billing_address || address || null,
         shipping_address || address || null,
-        presetJson
+        presetJson,
+        onboarding_date || null,
+        status || 'ACTIVE',
+        payment_terms_type || 'SINGLE',
+        scheduleJson
       ]
     );
 
@@ -128,10 +137,14 @@ async function updateClient(req, res) {
       billing_address,
       shipping_address,
       preset_services_json,
-      status
+      onboarding_date,
+      status,
+      payment_terms_type,
+      payment_schedule_json
     } = req.body;
 
     const presetJson = typeof preset_services_json === 'object' ? JSON.stringify(preset_services_json) : (preset_services_json !== undefined ? preset_services_json : oldClient[0].preset_services_json);
+    const scheduleJson = typeof payment_schedule_json === 'object' ? JSON.stringify(payment_schedule_json) : (payment_schedule_json !== undefined ? payment_schedule_json : oldClient[0].payment_schedule_json);
 
     await db.query(
       `UPDATE clients SET
@@ -148,7 +161,10 @@ async function updateClient(req, res) {
         billing_address = ?,
         shipping_address = ?,
         preset_services_json = ?,
-        status = ?
+        onboarding_date = ?,
+        status = ?,
+        payment_terms_type = ?,
+        payment_schedule_json = ?
       WHERE id = ?`,
       [
         company_name || oldClient[0].company_name,
@@ -164,7 +180,10 @@ async function updateClient(req, res) {
         billing_address !== undefined ? billing_address : oldClient[0].billing_address,
         shipping_address !== undefined ? shipping_address : oldClient[0].shipping_address,
         presetJson,
-        status || oldClient[0].status,
+        onboarding_date !== undefined ? onboarding_date : oldClient[0].onboarding_date,
+        status || oldClient[0].status || 'ACTIVE',
+        payment_terms_type || oldClient[0].payment_terms_type || 'SINGLE',
+        scheduleJson,
         id
       ]
     );

@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miscellaneous & Ad Funds - D-GROW Invoice System</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <style>
+    .cat-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .cat-travel { background: #e0f2fe; color: #0369a1; }
+    .cat-food { background: #ffedd5; color: #c2410c; }
+    .cat-office { background: #f1f5f9; color: #334155; }
+    .cat-tech { background: #e0e7ff; color: #3730a3; }
+    .cat-employee { background: #fce7f3; color: #9d174d; }
+    .cat-client { background: #fef3c7; color: #92400e; }
+    .cat-general { background: #ede9fe; color: #6d28d9; }
+    .cat-personal { background: #fee2e2; color: #b91c1c; }
+    .cat-refund { background: #f3f4f6; color: #4b5563; border: 1px dashed #9ca3af; }
+    .cat-adfunds { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .cat-emiloans { background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; }
+
+    .subcat-pill {
+      font-size: 0.75rem;
+      color: #475569;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .client-tag-pill {
+      font-size: 0.73rem;
+      color: #0284c7;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 0.12rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      white-space: nowrap;
+    }
+
+    .metrics-snippet {
+      font-size: 0.73rem;
+      color: #15803d;
+      font-family: monospace;
+      background: #f0fdf4;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      border: 1px solid #bbf7d0;
+      margin-top: 0.25rem;
+      display: inline-block;
+    }
+
+    .modal-box {
+      overflow-x: hidden !important;
+    }
+    .modal-box * {
+      box-sizing: border-box;
+    }
+
+    .icon-action-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-action-btn:hover {
+      background: #f1f5f9;
+      color: var(--primary);
+      border-color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
+        <li class="nav-item"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item"><a href="salary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Salary</a></li>
+        <li class="nav-item active"><a href="miscellaneous.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Miscellaneous</a></li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search expenses, ad funds, SaaS, travel..." id="globalQuickSearch" onkeydown="handleGlobalSearch(event)">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell with Dropdown -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)" title="Notifications">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount" style="display:none;">0</span>
+            </button>
+            
+            <div class="nav-dropdown-menu notif-dropdown-menu" id="notifDropdownMenu">
+              <div class="notif-header">
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <h4 style="margin:0; font-size:0.92rem; font-weight:700; color:var(--text-main);">Notifications</h4>
+                  <span class="badge" style="background:#fee2e2; color:#dc2626; font-size:0.7rem; font-weight:700; padding:0.15rem 0.45rem;">0 Actions</span>
+                </div>
+                <button type="button" class="notif-clear-btn" onclick="clearAllNotifications()">Mark all read</button>
+              </div>
+              <div class="notif-list" id="topbarNotifList"></div>
+              <div class="notif-footer">
+                <a href="notifications.html" style="display:inline-flex; align-items:center; justify-content:center; gap:0.35rem; width:100%;">Show all notifications →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile Dropdown Menu -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" id="userProfileToggleBtn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle">
+                <span id="topbarUserInitials">AD</span>
+              </div>
+              <div class="topbar-user-text">
+                <span class="user-name" id="topbarUserName">D-GROW Admin</span>
+                <span class="user-role-badge" id="topbarUserRole">ADMIN</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <div class="nav-dropdown-menu profile-dropdown-menu" id="profileDropdownMenu">
+              <div class="profile-dropdown-header">
+                <div class="profile-avatar-large">
+                  <span id="dropdownAvatarInitials">AD</span>
+                </div>
+                <div class="profile-header-info">
+                  <strong id="dropdownUserName">D-GROW Admin</strong>
+                  <span id="dropdownUserEmail">admin@dgrow.com</span>
+                  <span class="badge badge-paid" style="margin-top:0.25rem; font-size:0.7rem; align-self:flex-start;" id="dropdownUserRole">ADMIN ROLE</span>
+                </div>
+              </div>
+              <div class="profile-dropdown-body">
+                <a href="settings.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Agency Settings
+                </a>
+                <a href="audit.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                  Audit Trail
+                </a>
+              </div>
+              <div class="profile-dropdown-footer">
+                <button type="button" class="profile-logout-btn" onclick="handleLogout()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Sign Out / Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Header with 2 Distinct Action Buttons -->
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Miscellaneous & Operational Expenses</h1>
+          <p>Track agency travel, food, office utilities, SaaS subscriptions, client expenses, personal transfers, and client Ad Funds.</p>
+        </div>
+        <div class="page-actions" style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary" onclick="openMiscModal('Ad Funds')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            + Add Ad Fund
+          </button>
+          
+          <button type="button" class="btn btn-primary" onclick="openMiscModal()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + Add Expense Entry
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN SUB TOGGLE MENU: All / Ad Funds / Other Expenses -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+        <div class="period-toggle-group" style="display:inline-flex; background:#ffffff; padding:0.3rem; border-radius:var(--radius-md); gap:0.35rem; border:1.5px solid #cbd5e1; box-shadow:0 1px 4px rgba(0,0,0,0.03); flex-wrap:wrap;">
+          <button type="button" class="period-toggle-btn active" id="viewToggleAll" onclick="switchMiscSubView('ALL')" style="display:inline-flex; align-items:center; gap:0.45rem; font-weight:700; font-size:0.88rem; padding:0.45rem 1.15rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            All Expenses
+          </button>
+          <button type="button" class="period-toggle-btn" id="viewToggleAdFunds" onclick="switchMiscSubView('AD_FUNDS')" style="display:inline-flex; align-items:center; gap:0.45rem; font-weight:700; font-size:0.88rem; padding:0.45rem 1.15rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Ad Funds
+          </button>
+          <button type="button" class="period-toggle-btn" id="viewToggleEmiLoans" onclick="switchMiscSubView('EMI_LOANS')" style="display:inline-flex; align-items:center; gap:0.45rem; font-weight:700; font-size:0.88rem; padding:0.45rem 1.15rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            EMI & Loans
+          </button>
+          <button type="button" class="period-toggle-btn" id="viewToggleOtherExpenses" onclick="switchMiscSubView('OTHER_EXPENSES')" style="display:inline-flex; align-items:center; gap:0.45rem; font-weight:700; font-size:0.88rem; padding:0.45rem 1.15rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Other Expenses
+          </button>
+        </div>
+      </div>
+
+      <!-- Period Filter Header Bar -->
+      <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.25rem; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <h2 style="margin:0; font-size:1.15rem; font-weight:700; color:var(--text-main);">Daily Expense Overview</h2>
+              <span class="badge" id="activeMiscPeriodBadge" style="background:#e0e7ff; color:#3730a3; font-weight:700; font-size:0.75rem; padding:0.25rem 0.6rem;">Daily (Today)</span>
+            </div>
+            <p style="margin:0.25rem 0 0 0; font-size:0.82rem; color:var(--text-muted);" id="activeMiscPeriodSubtitle">Showing expenses & metrics for Today</p>
+          </div>
+
+          <!-- Period Toggle Buttons: Daily, Weekly, Monthly, Overall, Custom -->
+          <div class="period-toggle-group" style="display:inline-flex; background:#f1f5f9; padding:0.25rem; border-radius:var(--radius-md); gap:0.25rem; border:1px solid #e2e8f0;">
+            <button type="button" class="period-toggle-btn active" id="btnMiscPeriodDaily" onclick="switchMiscPeriod('DAILY')">
+              Daily
+            </button>
+            <button type="button" class="period-toggle-btn" id="btnMiscPeriodWeekly" onclick="switchMiscPeriod('WEEKLY')">
+              Weekly
+            </button>
+            <button type="button" class="period-toggle-btn" id="btnMiscPeriodMonthly" onclick="switchMiscPeriod('MONTHLY')">
+              Monthly
+            </button>
+            <button type="button" class="period-toggle-btn" id="btnMiscPeriodOverall" onclick="switchMiscPeriod('OVERALL')">
+              Overall
+            </button>
+            <button type="button" class="period-toggle-btn" id="btnMiscPeriodCustom" onclick="toggleMiscCustomPeriod()">
+              Custom ▾
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Date Range Bar (Collapsible) -->
+        <div id="miscCustomDateBar" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:var(--radius-md); padding:0.75rem 1rem; margin-top:1rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <span style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Custom Range:</span>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span style="font-size:0.75rem; color:var(--text-muted);">From:</span>
+              <input type="date" id="miscCustomFrom" class="form-input" style="padding:0.35rem 0.6rem; font-size:0.82rem;">
+            </div>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span style="font-size:0.75rem; color:var(--text-muted);">To:</span>
+              <input type="date" id="miscCustomTo" class="form-input" style="padding:0.35rem 0.6rem; font-size:0.82rem;">
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="applyMiscCustomRange()" style="padding:0.4rem 0.85rem; font-size:0.82rem;">
+              Apply Range
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expense Metric Cards (4 Dynamic KPI Cards) -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom:1.25rem;">
+        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid var(--primary); box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Total Expenses</span>
+            <div style="width:28px; height:28px; border-radius:6px; background:rgba(220,38,38,0.08); color:var(--primary); display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+          </div>
+          <h3 id="statTotalMisc" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:var(--text-main); font-weight:700;">₹0</h3>
+          <span style="font-size:0.72rem; color:var(--text-muted);" id="statMiscCycleLabel">August 2026</span>
+        </div>
+
+        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #16a34a; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Ad Funds Disbursed</span>
+            <div style="width:28px; height:28px; border-radius:6px; background:rgba(22,163,74,0.1); color:#16a34a; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+          </div>
+          <h3 id="statAdFundsMisc" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#16a34a; font-weight:700;">₹0</h3>
+          <span style="font-size:0.72rem; color:#16a34a; font-weight:600;">Meta & Google Ads</span>
+        </div>
+
+        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #4f46e5; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Software & Tech</span>
+            <div style="width:28px; height:28px; border-radius:6px; background:rgba(79,70,229,0.1); color:#4f46e5; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+          </div>
+          <h3 id="statSoftwareMisc" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#4f46e5; font-weight:700;">₹0</h3>
+          <span style="font-size:0.72rem; color:#4f46e5; font-weight:600;">AI Tools & SaaS</span>
+        </div>
+
+        <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #f59e0b; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Operations, Food & Travel</span>
+            <div style="width:28px; height:28px; border-radius:6px; background:rgba(245,158,11,0.1); color:#d97706; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+          </div>
+          <h3 id="statPettyMisc" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#d97706; font-weight:700;">₹0</h3>
+          <span style="font-size:0.72rem; color:#d97706; font-weight:600;">Utilities & Team Food</span>
+        </div>
+      </div>
+
+      <!-- Filter Bar with Search, Category, Client Filter, Billing Month Selector & Report Generator -->
+      <div class="card" style="padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+          <div style="display:flex; gap:0.65rem; flex-wrap:wrap; align-items:center; flex:1; min-width:320px;">
+            <input type="text" id="miscSearch" class="form-input" placeholder="Search ad campaign, client, category, mode..." style="flex:1.6; min-width:170px;" oninput="applyAllMiscFilters()">
+            
+            <select id="miscFilterCategory" class="form-select" style="flex:1.1; min-width:150px;" onchange="applyAllMiscFilters()">
+              <!-- Dynamically populated -->
+            </select>
+
+            <select id="miscFilterClient" class="form-select" style="flex:1.2; min-width:160px;" onchange="applyAllMiscFilters()">
+              <option value="">All Clients (Agency-Wide)</option>
+              <option value="Acme Corporation">Acme Corporation</option>
+              <option value="TechNova Global">TechNova Global</option>
+              <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
+              <option value="Zenith Health Labs">Zenith Health Labs</option>
+              <option value="D-GROW In-House">D-GROW In-House</option>
+            </select>
+
+            <!-- Billing Month Selector for Day 1 to 30 Monthly Bills -->
+            <select id="miscBillingMonth" class="form-select" style="flex:1.3; min-width:180px; font-weight:700; color:#1e293b; background:#f8fafc;" onchange="onBillingMonthChange(this.value)">
+              <option value="2026-08">August 2026 (Active Bill)</option>
+              <option value="2026-07">July 2026 (Closed Bill)</option>
+              <option value="2026-06">June 2026 (Archived)</option>
+              <option value="__NEW_MONTH__" style="color:var(--primary); font-weight:800;">+ Start New Month Bill...</option>
+            </select>
+          </div>
+
+          <!-- Quick Client Ad Bill / Statement Generator Actions: Daily vs Monthly -->
+          <div style="display:flex; gap:0.45rem; align-items:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" onclick="openDailyBillModal()" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.45rem 0.85rem; font-size:0.82rem; font-weight:700; white-space:nowrap; background:#0284c7; border-color:#0284c7;" title="Select custom date to generate Daily Ad Spend Bill">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Daily Bill
+            </button>
+            <button type="button" class="btn btn-primary" onclick="generateClientAdReport(null, 'MONTHLY')" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.45rem 0.85rem; font-size:0.82rem; font-weight:700; white-space:nowrap; background:#16a34a; border-color:#16a34a;" title="Generate Monthly Ad Spend Bill (Day 1 to 30 consolidated)">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Monthly Bill (Day 1-30)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Miscellaneous Records Table Card -->
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-responsive">
+          <table class="table" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+                <th style="padding:0.75rem 0.75rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em; white-space:nowrap;">CLIENT NAME</th>
+                <th style="padding:0.75rem 0.75rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em; white-space:nowrap;">MONTH & DATE</th>
+                <th style="padding:0.75rem 0.75rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em; white-space:nowrap;">TOTAL MONTHLY SPENT</th>
+                <th style="padding:0.75rem 0.75rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em;">EXPENSE ITEM / DESCRIPTION</th>
+                <th style="padding:0.75rem 0.75rem; text-align:center; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em; white-space:nowrap;">CATEGORY</th>
+                <th style="padding:0.75rem 0.75rem; text-align:center; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em; white-space:nowrap;">SUB-CATEGORY</th>
+                <th style="padding:0.75rem 0.75rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em; white-space:nowrap;">PAYMENT MODE</th>
+                <th style="padding:0.75rem 0.75rem; text-align:right; font-size:0.75rem; font-weight:700; color:#475569; letter-spacing:0.03em; white-space:nowrap;">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="miscTableBody">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add / Edit Expense Entry Modal with Dynamic Subcategories & Ad Funds Support -->
+  <div class="modal-overlay" id="miscModal" style="z-index: 1200;">
+    <div class="modal-box" style="max-width: 600px; width:92%; padding:1.5rem;">
+      <div class="modal-header" style="margin-bottom:1rem; padding-bottom:0.65rem;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700;" id="miscModalTitle">Add Expense Entry</h3>
+        <button type="button" class="modal-close" onclick="closeMiscModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <form id="miscForm" onsubmit="handleSaveMisc(event)">
+        <input type="hidden" id="modalMiscEditId" value="">
+        
+        <div style="display:flex; flex-direction:column; gap:0.85rem;">
+          
+          <!-- Category & Sub-Category Hierarchy Selectors with Custom Add Actions -->
+          <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                <label class="form-label required" style="font-size:0.8rem; margin:0;">Category</label>
+                <button type="button" onclick="toggleAddCategoryBox()" style="background:none; border:none; color:var(--primary); font-size:0.75rem; font-weight:700; cursor:pointer; padding:0;">+ Custom</button>
+              </div>
+              <select id="modalMiscCategory" class="form-select" required onchange="onCategoryChange(this.value)">
+                <!-- Dynamically populated from categoryHierarchy with + Add option -->
+              </select>
+            </div>
+
+            <div class="form-group" style="margin:0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                <label class="form-label required" style="font-size:0.8rem; margin:0;">Sub-Category</label>
+                <button type="button" onclick="toggleAddSubCategoryBox()" style="background:none; border:none; color:var(--primary); font-size:0.75rem; font-weight:700; cursor:pointer; padding:0;">+ Custom</button>
+              </div>
+              <select id="modalMiscSubCategory" class="form-select" required onchange="onSubCategoryChange(this.value)">
+                <!-- Dynamically populated based on selected category -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Inline Box: Add Custom Category -->
+          <div id="addCategoryInlineBox" style="display:none; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:6px; padding:0.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <strong style="font-size:0.82rem; color:var(--text-main); display:inline-flex; align-items:center; gap:0.35rem;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create New Custom Category
+              </strong>
+              <button type="button" onclick="toggleAddCategoryBox(false)" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:#64748b; cursor:pointer;" title="Cancel">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <input type="text" id="customCategoryInput" class="form-input" placeholder="Enter Category Name (e.g. Legal & Compliance)" style="flex:2; min-width:180px; font-size:0.82rem;">
+              <input type="text" id="customInitialSubCatInput" class="form-input" placeholder="Sub-category (Optional)" style="flex:1.5; min-width:140px; font-size:0.82rem;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="saveCustomCategory()" style="padding:0.35rem 0.75rem; font-size:0.8rem; display:inline-flex; align-items:center; gap:0.3rem;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Category
+              </button>
+            </div>
+          </div>
+
+          <!-- Inline Box: Add Custom Sub-Category -->
+          <div id="addSubCategoryInlineBox" style="display:none; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:6px; padding:0.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <strong style="font-size:0.82rem; color:var(--text-main); display:inline-flex; align-items:center; gap:0.35rem;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add New Sub-Category to <span id="customSubCatParentLabel" style="color:var(--primary);">Travel & Transport</span>
+              </strong>
+              <button type="button" onclick="toggleAddSubCategoryBox(false)" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:#64748b; cursor:pointer;" title="Cancel">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <input type="text" id="customSubCategoryInput" class="form-input" placeholder="Enter Sub-Category Name (e.g. Metro Ticket / Uber)" style="flex:2; min-width:200px; font-size:0.82rem;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="saveCustomSubCategory()" style="padding:0.35rem 0.75rem; font-size:0.8rem; display:inline-flex; align-items:center; gap:0.3rem;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Sub-Category
+              </button>
+            </div>
+          </div>
+
+          <!-- Description / Title -->
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.8rem;">Expense Description / Item</label>
+            <input type="text" id="modalMiscTitle" class="form-input" placeholder="e.g. Petrol for client shoot / Meta Ads for TechNova" required>
+          </div>
+
+          <!-- Special Client Picker (Visible for Client-Related Expenses or Ad Funds) -->
+          <div id="modalClientSection" style="display:none; background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:0.75rem;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.65rem;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.78rem; font-weight:700; color:#0369a1;">Assign to Client</label>
+                <select id="modalMiscClient" class="form-select" style="font-size:0.85rem;">
+                  <option value="">-- Agency In-House / General --</option>
+                  <option value="Acme Corporation">Acme Corporation</option>
+                  <option value="TechNova Global">TechNova Global</option>
+                  <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
+                  <option value="Zenith Health Labs">Zenith Health Labs</option>
+                  <option value="D-GROW In-House">D-GROW In-House</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin:0;" id="modalCampaignMetricsGroup">
+                <label class="form-label" style="font-size:0.78rem; font-weight:700; color:#0369a1;">Total Campaigns</label>
+                <input type="text" id="modalMiscMetrics" class="form-input" placeholder="e.g. 20 Campaigns / 184 Leads" style="font-size:0.85rem;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Amount, Payment Mode & Date -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Amount (₹)</label>
+              <input type="number" id="modalMiscAmount" class="form-input" placeholder="5000" min="1" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Payment Mode</label>
+              <select id="modalMiscPaymentMode" class="form-select" required>
+                <option value="Corporate Card">Corporate Card</option>
+                <option value="UPI / GPay">UPI / GPay</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cash / Petty Cash">Cash / Petty Cash</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Date</label>
+              <input type="date" id="modalMiscDate" class="form-input" required onchange="updateModalDateHint(this.value)">
+              <span id="modalDateDayHint" style="font-size:0.72rem; color:#16a34a; font-weight:700; display:inline-flex; align-items:center; gap:0.3rem; margin-top:0.25rem;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Monthly Bill: August 2026 (Day 16)
+              </span>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.8rem;">Receipt / Voucher Ref</label>
+              <input type="text" id="modalMiscReceipt" class="form-input" placeholder="e.g. Attached / Inv #204 / Voucher #12">
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <button type="button" class="btn btn-secondary" onclick="closeMiscModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Date Selection Modal for Ad Spend Bill (Single Date or Multiple Dates Range) -->
+  <div class="modal-overlay" id="dailyBillModal" style="z-index: 1200;">
+    <div class="modal-box" style="max-width: 500px; width:92%; padding:1.5rem;">
+      <div class="modal-header" style="margin-bottom:1rem; padding-bottom:0.65rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div style="width:32px; height:32px; border-radius:6px; background:#e0f2fe; color:#0284c7; display:flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:1.1rem; font-weight:700; color:var(--text-main);">Download Custom Ad Spend Bill</h3>
+            <p style="margin:0.15rem 0 0 0; font-size:0.75rem; color:var(--text-muted);">Customize single date or multiple dates range to download bill</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick="closeDailyBillModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <form id="dailyBillForm" onsubmit="submitCustomDateBillModal(event)">
+        <div style="display:flex; flex-direction:column; gap:0.9rem;">
+          
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.8rem;">Select Client Company</label>
+            <select id="dailyBillClient" class="form-select" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <!-- Date Mode Switcher: Single Date vs Multiple Dates -->
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.8rem; margin-bottom:0.35rem;">Download Format</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem;">
+              <label style="display:flex; align-items:center; gap:0.45rem; padding:0.45rem 0.65rem; border:1.5px solid #0284c7; background:#f0f9ff; border-radius:6px; cursor:pointer; font-size:0.82rem; font-weight:700; color:#0369a1;" id="labelDateTypeSingle">
+                <input type="radio" name="customBillType" value="SINGLE" checked onchange="toggleCustomBillDateMode('SINGLE')">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Single Date
+              </label>
+              <label style="display:flex; align-items:center; gap:0.45rem; padding:0.45rem 0.65rem; border:1.5px solid #cbd5e1; background:#ffffff; border-radius:6px; cursor:pointer; font-size:0.82rem; font-weight:700; color:#475569;" id="labelDateTypeRange">
+                <input type="radio" name="customBillType" value="RANGE" onchange="toggleCustomBillDateMode('RANGE')">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>
+                Multiple Dates
+              </label>
+            </div>
+          </div>
+
+          <!-- Single Date Input Container -->
+          <div id="containerSingleDate" class="form-group" style="margin:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <label class="form-label required" style="font-size:0.8rem; margin:0;">Select Specific Date</label>
+              <div style="display:flex; gap:0.35rem;">
+                <button type="button" onclick="setDailyBillDate('today')" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; padding:0.15rem 0.45rem; font-size:0.72rem; font-weight:700; color:#0f172a; cursor:pointer;">Today</button>
+                <button type="button" onclick="setDailyBillDate('yesterday')" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; padding:0.15rem 0.45rem; font-size:0.72rem; font-weight:700; color:#0f172a; cursor:pointer;">Yesterday</button>
+              </div>
+            </div>
+            <input type="date" id="dailyBillDate" class="form-input">
+          </div>
+
+          <!-- Date Range Input Container -->
+          <div id="containerRangeDate" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <span style="font-size:0.78rem; font-weight:700; color:#0f172a;">Select Date Range:</span>
+              <div style="display:flex; gap:0.35rem;">
+                <button type="button" onclick="setDailyBillRange('7days')" style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:0.15rem 0.45rem; font-size:0.72rem; font-weight:700; color:#0f172a; cursor:pointer;">Last 7 Days</button>
+                <button type="button" onclick="setDailyBillRange('month')" style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:0.15rem 0.45rem; font-size:0.72rem; font-weight:700; color:#0f172a; cursor:pointer;">This Month</button>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem;">
+              <div>
+                <label style="font-size:0.75rem; color:#64748b; font-weight:700; display:block; margin-bottom:0.15rem;">From Date</label>
+                <input type="date" id="dailyBillFromDate" class="form-input" style="font-size:0.82rem;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem; color:#64748b; font-weight:700; display:block; margin-bottom:0.15rem;">To Date</label>
+                <input type="date" id="dailyBillToDate" class="form-input" style="font-size:0.82rem;">
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:0.75rem; font-size:0.78rem; color:#0369a1; display:flex; align-items:center; gap:0.4rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div><strong>Custom Statement:</strong> Generates a certified reimbursement bill for only the selected date or multiple dates without adding outside periods.</div>
+          </div>
+
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <button type="button" class="btn btn-secondary" onclick="closeDailyBillModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:#0284c7; border-color:#0284c7; font-weight:700; display:inline-flex; align-items:center; gap:0.4rem;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Generate & Download Bill
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Client Monthly Date-wise Bills Ledger Modal with Add & Edit Options -->
+  <div class="modal-overlay" id="clientLedgerModal" style="z-index: 1050;">
+    <div class="modal-box" style="max-width: 840px; width:95%; max-height:90vh; display:flex; flex-direction:column; padding:1.5rem;">
+      <div class="modal-header" style="margin-bottom:0.75rem; padding-bottom:0.75rem; border-bottom:1.5px solid #e2e8f0; display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:34px; height:34px; border-radius:6px; background:#dcfce7; color:#15803d; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M9 8h1m4 0h1m-5 4h1m4 0h1m-5 4h1m4 0h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg>
+            </div>
+            <div>
+              <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main);" id="ledgerModalClientTitle">Marks Biotech</h3>
+              <p style="margin:0.15rem 0 0 0; font-size:0.78rem; color:#64748b;" id="ledgerModalSubtitle">August 2026 Monthly Ad Ledger (Day 1 to 31)</p>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <button type="button" class="btn btn-primary" id="ledgerModalAddBillBtn" style="background:#16a34a; border-color:#16a34a; font-size:0.78rem; font-weight:700; padding:0.35rem 0.75rem; display:inline-flex; align-items:center; gap:0.3rem;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Date Bill
+          </button>
+          <button type="button" class="modal-close" onclick="closeClientLedgerModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Quick KPI Strip inside modal -->
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.65rem; margin-bottom:1rem;">
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:0.6rem 0.75rem;">
+          <div style="font-size:0.68rem; color:#166534; font-weight:700; text-transform:uppercase;">Month Total Ad Spend</div>
+          <div style="font-size:1.2rem; font-weight:900; color:#15803d;" id="ledgerModalTotalSpent">₹0</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.6rem 0.75rem;">
+          <div style="font-size:0.68rem; color:#64748b; font-weight:700; text-transform:uppercase;">Total Campaigns / Runs</div>
+          <div style="font-size:1.2rem; font-weight:800; color:#0f172a;" id="ledgerModalCampaignCount">0</div>
+        </div>
+        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:0.6rem 0.75rem;">
+          <div style="font-size:0.68rem; color:#0369a1; font-weight:700; text-transform:uppercase;">Billing Month</div>
+          <div style="font-size:1.05rem; font-weight:800; color:#0284c7;" id="ledgerModalMonthName">August 2026</div>
+        </div>
+      </div>
+
+      <!-- Date-wise Bills Table -->
+      <div style="flex:1; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; max-height:48vh;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
+          <thead>
+            <tr style="background:#f8fafc; color:#475569; font-size:0.75rem; text-transform:uppercase; font-weight:700; position:sticky; top:0; z-index:1; border-bottom:1px solid #e2e8f0;">
+              <th style="padding:0.6rem 0.75rem; text-align:left;">Day & Date</th>
+              <th style="padding:0.6rem 0.75rem; text-align:left;">Campaign Name & Goal</th>
+              <th style="padding:0.6rem 0.75rem; text-align:left;">Total Campaigns / Metrics</th>
+              <th style="padding:0.6rem 0.75rem; text-align:left;">Payment Mode</th>
+              <th style="padding:0.6rem 0.75rem; text-align:right;">Amount (₹)</th>
+              <th style="padding:0.6rem 0.75rem; text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerModalTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem; padding-top:0.75rem; border-top:1.5px solid #e2e8f0;">
+        <div style="font-size:0.82rem; color:#64748b; display:flex; align-items:center; gap:0.35rem;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Add daily ad funds anytime — it automatically rolls into this client's Monthly Bill.
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeClientLedgerModal()">Close</button>
+          <button type="button" class="btn btn-primary" id="ledgerModalDownloadMonthBtn" style="background:#16a34a; border-color:#16a34a; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Full Month Bill
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    // Period state - Default to MONTHLY
+    let currentMiscPeriod = 'MONTHLY';
+    let currentMiscSubView = 'ALL'; // 'ALL' | 'AD_FUNDS' | 'OTHER_EXPENSES'
+    let miscCustomFromDate = '';
+    let miscCustomToDate = '';
+
+    // Sub Toggle Menu Handler
+    function switchMiscSubView(view) {
+      currentMiscSubView = view;
+      document.getElementById('viewToggleAll')?.classList.remove('active');
+      document.getElementById('viewToggleAdFunds')?.classList.remove('active');
+      document.getElementById('viewToggleEmiLoans')?.classList.remove('active');
+      document.getElementById('viewToggleOtherExpenses')?.classList.remove('active');
+
+      if (view === 'ALL') {
+        document.getElementById('viewToggleAll')?.classList.add('active');
+      } else if (view === 'AD_FUNDS') {
+        document.getElementById('viewToggleAdFunds')?.classList.add('active');
+      } else if (view === 'EMI_LOANS') {
+        document.getElementById('viewToggleEmiLoans')?.classList.add('active');
+      } else if (view === 'OTHER_EXPENSES') {
+        document.getElementById('viewToggleOtherExpenses')?.classList.add('active');
+      }
+
+      applyAllMiscFilters();
+    }
+
+    // Master Hierarchy of Categories & Subcategories with custom dynamic support
+    const defaultCategoryHierarchy = {
+      'Travel & Transport': [
+        'Petrol / Fuel',
+        'Rapido',
+        'Parking',
+        'Vehicle Maintenance',
+        'Vehicle Repair'
+      ],
+      'Food Expenses': [
+        'Breakfast',
+        'Lunch',
+        'Dinner',
+        'Tea / Coffee',
+        'Snacks',
+        'Drinking Water',
+        'Client Meeting Food',
+        'Team Food'
+      ],
+      'Office Expenses': [
+        'Stationery',
+        'Printing',
+        'Office Supplies',
+        'Cleaning',
+        'Drinking Water',
+        'Electricity',
+        'Internet',
+        'Mobile Recharge',
+        'Office Maintenance',
+        'Furniture',
+        'Equipment',
+        'Repairs'
+      ],
+      'Software & Technology': [
+        'Software Subscription',
+        'AI Tools',
+        'Domain',
+        'Hosting',
+        'Plugins',
+        'Cloud Storage',
+        'API Charges',
+        'Other Online Services',
+        'Storage Purchases',
+        'System Rent',
+        'Shooting Equipment Rent'
+      ],
+      'Employee': [
+        'Incentive'
+      ],
+      'Client-Related Expenses': [
+        'Client/Model Travel',
+        'Client Meeting',
+        'Client Food',
+        'Client Gift',
+        'Client Shoot Expense',
+        'Client Delivery / Courier'
+      ],
+      'General Business': [
+        'Auditor Bill',
+        'EB Bill',
+        'Office Rent'
+      ],
+      'EMI & Loans': [
+        'Kissht',
+        'Money Overview',
+        'Sri Ram Finance',
+        'Navi',
+        'Bajaj',
+        'IDFC Bank',
+        'Credit Card Bill',
+        'Personal Loan',
+        'Equipment EMI',
+        'Vehicle EMI'
+      ],
+      'Personal Expenses': [
+        'Personal Food',
+        'Personal Travel',
+        'Personal Shopping',
+        'Personal Bills',
+        'Personal Medical',
+        'Personal Transfer',
+        'Personal Withdrawal',
+        'Family Expense',
+        'Other Personal'
+      ],
+      'Refund': [
+        'Refund'
+      ],
+      'Ad Funds': [
+        'Meta Ads Only',
+        'Google Ads Only',
+        'Client Ad Fund'
+      ]
+    };
+
+    let categoryHierarchy = { ...defaultCategoryHierarchy };
+
+    function getCategoryBadgeClass(category) {
+      if (!category) return 'cat-general';
+      const cat = category.toLowerCase();
+      if (cat.includes('travel')) return 'cat-travel';
+      if (cat.includes('food')) return 'cat-food';
+      if (cat.includes('office') && !cat.includes('rent')) return 'cat-office';
+      if (cat.includes('software') || cat.includes('tech')) return 'cat-tech';
+      if (cat.includes('employee')) return 'cat-employee';
+      if (cat.includes('client')) return 'cat-client';
+      if (cat.includes('general')) return 'cat-general';
+      if (cat.includes('personal')) return 'cat-personal';
+      if (cat.includes('refund')) return 'cat-refund';
+      if (cat.includes('ad funds')) return 'cat-adfunds';
+      if (cat.includes('emi') || cat.includes('loan')) return 'cat-emiloans';
+      return 'cat-general';
+    }
+
+    // Today's date string helper
+    const todayISO = new Date().toISOString().split('T')[0];
+    function getPastDateISO(daysAgo) {
+      const d = new Date();
+      d.setDate(d.getDate() - daysAgo);
+      return d.toISOString().split('T')[0];
+    }
+
+    // Full comprehensive dataset with multi-client, multi-campaign daily, weekly & monthly records
+    let miscRecords = [
+      // Acme Corporation - Today (Daily Ad Campaigns)
+      { id: 1, title: 'Meta Ads - Summer Retargeting CBO #01', category: 'Ad Funds', subCategory: 'Meta Ads Only', client: 'Acme Corporation', metrics: '124 Leads | ₹11.20 CPL | 5.2x ROAS', mode: 'Corporate Card', amount: 4500, receipt: 'FB-ACM-01', date: todayISO, month: 'Current' },
+      { id: 2, title: 'Meta Ads - Broad Lookalike 1% Scale Ad Set', category: 'Ad Funds', subCategory: 'Meta Ads Only', client: 'Acme Corporation', metrics: '88 Leads | ₹14.50 CPL', mode: 'Corporate Card', amount: 3500, receipt: 'FB-ACM-02', date: todayISO, month: 'Current' },
+      { id: 3, title: 'Google Search Ads - High Intent Brand Keywords', category: 'Ad Funds', subCategory: 'Google Ads Only', client: 'Acme Corporation', metrics: '920 Clicks | ₹2.80 CPC | 6.1x ROAS', mode: 'Corporate Card', amount: 3800, receipt: 'G-ACM-03', date: todayISO, month: 'Current' },
+      { id: 4, title: 'Google Performance Max - Dynamic Product Catalog', category: 'Ad Funds', subCategory: 'Google Ads Only', client: 'Acme Corporation', metrics: '45 Purchases | 4.8x ROAS', mode: 'Corporate Card', amount: 4200, receipt: 'G-ACM-04', date: todayISO, month: 'Current' },
+      { id: 5, title: 'Instagram Reels - Video Creative Hook Test #03', category: 'Ad Funds', subCategory: 'Meta Ads Only', client: 'Acme Corporation', metrics: '150K Impressions | 1,420 Clicks', mode: 'Corporate Card', amount: 2500, receipt: 'FB-ACM-05', date: todayISO, month: 'Current' },
+
+      // TechNova Global - Today (Daily Ad Campaigns)
+      { id: 6, title: 'Meta Ads - SaaS B2B Decision Maker Lead Gen', category: 'Ad Funds', subCategory: 'Meta Ads Only', client: 'TechNova Global', metrics: '32 Qualified Leads | ₹85 CPL', mode: 'Corporate Card', amount: 6000, receipt: 'FB-TN-01', date: todayISO, month: 'Current' },
+      { id: 7, title: 'Google Search - Cloud Migration Solutions', category: 'Ad Funds', subCategory: 'Google Ads Only', client: 'TechNova Global', metrics: '650 Clicks | ₹7.20 CPC', mode: 'Corporate Card', amount: 4800, receipt: 'G-TN-02', date: todayISO, month: 'Current' },
+      { id: 8, title: 'YouTube Pre-Roll Ads - 30s Brand Video', category: 'Ad Funds', subCategory: 'Google Ads Only', client: 'TechNova Global', metrics: '75K Views | ₹0.40 CPV', mode: 'Corporate Card', amount: 3000, receipt: 'YT-TN-03', date: todayISO, month: 'Current' },
+
+      // Apex Retail & Fashion - Today & Weekly Ad Campaigns
+      { id: 9, title: 'Meta Ads - Festive Collection Catalog Carousel', category: 'Ad Funds', subCategory: 'Meta Ads Only', client: 'Apex Retail & Fashion', metrics: '1,850 Clicks | 110 Orders | 4.9x ROAS', mode: 'Corporate Card', amount: 8500, receipt: 'FB-APX-01', date: todayISO, month: 'Current' },
+      { id: 10, title: 'Meta Ads - Influencer User-Generated Content Test', category: 'Ad Funds', subCategory: 'Meta Ads Only', client: 'Apex Retail & Fashion', metrics: '84 Orders | 4.2x ROAS', mode: 'Corporate Card', amount: 5000, receipt: 'FB-APX-02', date: getPastDateISO(1), month: 'Current' },
+      { id: 11, title: 'Google Search - Designer Apparel Store Near Me', category: 'Ad Funds', subCategory: 'Google Ads Only', client: 'Apex Retail & Fashion', metrics: '980 Clicks | ₹3.10 CPC', mode: 'Corporate Card', amount: 4200, receipt: 'G-APX-03', date: getPastDateISO(2), month: 'Current' },
+      { id: 12, title: 'Meta Ads - Abandoned Cart Dynamic Retargeting', category: 'Ad Funds', subCategory: 'Meta Ads Only', client: 'Apex Retail & Fashion', metrics: '72 Recovered Carts | 8.5x ROAS', mode: 'Corporate Card', amount: 3500, receipt: 'FB-APX-04', date: getPastDateISO(3), month: 'Current' },
+
+      // Operational, Food, Tech & General Expenses
+      { id: 13, title: 'Pantry Snacks, Fresh Juice & Morning Coffee', category: 'Food Expenses', subCategory: 'Tea / Coffee', client: '', metrics: '', mode: 'Cash / Petty Cash', amount: 450, receipt: 'Voucher #112', date: todayISO, month: 'Current' },
+      { id: 14, title: 'Fuel for Client On-Site Presentation Travel', category: 'Travel & Transport', subCategory: 'Petrol / Fuel', client: 'Apex Retail & Fashion', metrics: '', mode: 'UPI / GPay', amount: 800, receipt: 'HPCL #991', date: todayISO, month: 'Current' },
+      { id: 15, title: 'ChatGPT Team API & Image Rendering Usage', category: 'Software & Technology', subCategory: 'AI Tools', client: '', metrics: '', mode: 'Corporate Card', amount: 1200, receipt: 'OpenAI #891', date: todayISO, month: 'Current' },
+      { id: 16, title: 'Adobe Creative Cloud & Figma Org Licenses', category: 'Software & Technology', subCategory: 'Software Subscription', client: '', metrics: '', mode: 'Corporate Card', amount: 9200, receipt: 'Attached', date: getPastDateISO(3), month: 'Current' },
+      { id: 17, title: 'Sony FX3 & GM Master Cinema Lens Rental', category: 'Software & Technology', subCategory: 'Shooting Equipment Rent', client: 'Apex Retail & Fashion', metrics: '', mode: 'Bank Transfer', amount: 12000, receipt: 'RentVoucher #88', date: getPastDateISO(4), month: 'Current' },
+      { id: 18, title: 'High-Speed Airtel Fiber Broadband', category: 'Office Expenses', subCategory: 'Internet', client: '', metrics: '', mode: 'UPI / GPay', amount: 2450, receipt: 'Airtel #1029', date: getPastDateISO(4), month: 'Current' },
+      { id: 19, title: 'Office Electricity Bill (TNEB Commercial)', category: 'General Business', subCategory: 'EB Bill', client: '', metrics: '', mode: 'UPI / GPay', amount: 5600, receipt: 'EB-REC-9912', date: getPastDateISO(5), month: 'Current' },
+      { id: 20, title: 'Strategic Growth & Campaign Strategy Lunch', category: 'Client-Related Expenses', subCategory: 'Client Food', client: 'TechNova Global', metrics: '', mode: 'Corporate Card', amount: 3600, receipt: 'Attached', date: getPastDateISO(5), month: 'Current' },
+      { id: 21, title: 'Rapido Express Delivery for Project Hard Disks', category: 'Travel & Transport', subCategory: 'Rapido', client: '', metrics: '', mode: 'UPI / GPay', amount: 140, receipt: 'Rapido #9102', date: getPastDateISO(6), month: 'Current' },
+      { id: 22, title: 'Chartered Accountant Quarterly GST & Audit Fee', category: 'General Business', subCategory: 'Auditor Bill', client: '', metrics: '', mode: 'Bank Transfer', amount: 8500, receipt: 'CA-INV-401', date: getPastDateISO(15), month: 'Previous' },
+      { id: 23, title: 'Q2 Top Campaign Lead Performance Incentive', category: 'Employee', subCategory: 'Incentive', client: '', metrics: '', mode: 'Bank Transfer', amount: 15000, receipt: 'Voucher #106', date: getPastDateISO(18), month: 'Previous' },
+      { id: 24, title: 'Monthly Commercial Office Space Rent', category: 'General Business', subCategory: 'Office Rent', client: '', metrics: '', mode: 'Bank Transfer', amount: 35000, receipt: 'RentReceipt #08', date: getPastDateISO(20), month: 'Previous' },
+      { id: 25, title: 'Executive Savings Transfer to Personal Account', category: 'Personal Expenses', subCategory: 'Personal Transfer', client: '', metrics: '', mode: 'Bank Transfer', amount: 25000, receipt: 'TRF-50100', date: getPastDateISO(22), month: 'Previous' },
+
+      // EMI & Loans / Monthly Dues
+      { id: 26, title: 'Kissht - Mobile EMI (14th)', category: 'EMI & Loans', subCategory: 'Kissht', client: '', metrics: 'Due Date: 14th of every month', mode: 'Bank Transfer / Auto-Debit', amount: 6406, receipt: 'KISSHT-6406', date: '2026-08-14', month: '2026-08' },
+      { id: 27, title: 'Money Overview - Amma Monthly Support (5th)', category: 'EMI & Loans', subCategory: 'Money Overview', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / UPI', amount: 5918, receipt: 'MO-5918', date: '2026-08-05', month: '2026-08' },
+      { id: 28, title: 'Sri Ram Finance - Bike Monthly Due (5th)', category: 'EMI & Loans', subCategory: 'Sri Ram Finance', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / NACH', amount: 4879, receipt: 'SRF-4879', date: '2026-08-05', month: '2026-08' },
+      { id: 29, title: 'Navi - Camera Upgrade EMI (5th)', category: 'EMI & Loans', subCategory: 'Navi', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / Auto-Debit', amount: 5200, receipt: 'NAVI-5200', date: '2026-08-05', month: '2026-08' },
+      { id: 30, title: 'Bajaj - AC + Office Workstation (2nd)', category: 'EMI & Loans', subCategory: 'Bajaj', client: '', metrics: 'Due Date: 2nd of every month', mode: 'Bank Transfer / Auto-Debit', amount: 11160, receipt: 'BAJAJ-11160', date: '2026-08-02', month: '2026-08' },
+      { id: 31, title: 'IDFC Bank - Bike Monthly Due (5th)', category: 'EMI & Loans', subCategory: 'IDFC Bank', client: '', metrics: 'Bike Loan Monthly Installment', mode: 'Bank Transfer / Auto-Debit', amount: 3500, receipt: 'IDFC-3500', date: '2026-08-05', month: '2026-08' },
+      { id: 32, title: 'Credit Card Bill - Office Upgradation (10th)', category: 'EMI & Loans', subCategory: 'Credit Card Bill', client: '', metrics: 'Office Setup & Studio Upgrades', mode: 'Corporate Card', amount: 18500, receipt: 'CC-18500', date: '2026-08-10', month: '2026-08' }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCategoryHierarchy();
+      loadBillingMonths();
+      const stored = localStorage.getItem('dgrow_misc_records_v7');
+      if (stored) {
+        try { 
+          miscRecords = JSON.parse(stored);
+          // Sanitize legacy entries
+          miscRecords.forEach(r => {
+            if (!r.date || !r.date.includes('-') || r.date.startsWith('2001')) {
+              r.date = todayISO;
+            }
+            r.month = r.date.substring(0, 7);
+          });
+        } catch(e){}
+      }
+
+      // Merge EMI & Loans records if not present in miscRecords
+      const emiRequiredRecords = [
+        { id: 26, title: 'Kissht - Mobile EMI (14th)', category: 'EMI & Loans', subCategory: 'Kissht', client: '', metrics: 'Due Date: 14th of every month', mode: 'Bank Transfer / Auto-Debit', amount: 6406, receipt: 'KISSHT-6406', date: '2026-08-14', month: '2026-08' },
+        { id: 27, title: 'Money Overview - Amma Monthly Support (5th)', category: 'EMI & Loans', subCategory: 'Money Overview', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / UPI', amount: 5918, receipt: 'MO-5918', date: '2026-08-05', month: '2026-08' },
+        { id: 28, title: 'Sri Ram Finance - Bike Monthly Due (5th)', category: 'EMI & Loans', subCategory: 'Sri Ram Finance', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / NACH', amount: 4879, receipt: 'SRF-4879', date: '2026-08-05', month: '2026-08' },
+        { id: 29, title: 'Navi - Camera Upgrade EMI (5th)', category: 'EMI & Loans', subCategory: 'Navi', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / Auto-Debit', amount: 5200, receipt: 'NAVI-5200', date: '2026-08-05', month: '2026-08' },
+        { id: 30, title: 'Bajaj - AC + Office Workstation (2nd)', category: 'EMI & Loans', subCategory: 'Bajaj', client: '', metrics: 'Due Date: 2nd of every month', mode: 'Bank Transfer / Auto-Debit', amount: 11160, receipt: 'BAJAJ-11160', date: '2026-08-02', month: '2026-08' },
+        { id: 31, title: 'IDFC Bank - Bike Monthly Due (5th)', category: 'EMI & Loans', subCategory: 'IDFC Bank', client: '', metrics: 'Bike Loan Monthly Installment', mode: 'Bank Transfer / Auto-Debit', amount: 3500, receipt: 'IDFC-3500', date: '2026-08-05', month: '2026-08' },
+        { id: 32, title: 'Credit Card Bill - Office Upgradation (10th)', category: 'EMI & Loans', subCategory: 'Credit Card Bill', client: '', metrics: 'Office Setup & Studio Upgrades', mode: 'Corporate Card', amount: 18500, receipt: 'CC-18500', date: '2026-08-10', month: '2026-08' }
+      ];
+
+      emiRequiredRecords.forEach(er => {
+        if (!miscRecords.some(r => r.subCategory === er.subCategory && r.category === 'EMI & Loans')) {
+          miscRecords.push(er);
+        }
+      });
+      saveMiscStorage();
+
+      document.getElementById('modalMiscDate').value = todayISO;
+      updateModalDateHint(todayISO);
+      renderCategoryDropdowns('EMI & Loans');
+      loadClientsIntoModal();
+      switchMiscPeriod('MONTHLY');
+    });
+
+    function saveMiscStorage() {
+      localStorage.setItem('dgrow_misc_records_v7', JSON.stringify(miscRecords));
+    }
+
+    async function loadClientsIntoModal() {
+      const clientSelect = document.getElementById('modalMiscClient');
+      const filterClientSelect = document.getElementById('miscFilterClient');
+      if (!clientSelect) return;
+
+      let apiClients = [];
+      try {
+        if (typeof apiFetch === 'function') {
+          const res = await apiFetch('/clients');
+          if (res && res.clients && res.clients.length > 0) {
+            apiClients = res.clients.map(c => c.company_name);
+          }
+        }
+      } catch (e) {}
+
+      // Distinct client names from API + miscRecords
+      const recordClients = miscRecords.filter(r => r.client && r.client.trim()).map(r => r.client.trim());
+      const defaultClients = ['Acme Corporation', 'TechNova Global', 'Apex Retail & Fashion', 'Zenith Health Labs', 'D-GROW In-House'];
+      const allClients = [...new Set([...apiClients, ...recordClients, ...defaultClients])].filter(Boolean);
+
+      const modalClientOptions = `<option value="">-- Agency In-House / General --</option>` + 
+        allClients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+      clientSelect.innerHTML = modalClientOptions;
+
+      if (filterClientSelect) {
+        const currVal = filterClientSelect.value;
+        let filterOptions = `<option value="">All Clients (Agency-Wide)</option>`;
+        filterOptions += allClients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        filterClientSelect.innerHTML = filterOptions;
+        if (allClients.includes(currVal)) filterClientSelect.value = currVal;
+      }
+    }
+
+    // Load custom category additions from localStorage
+    function loadCategoryHierarchy() {
+      const stored = localStorage.getItem('dgrow_custom_hierarchy_v1');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          categoryHierarchy = { ...defaultCategoryHierarchy, ...parsed };
+        } catch (e) {
+          categoryHierarchy = { ...defaultCategoryHierarchy };
+        }
+      }
+    }
+
+    function saveCategoryHierarchy() {
+      localStorage.setItem('dgrow_custom_hierarchy_v1', JSON.stringify(categoryHierarchy));
+    }
+
+    // Populate Category Select Elements
+    function renderCategoryDropdowns(selectedCategory = 'Travel & Transport', selectedSubCat = null) {
+      const catSelect = document.getElementById('modalMiscCategory');
+      const filterCatSelect = document.getElementById('miscFilterCategory');
+
+      const categories = Object.keys(categoryHierarchy);
+
+      if (catSelect) {
+        let catOptions = categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        catOptions += `<option value="__ADD_CUSTOM_CAT__" style="color:var(--primary); font-weight:700;">+ Add Custom Category...</option>`;
+        catSelect.innerHTML = catOptions;
+
+        if (categories.includes(selectedCategory)) {
+          catSelect.value = selectedCategory;
+        } else if (categories.length > 0) {
+          catSelect.value = categories[0];
+          selectedCategory = categories[0];
+        }
+      }
+
+      if (filterCatSelect) {
+        const currentFilterVal = filterCatSelect.value;
+        let filterOptions = `<option value="">All Categories</option>`;
+        filterOptions += categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        filterCatSelect.innerHTML = filterOptions;
+        if (categories.includes(currentFilterVal)) filterCatSelect.value = currentFilterVal;
+      }
+
+      populateSubCategories(selectedCategory, selectedSubCat);
+    }
+
+    // Dynamic Category -> SubCategory Handler
+    function populateSubCategories(category, selectedSubCat = null) {
+      const subSelect = document.getElementById('modalMiscSubCategory');
+      if (!subSelect) return;
+
+      const subList = categoryHierarchy[category] || [];
+      let subOptions = subList.map(s => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join('');
+      subOptions += `<option value="__ADD_CUSTOM_SUBCAT__" style="color:var(--primary); font-weight:700;">+ Add Custom Subcategory...</option>`;
+      subSelect.innerHTML = subOptions;
+
+      if (selectedSubCat && subList.includes(selectedSubCat)) {
+        subSelect.value = selectedSubCat;
+      } else if (subList.length > 0) {
+        subSelect.value = subList[0];
+      }
+
+      // Check if client section should be shown
+      const clientSec = document.getElementById('modalClientSection');
+      if (category === 'Ad Funds' || category === 'Client-Related Expenses' || category === 'Travel & Transport') {
+        clientSec.style.display = 'block';
+      } else {
+        clientSec.style.display = 'none';
+      }
+
+      // Check metrics group
+      const metricsGrp = document.getElementById('modalCampaignMetricsGroup');
+      if (category === 'Ad Funds') {
+        metricsGrp.style.display = 'block';
+      } else {
+        metricsGrp.style.display = 'none';
+      }
+    }
+
+    // Custom Category & Sub-category Toggles & Handlers
+    function toggleAddCategoryBox(forceShow = null) {
+      const box = document.getElementById('addCategoryInlineBox');
+      const isVisible = (box.style.display !== 'none');
+      const shouldShow = forceShow !== null ? forceShow : !isVisible;
+      box.style.display = shouldShow ? 'block' : 'none';
+      if (shouldShow) {
+        document.getElementById('customCategoryInput').focus();
+      }
+    }
+
+    function toggleAddSubCategoryBox(forceShow = null) {
+      const box = document.getElementById('addSubCategoryInlineBox');
+      const isVisible = (box.style.display !== 'none');
+      const shouldShow = forceShow !== null ? forceShow : !isVisible;
+      box.style.display = shouldShow ? 'block' : 'none';
+      if (shouldShow) {
+        const currentCat = document.getElementById('modalMiscCategory').value;
+        const parentLabel = document.getElementById('customSubCatParentLabel');
+        if (parentLabel) parentLabel.textContent = currentCat;
+        document.getElementById('customSubCategoryInput').focus();
+      }
+    }
+
+    function saveCustomCategory() {
+      const name = (document.getElementById('customCategoryInput').value || '').trim();
+      const initialSub = (document.getElementById('customInitialSubCatInput').value || '').trim() || 'General';
+
+      if (!name) {
+        alert('Please enter a valid category name.');
+        return;
+      }
+
+      if (categoryHierarchy[name]) {
+        alert('This category already exists!');
+        renderCategoryDropdowns(name);
+        toggleAddCategoryBox(false);
+        return;
+      }
+
+      categoryHierarchy[name] = [initialSub];
+      saveCategoryHierarchy();
+      renderCategoryDropdowns(name, initialSub);
+      document.getElementById('customCategoryInput').value = '';
+      document.getElementById('customInitialSubCatInput').value = '';
+      toggleAddCategoryBox(false);
+      showToast(`Category "${name}" created successfully!`, 'success');
+    }
+
+    function saveCustomSubCategory() {
+      const currentCat = document.getElementById('modalMiscCategory').value;
+      const subName = (document.getElementById('customSubCategoryInput').value || '').trim();
+
+      if (!subName) {
+        alert('Please enter a valid sub-category name.');
+        return;
+      }
+
+      if (!categoryHierarchy[currentCat]) {
+        categoryHierarchy[currentCat] = [];
+      }
+
+      if (categoryHierarchy[currentCat].includes(subName)) {
+        alert('This sub-category already exists in ' + currentCat);
+        populateSubCategories(currentCat, subName);
+        toggleAddSubCategoryBox(false);
+        return;
+      }
+
+      categoryHierarchy[currentCat].push(subName);
+      saveCategoryHierarchy();
+      populateSubCategories(currentCat, subName);
+      document.getElementById('customSubCategoryInput').value = '';
+      toggleAddSubCategoryBox(false);
+      showToast(`Sub-category "${subName}" added to ${currentCat}!`, 'success');
+    }
+
+    function onCategoryChange(cat) {
+      if (cat === '__ADD_CUSTOM_CAT__') {
+        toggleAddCategoryBox(true);
+        // revert select to first available category
+        const firstCat = Object.keys(categoryHierarchy)[0] || 'Travel & Transport';
+        document.getElementById('modalMiscCategory').value = firstCat;
+        return;
+      }
+      populateSubCategories(cat);
+      const titleInput = document.getElementById('modalMiscTitle');
+      const firstSub = (categoryHierarchy[cat] || [])[0] || cat;
+      if (!titleInput.value || titleInput.value.includes('- Expense') || titleInput.value.startsWith('Petrol') || titleInput.value.startsWith('Meta') || titleInput.value.startsWith('Tea')) {
+        titleInput.value = `${firstSub} - Expense`;
+      }
+    }
+
+    function onSubCategoryChange(subCat) {
+      if (subCat === '__ADD_CUSTOM_SUBCAT__') {
+        toggleAddSubCategoryBox(true);
+        const currentCat = document.getElementById('modalMiscCategory').value;
+        const firstSub = (categoryHierarchy[currentCat] || [])[0] || 'General';
+        document.getElementById('modalMiscSubCategory').value = firstSub;
+        return;
+      }
+      const titleInput = document.getElementById('modalMiscTitle');
+      titleInput.value = `${subCat} - Expense`;
+    }
+
+    // --- PERIOD TOGGLE FILTER LOGIC: DAILY, WEEKLY, MONTHLY, OVERALL, CUSTOM ---
+    function switchMiscPeriod(period) {
+      currentMiscPeriod = period;
+      document.querySelectorAll('.period-toggle-btn').forEach(b => b.classList.remove('active'));
+      
+      const customBar = document.getElementById('miscCustomDateBar');
+      if (customBar) customBar.style.display = 'none';
+
+      const badgeEl = document.getElementById('activeMiscPeriodBadge');
+      const subtitleEl = document.getElementById('activeMiscPeriodSubtitle');
+      const cycleLabel = document.getElementById('statMiscCycleLabel');
+
+      if (period === 'DAILY') {
+        const btn = document.getElementById('btnMiscPeriodDaily');
+        if (btn) btn.classList.add('active');
+        badgeEl.textContent = 'Daily (Today)';
+        badgeEl.style.background = '#e0e7ff';
+        badgeEl.style.color = '#3730a3';
+        subtitleEl.textContent = `Showing daily expenses & metrics for Today (${formatDate(todayISO)})`;
+        cycleLabel.textContent = `Today (${formatDate(todayISO)})`;
+      } else if (period === 'WEEKLY') {
+        const btn = document.getElementById('btnMiscPeriodWeekly');
+        if (btn) btn.classList.add('active');
+        badgeEl.textContent = 'Weekly';
+        badgeEl.style.background = '#fef3c7';
+        badgeEl.style.color = '#92400e';
+        subtitleEl.textContent = 'Showing expenses & metrics for the Past 7 Days';
+        cycleLabel.textContent = 'Past 7 Days';
+      } else if (period === 'MONTHLY') {
+        const btn = document.getElementById('btnMiscPeriodMonthly');
+        if (btn) btn.classList.add('active');
+        const selectedMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
+        const mDate = new Date(selectedMonth + '-01');
+        const mName = isNaN(mDate.getTime()) ? selectedMonth : mDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        badgeEl.textContent = 'Monthly (' + mName + ')';
+        badgeEl.style.background = '#ede9fe';
+        badgeEl.style.color = '#6d28d9';
+        subtitleEl.textContent = `Showing expenses & metrics for ${mName} (Day 1 to 30/31)`;
+        cycleLabel.textContent = mName;
+      } else if (period === 'OVERALL') {
+        const btn = document.getElementById('btnMiscPeriodOverall');
+        if (btn) btn.classList.add('active');
+        badgeEl.textContent = 'Overall';
+        badgeEl.style.background = '#dcfce7';
+        badgeEl.style.color = '#15803d';
+        subtitleEl.textContent = 'Showing all-time cumulative expenses & ad funds';
+        cycleLabel.textContent = 'All-Time Cumulative';
+      }
+
+      applyAllMiscFilters();
+    }
+
+    function toggleMiscCustomPeriod() {
+      const customBar = document.getElementById('miscCustomDateBar');
+      const isHidden = (customBar.style.display === 'none');
+      
+      document.querySelectorAll('.period-toggle-btn').forEach(b => b.classList.remove('active'));
+      const btnCustom = document.getElementById('btnMiscPeriodCustom');
+      if (btnCustom) btnCustom.classList.add('active');
+
+      if (isHidden) {
+        customBar.style.display = 'block';
+        if (!document.getElementById('miscCustomFrom').value) {
+          document.getElementById('miscCustomFrom').value = getPastDateISO(30);
+          document.getElementById('miscCustomTo').value = todayISO;
+        }
+      } else {
+        customBar.style.display = 'none';
+      }
+    }
+
+    function applyMiscCustomRange() {
+      currentMiscPeriod = 'CUSTOM';
+      miscCustomFromDate = document.getElementById('miscCustomFrom').value;
+      miscCustomToDate = document.getElementById('miscCustomTo').value;
+
+      const badgeEl = document.getElementById('activeMiscPeriodBadge');
+      const subtitleEl = document.getElementById('activeMiscPeriodSubtitle');
+      const cycleLabel = document.getElementById('statMiscCycleLabel');
+
+      badgeEl.textContent = 'Custom Range';
+      badgeEl.style.background = '#f3e8ff';
+      badgeEl.style.color = '#7e22ce';
+      subtitleEl.textContent = `Showing range: ${formatDate(miscCustomFromDate)} to ${formatDate(miscCustomToDate)}`;
+      cycleLabel.textContent = `${formatDate(miscCustomFromDate)} - ${formatDate(miscCustomToDate)}`;
+
+      applyAllMiscFilters();
+    }
+
+    // --- BILLING MONTH MANAGEMENT & DAY 1 TO 30 LEDGER ---
+    let activeBillingMonth = '2026-08'; // Default YYYY-MM
+    let customBillingMonths = ['2026-08', '2026-07', '2026-06'];
+
+    function loadBillingMonths() {
+      const stored = localStorage.getItem('dgrow_billing_months');
+      if (stored) {
+        try { customBillingMonths = JSON.parse(stored); } catch(e){}
+      }
+      renderBillingMonthSelect();
+    }
+
+    function renderBillingMonthSelect() {
+      const select = document.getElementById('miscBillingMonth');
+      if (!select) return;
+
+      const currentVal = select.value || activeBillingMonth;
+      let opts = customBillingMonths.map(m => {
+        const d = new Date(m + '-01');
+        const monthName = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const isActive = (m === activeBillingMonth);
+        return `<option value="${m}">${monthName} ${isActive ? '(Active Bill)' : '(Closed Bill)'}</option>`;
+      }).join('');
+
+      opts += `<option value="__NEW_MONTH__" style="color:var(--primary); font-weight:800;">+ Start New Month Bill...</option>`;
+      select.innerHTML = opts;
+
+      if (customBillingMonths.includes(currentVal)) select.value = currentVal;
+      else if (customBillingMonths.length > 0) select.value = customBillingMonths[0];
+    }
+
+    function onBillingMonthChange(val) {
+      if (val === '__NEW_MONTH__') {
+        const nextMonthPrompt = prompt('Enter next billing month (e.g. "September 2026" or format "2026-09"):', '2026-09');
+        if (nextMonthPrompt) {
+          let monthCode = nextMonthPrompt.trim();
+          if (!monthCode.match(/^\d{4}-\d{2}$/)) {
+            // attempt parse month name
+            const parsedDate = new Date(monthCode + ' 01');
+            if (!isNaN(parsedDate.getTime())) {
+              const y = parsedDate.getFullYear();
+              const m = String(parsedDate.getMonth() + 1).padStart(2, '0');
+              monthCode = `${y}-${m}`;
+            } else {
+              monthCode = todayISO.substring(0, 7);
+            }
+          }
+          if (!customBillingMonths.includes(monthCode)) {
+            customBillingMonths.unshift(monthCode);
+            localStorage.setItem('dgrow_billing_months', JSON.stringify(customBillingMonths));
+          }
+          activeBillingMonth = monthCode;
+          renderBillingMonthSelect();
+          document.getElementById('miscBillingMonth').value = monthCode;
+          showToast(`Started new monthly bill cycle for ${monthCode}!`, 'success');
+        } else {
+          renderBillingMonthSelect();
+        }
+      } else {
+        activeBillingMonth = val;
+      }
+      applyAllMiscFilters();
+    }
+
+    function updateModalDateHint(dateVal) {
+      const hint = document.getElementById('modalDateDayHint');
+      if (!hint || !dateVal) return;
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return;
+      const dayNum = d.getDate();
+      const monthName = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const totalDays = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      hint.textContent = `Monthly Bill: ${monthName} (Day ${dayNum} of ${totalDays})`;
+    }
+
+    function applyAllMiscFilters() {
+      const search = (document.getElementById('miscSearch')?.value || '').toLowerCase().trim();
+      const category = document.getElementById('miscFilterCategory')?.value;
+      const filterClient = document.getElementById('miscFilterClient')?.value;
+      const selectedMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
+
+      const sevenDaysAgo = getPastDateISO(7);
+      const thirtyDaysAgo = getPastDateISO(30);
+
+      const filtered = miscRecords.filter(r => {
+        const matchesSearch = !search || 
+          r.title.toLowerCase().includes(search) || 
+          r.category.toLowerCase().includes(search) || 
+          (r.subCategory && r.subCategory.toLowerCase().includes(search)) ||
+          (r.client && r.client.toLowerCase().includes(search)) ||
+          r.mode.toLowerCase().includes(search) ||
+          (r.receipt && r.receipt.toLowerCase().includes(search));
+        
+        const matchesCategory = !category || r.category === category;
+        const matchesClient = !filterClient || r.client === filterClient;
+
+        // Date/Period match
+        let matchesPeriod = true;
+        const recDate = r.date || todayISO;
+
+        if (currentMiscPeriod === 'DAILY') {
+          matchesPeriod = (recDate === todayISO);
+        } else if (currentMiscPeriod === 'WEEKLY') {
+          matchesPeriod = (recDate >= sevenDaysAgo && recDate <= todayISO);
+        } else if (currentMiscPeriod === 'MONTHLY') {
+          // Filter by selected billing month (e.g. 2026-08)
+          matchesPeriod = recDate.startsWith(selectedMonth);
+        } else if (currentMiscPeriod === 'OVERALL') {
+          matchesPeriod = true;
+        } else if (currentMiscPeriod === 'CUSTOM') {
+          if (miscCustomFromDate && recDate < miscCustomFromDate) matchesPeriod = false;
+          if (miscCustomToDate && recDate > miscCustomToDate) matchesPeriod = false;
+        }
+
+        // Sub Toggle view match (All / Ad Funds / EMI & Loans / Other Expenses)
+        let matchesSubView = true;
+        if (currentMiscSubView === 'AD_FUNDS') {
+          matchesSubView = (r.category === 'Ad Funds');
+        } else if (currentMiscSubView === 'EMI_LOANS') {
+          matchesSubView = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues');
+        } else if (currentMiscSubView === 'OTHER_EXPENSES') {
+          matchesSubView = (r.category !== 'Ad Funds' && r.category !== 'EMI & Loans' && r.category !== 'EMI & Monthly Dues');
+        }
+
+        return matchesSearch && matchesCategory && matchesClient && matchesPeriod && matchesSubView;
+      });
+
+      renderMiscTable(filtered);
+    }
+
+    // Modal Handlers
+    function openMiscModal(prefillCategory = null, prefillClient = null) {
+      document.getElementById('miscForm').reset();
+      document.getElementById('modalMiscEditId').value = '';
+      document.getElementById('miscModalTitle').textContent = 'Add Expense Entry';
+      document.getElementById('modalMiscDate').value = todayISO;
+      updateModalDateHint(todayISO);
+
+      const catToSet = prefillCategory || 'Travel & Transport';
+      document.getElementById('modalMiscCategory').value = catToSet;
+      populateSubCategories(catToSet);
+
+      if (prefillClient) {
+        document.getElementById('modalMiscClient').value = prefillClient;
+      }
+
+      if (catToSet === 'Ad Funds') {
+        document.getElementById('modalMiscTitle').value = 'Meta Ads - Lead Gen Campaign';
+      }
+
+      document.getElementById('miscModal').classList.add('active');
+    }
+
+    function closeMiscModal() {
+      document.getElementById('miscModal').classList.remove('active');
+    }
+
+    function openEditMiscModal(id) {
+      const record = miscRecords.find(r => r.id === id);
+      if (!record) return;
+
+      document.getElementById('modalMiscEditId').value = record.id;
+      document.getElementById('miscModalTitle').textContent = 'Edit Expense Entry';
+      document.getElementById('modalMiscCategory').value = record.category;
+      populateSubCategories(record.category, record.subCategory);
+
+      document.getElementById('modalMiscTitle').value = record.title;
+      document.getElementById('modalMiscAmount').value = record.amount;
+      document.getElementById('modalMiscPaymentMode').value = record.mode;
+      document.getElementById('modalMiscDate').value = record.date;
+      updateModalDateHint(record.date);
+      document.getElementById('modalMiscReceipt').value = record.receipt || '';
+      document.getElementById('modalMiscClient').value = record.client || '';
+      document.getElementById('modalMiscMetrics').value = record.metrics || '';
+
+      document.getElementById('miscModal').classList.add('active');
+    }
+
+    function handleSaveMisc(e) {
+      e.preventDefault();
+      const editId = document.getElementById('modalMiscEditId').value;
+      const title = document.getElementById('modalMiscTitle').value.trim();
+      const category = document.getElementById('modalMiscCategory').value;
+      const subCategory = document.getElementById('modalMiscSubCategory').value;
+      const amount = parseFloat(document.getElementById('modalMiscAmount').value) || 0;
+      const mode = document.getElementById('modalMiscPaymentMode').value;
+      const date = document.getElementById('modalMiscDate').value;
+      const receipt = document.getElementById('modalMiscReceipt').value.trim() || 'Attached';
+      const client = document.getElementById('modalMiscClient').value;
+      const metrics = document.getElementById('modalMiscMetrics').value.trim();
+
+      const monthCode = (date && date.length >= 7) ? date.substring(0, 7) : activeBillingMonth;
+
+      if (editId) {
+        const index = miscRecords.findIndex(r => r.id === parseInt(editId));
+        if (index !== -1) {
+          miscRecords[index] = {
+            ...miscRecords[index],
+            title,
+            category,
+            subCategory,
+            client,
+            metrics,
+            amount,
+            mode,
+            date,
+            receipt,
+            month: monthCode
+          };
+          showToast('Expense entry updated', 'success');
+        }
+      } else {
+        const newRecord = {
+          id: Date.now(),
+          title,
+          category,
+          subCategory,
+          client,
+          metrics,
+          amount,
+          mode,
+          date,
+          receipt,
+          month: monthCode
+        };
+        miscRecords.unshift(newRecord);
+        showToast('Expense entry saved to Monthly Bill', 'success');
+      }
+
+      saveMiscStorage();
+      applyAllMiscFilters();
+      closeMiscModal();
+
+      // If client ledger modal was open, refresh it so updated/added bill immediately reflects
+      const ledgerModal = document.getElementById('clientLedgerModal');
+      if (ledgerModal && ledgerModal.classList.contains('active') && activeLedgerClient) {
+        openClientLedgerModal(activeLedgerClient, activeLedgerMonth);
+      }
+    }
+
+    function deleteMiscRecord(id) {
+      if (confirm('Are you sure you want to delete this expense entry?')) {
+        miscRecords = miscRecords.filter(r => r.id !== id);
+        saveMiscStorage();
+        applyAllMiscFilters();
+        showToast('Expense deleted', 'info');
+      }
+    }
+
+    function getCategoryBadgeClass(category) {
+      switch(category) {
+        case 'Travel & Transport': return 'cat-travel';
+        case 'Food Expenses': return 'cat-food';
+        case 'Office Expenses': return 'cat-office';
+        case 'Software & Technology': return 'cat-tech';
+        case 'Employee': return 'cat-employee';
+        case 'Client-Related Expenses': return 'cat-client';
+        case 'General Business': return 'cat-general';
+        case 'Personal Expenses': return 'cat-personal';
+        case 'Refund': return 'cat-refund';
+        case 'Ad Funds': return 'cat-adfunds';
+        default: return 'cat-office';
+      }
+    }
+
+    // --- CLIENT MONTHLY DATE-WISE BILLS LEDGER MODAL ---
+    let activeLedgerClient = null;
+    let activeLedgerMonth = null;
+
+    function openClientLedgerModal(clientName, monthKey = null) {
+      activeLedgerClient = clientName;
+      activeLedgerMonth = monthKey || (document.getElementById('miscBillingMonth')?.value || activeBillingMonth);
+
+      const mDate = new Date(activeLedgerMonth + '-01');
+      const monthNameStr = isNaN(mDate.getTime()) ? activeLedgerMonth : mDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const totalMonthDays = isNaN(mDate.getTime()) ? 30 : new Date(mDate.getFullYear(), mDate.getMonth() + 1, 0).getDate();
+
+      document.getElementById('ledgerModalClientTitle').textContent = clientName;
+      document.getElementById('ledgerModalSubtitle').textContent = `${monthNameStr} Monthly Ad Ledger (Day 1 to ${totalMonthDays})`;
+      document.getElementById('ledgerModalMonthName').textContent = monthNameStr;
+
+      // Filter all date bills for this client in this month
+      const clientMonthRecords = miscRecords.filter(r => {
+        if (r.category !== 'Ad Funds' || r.client !== clientName) return false;
+        const recDate = r.date || todayISO;
+        return recDate.startsWith(activeLedgerMonth);
+      });
+
+      // Sort chronologically
+      clientMonthRecords.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+      const totalSpent = clientMonthRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+      document.getElementById('ledgerModalTotalSpent').textContent = '₹' + totalSpent.toLocaleString('en-IN');
+      document.getElementById('ledgerModalCampaignCount').textContent = clientMonthRecords.length;
+
+      // Setup Add and Download actions
+      document.getElementById('ledgerModalAddBillBtn').onclick = () => openAddBillForClient(clientName, activeLedgerMonth);
+      document.getElementById('ledgerModalDownloadMonthBtn').onclick = () => generateClientAdReport(clientName, 'MONTHLY');
+
+      const tbody = document.getElementById('ledgerModalTableBody');
+      if (clientMonthRecords.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+              No ad spend entries found for ${escapeHtml(clientName)} in ${escapeHtml(monthNameStr)}.<br>
+              Click <strong>"+ Add Date Bill"</strong> above to record a day's ad fund.
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = clientMonthRecords.map(item => {
+          const itemD = new Date(item.date || todayISO);
+          const itemDayNum = isNaN(itemD.getTime()) ? '' : `Day ${itemD.getDate()}`;
+          return `
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:0.6rem 0.75rem;">
+                <span style="font-weight:700; color:#0f172a; font-size:0.84rem;">${formatDate(item.date)}</span>
+                ${itemDayNum ? `<span style="font-size:0.7rem; color:#16a34a; font-weight:800; margin-left:0.25rem; background:#f0fdf4; padding:0.1rem 0.35rem; border-radius:3px;">${itemDayNum}</span>` : ''}
+              </td>
+              <td style="padding:0.6rem 0.75rem;">
+                <strong style="color:#0f172a; font-size:0.88rem;">${escapeHtml(item.title)}</strong>
+                ${item.receipt ? `<div style="font-size:0.72rem; color:#64748b; font-family:monospace;">Ref: ${escapeHtml(item.receipt)}</div>` : ''}
+              </td>
+              <td style="padding:0.6rem 0.75rem;">
+                <span style="color:#15803d; font-family:monospace; font-weight:700; background:#f0fdf4; padding:0.15rem 0.4rem; border-radius:3px;">
+                  ${escapeHtml(item.metrics || '1 Campaign')}
+                </span>
+              </td>
+              <td style="padding:0.6rem 0.75rem; color:#334155; font-weight:600;">${escapeHtml(item.mode)}</td>
+              <td style="padding:0.6rem 0.75rem; text-align:right; font-weight:800; color:#15803d; font-size:0.95rem;">
+                ₹${Number(item.amount || 0).toLocaleString('en-IN')}
+              </td>
+              <td style="padding:0.6rem 0.75rem; text-align:right;">
+                <div style="display:inline-flex; gap:0.35rem;">
+                  <button type="button" class="icon-action-btn" onclick="generateClientAdReport('${escapeAttr(clientName)}', 'DAILY', '${item.date}')" style="color:#0284c7;" title="Download Daily Bill for ${formatDate(item.date)}">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  </button>
+                  <button type="button" class="icon-action-btn" onclick="openEditFromLedger(${item.id}, '${escapeAttr(clientName)}', '${escapeAttr(activeLedgerMonth)}')" title="Edit Date Bill">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button type="button" class="icon-action-btn" onclick="deleteFromLedger(${item.id}, '${escapeAttr(clientName)}', '${escapeAttr(activeLedgerMonth)}')" style="color:#dc2626;" title="Delete Date Bill">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('clientLedgerModal').classList.add('active');
+    }
+
+    function closeClientLedgerModal() {
+      document.getElementById('clientLedgerModal').classList.remove('active');
+    }
+
+    function openAddBillForClient(clientName, monthKey) {
+      openMiscModal('Ad Funds', clientName);
+    }
+
+    function openEditFromLedger(id, clientName, monthKey) {
+      openEditMiscModal(id);
+    }
+
+    function deleteFromLedger(id, clientName, monthKey) {
+      if (confirm('Are you sure you want to delete this date bill entry?')) {
+        miscRecords = miscRecords.filter(r => r.id !== id);
+        saveMiscStorage();
+        applyAllMiscFilters();
+        showToast('Date bill entry deleted', 'info');
+        // Refresh modal
+        openClientLedgerModal(clientName, monthKey);
+      }
+    }
+
+    function renderMiscTable(records = miscRecords) {
+      const tbody = document.getElementById('miscTableBody');
+      if (!tbody) return;
+
+      let totalAmount = 0;
+      let adFundsTotal = 0;
+      let softwareTotal = 0;
+      let pettyOpsTotal = 0;
+
+      // Grouping decision: in Ad Funds sub-view or Monthly period, group Ad Funds by (client + month) so 1 month 1 client displays!
+      const shouldGroupAdFunds = (currentMiscSubView === 'AD_FUNDS' || currentMiscPeriod === 'MONTHLY');
+
+      if (records.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+              No expenses or ad fund entries found for the selected criteria.
+            </td>
+          </tr>
+        `;
+      } else {
+        let renderedRows = [];
+
+        if (shouldGroupAdFunds) {
+          // Separate Ad Funds and Other Expenses
+          const adFundRecords = records.filter(r => r.category === 'Ad Funds');
+          const otherRecords = records.filter(r => r.category !== 'Ad Funds');
+
+          // Group ad funds by (client + '___' + month)
+          const adGroups = {};
+          const selectedBillingMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
+
+          adFundRecords.forEach(r => {
+            const amt = Number(r.amount || 0);
+            totalAmount += amt;
+            adFundsTotal += amt;
+
+            const clientKey = (r.client && r.client.trim()) ? r.client.trim() : 'Agency In-House';
+            const mKey = (r.date && r.date.length >= 7 && r.date.includes('-')) ? r.date.substring(0, 7) : (selectedBillingMonth || '2026-08');
+            const groupKey = `${clientKey}___${mKey}`;
+
+            if (!adGroups[groupKey]) {
+              adGroups[groupKey] = {
+                client: clientKey,
+                month: mKey,
+                items: [],
+                totalSpent: 0,
+                subCategories: new Set(),
+                paymentModes: new Set()
+              };
+            }
+            adGroups[groupKey].items.push(r);
+            adGroups[groupKey].totalSpent += amt;
+            if (r.subCategory) adGroups[groupKey].subCategories.add(r.subCategory);
+            if (r.mode) adGroups[groupKey].paymentModes.add(r.mode);
+          });
+
+          // Render Exactly 1 Row per Client for that Month
+          Object.keys(adGroups).forEach(grpKey => {
+            const grp = adGroups[grpKey];
+            const mDate = new Date(grp.month + '-01');
+            const monthNameStr = isNaN(mDate.getTime()) ? grp.month : mDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            const totalMonthDays = isNaN(mDate.getTime()) ? 30 : new Date(mDate.getFullYear(), mDate.getMonth() + 1, 0).getDate();
+            const subCatDisplay = [...grp.subCategories].join(', ') || 'Meta Ads Only';
+            const modeDisplay = [...grp.paymentModes].join(', ') || 'Corporate Card';
+
+            renderedRows.push(`
+              <tr style="background:#ffffff; border-bottom:1px solid #f1f5f9;">
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <span class="client-tag-pill" style="font-size:0.84rem; font-weight:700; padding:0.25rem 0.6rem; background:#f0fdf4; border:1px solid #86efac; color:#15803d; display:inline-flex; align-items:center; gap:0.35rem; border-radius:4px;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M9 8h1m4 0h1m-5 4h1m4 0h1m-5 4h1m4 0h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg>
+                    ${escapeHtml(grp.client)}
+                  </span>
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:#0f172a; font-size:0.88rem; display:block;">${escapeHtml(monthNameStr)}</strong>
+                  <span style="font-size:0.73rem; color:#16a34a; font-weight:700;">Monthly Bill (Day 1 to ${totalMonthDays})</span>
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:#15803d; font-size:1.15rem; font-weight:900;">₹${grp.totalSpent.toLocaleString('en-IN')}</strong>
+                  <span style="font-size:0.72rem; color:#16a34a; font-weight:700; display:block;">Monthly Total</span>
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <div style="font-weight:700; color:var(--text-main); font-size:0.88rem;">
+                    ${grp.items.length} Campaign${grp.items.length > 1 ? 's' : ''} Run in ${escapeHtml(monthNameStr)}
+                  </div>
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:center;"><span class="cat-badge cat-adfunds">AD FUNDS</span></td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:center;"><span class="subcat-pill">${escapeHtml(subCatDisplay)}</span></td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;"><span style="font-weight:600; font-size:0.82rem; color:#334155;">${escapeHtml(modeDisplay)}</span></td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:right;">
+                  <div style="display:inline-flex; align-items:center; justify-content:flex-end; gap:0.35rem;">
+                    <button type="button" class="icon-action-btn" onclick="openClientLedgerModal('${escapeAttr(grp.client)}', '${escapeAttr(grp.month)}')" style="color:#0284c7;" title="View all date bills (${grp.items.length} campaigns) for ${escapeAttr(grp.client)}">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button type="button" class="icon-action-btn" onclick="openDailyBillModal('${escapeAttr(grp.client)}')" style="color:#0284c7;" title="Customize Date Bill for ${escapeAttr(grp.client)}">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </button>
+                    <button type="button" class="icon-action-btn" onclick="generateClientAdReport('${escapeAttr(grp.client)}', 'MONTHLY')" style="color:#16a34a;" title="Download Full Monthly Bill for ${escapeAttr(grp.client)}">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `);
+          });
+
+          // Render other operational records
+          otherRecords.forEach(r => {
+            const amt = Number(r.amount || 0);
+            totalAmount += amt;
+            if (r.category === 'Software & Technology') softwareTotal += amt;
+            else pettyOpsTotal += amt;
+
+            const catBadgeClass = getCategoryBadgeClass(r.category);
+            const d = new Date(r.date || todayISO);
+            const dayNum = isNaN(d.getTime()) ? '' : `Day ${d.getDate()}`;
+            const monthStr = isNaN(d.getTime()) ? 'August 2026' : d.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            renderedRows.push(`
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  ${r.client ? `<span class="client-tag-pill" style="font-size:0.84rem; font-weight:700; padding:0.25rem 0.6rem; display:inline-flex; align-items:center; gap:0.35rem; border-radius:4px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M9 8h1m4 0h1m-5 4h1m4 0h1m-5 4h1m4 0h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg> ${escapeHtml(r.client)}</span>` : `<span style="color:var(--text-muted); font-size:0.8rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> In-House</span>`}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:#0f172a; font-size:0.84rem; display:block;">${escapeHtml(monthStr)}</strong>
+                  <span style="font-size:0.75rem; color:#475569; font-weight:600;">${formatDate(r.date)}</span>
+                  ${dayNum ? `<span style="font-size:0.7rem; color:#16a34a; font-weight:800; margin-left:0.2rem;">(${dayNum})</span>` : ''}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:#16a34a; font-size:1.05rem; font-weight:800;">₹${amt.toLocaleString('en-IN')}</strong>
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:var(--text-main); font-size:0.92rem;">${escapeHtml(r.title)}</strong>
+                  ${r.metrics ? `<br><span class="metrics-snippet" style="display:inline-flex; align-items:center; gap:0.25rem; font-size:0.74rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> ${escapeHtml(r.metrics)}</span>` : ''}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:center;"><span class="cat-badge ${catBadgeClass}">${escapeHtml(r.category)}</span></td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:center;"><span class="subcat-pill">${escapeHtml(r.subCategory || '-')}</span></td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <span style="font-weight:600; font-size:0.82rem; color:#334155;">${escapeHtml(r.mode)}</span>
+                  ${r.receipt ? `<br><span style="font-size:0.72rem; color:var(--text-muted); font-family:monospace;">${escapeHtml(r.receipt)}</span>` : ''}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:right;">
+                  <div style="display:inline-flex; justify-content:flex-end; gap:0.35rem;">
+                    <button type="button" class="icon-action-btn" onclick="openEditMiscModal(${r.id})" title="Edit Expense">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button type="button" class="icon-action-btn" onclick="deleteMiscRecord(${r.id})" style="color:#dc2626;" title="Delete Expense">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `);
+          });
+
+        } else {
+          // Standard Individual Row rendering
+          records.forEach(r => {
+            const amt = Number(r.amount || 0);
+            totalAmount += amt;
+
+            if (r.category === 'Ad Funds') adFundsTotal += amt;
+            else if (r.category === 'Software & Technology') softwareTotal += amt;
+            else pettyOpsTotal += amt;
+
+            const catBadgeClass = getCategoryBadgeClass(r.category);
+            const d = new Date(r.date || todayISO);
+            const dayNum = isNaN(d.getTime()) ? '' : `Day ${d.getDate()}`;
+            const monthStr = isNaN(d.getTime()) ? 'August 2026' : d.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            renderedRows.push(`
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  ${r.client ? `<span class="client-tag-pill" style="font-size:0.84rem; font-weight:700; padding:0.25rem 0.6rem; display:inline-flex; align-items:center; gap:0.35rem; border-radius:4px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M9 8h1m4 0h1m-5 4h1m4 0h1m-5 4h1m4 0h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg> ${escapeHtml(r.client)}</span>` : `<span style="color:var(--text-muted); font-size:0.8rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> In-House</span>`}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:#0f172a; font-size:0.84rem; display:block;">${escapeHtml(monthStr)}</strong>
+                  <span style="font-size:0.75rem; color:#475569; font-weight:600;">${formatDate(r.date)}</span>
+                  ${dayNum ? `<span style="font-size:0.7rem; color:#16a34a; font-weight:800; margin-left:0.2rem;">(${dayNum})</span>` : ''}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:#16a34a; font-size:1.05rem; font-weight:800;">₹${amt.toLocaleString('en-IN')}</strong>
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <strong style="color:var(--text-main); font-size:0.92rem;">${escapeHtml(r.title)}</strong>
+                  ${r.metrics ? `<br><span class="metrics-snippet" style="display:inline-flex; align-items:center; gap:0.25rem; font-size:0.74rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> ${escapeHtml(r.metrics)}</span>` : ''}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:center;"><span class="cat-badge ${catBadgeClass}">${escapeHtml(r.category)}</span></td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:center;"><span class="subcat-pill">${escapeHtml(r.subCategory || '-')}</span></td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle;">
+                  <span style="font-weight:600; font-size:0.82rem; color:#334155;">${escapeHtml(r.mode)}</span>
+                  ${r.receipt ? `<br><span style="font-size:0.72rem; color:var(--text-muted); font-family:monospace;">${escapeHtml(r.receipt)}</span>` : ''}
+                </td>
+                <td style="padding:0.75rem 0.75rem; vertical-align:middle; text-align:right;">
+                  <div style="display:inline-flex; justify-content:flex-end; gap:0.35rem;">
+                    ${r.category === 'Ad Funds' && r.client ? `
+                      <button type="button" class="icon-action-btn" onclick="openDailyBillModal('${escapeAttr(r.client)}', '${r.date}')" style="color:#0284c7;" title="Customize Date Bill for ${escapeAttr(r.client)}">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      </button>
+                      <button type="button" class="icon-action-btn" onclick="generateClientAdReport('${escapeAttr(r.client)}', 'MONTHLY')" style="color:#16a34a;" title="Download Full Monthly Bill for ${escapeAttr(r.client)}">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      </button>
+                    ` : ''}
+                    <button type="button" class="icon-action-btn" onclick="openEditMiscModal(${r.id})" title="Edit Expense">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button type="button" class="icon-action-btn" onclick="deleteMiscRecord(${r.id})" style="color:#dc2626;" title="Delete Expense">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `);
+          });
+        }
+
+        tbody.innerHTML = renderedRows.join('');
+      }
+
+      document.getElementById('statTotalMisc').textContent = '₹' + totalAmount.toLocaleString('en-IN');
+      document.getElementById('statAdFundsMisc').textContent = '₹' + adFundsTotal.toLocaleString('en-IN');
+      document.getElementById('statSoftwareMisc').textContent = '₹' + softwareTotal.toLocaleString('en-IN');
+      document.getElementById('statPettyMisc').textContent = '₹' + pettyOpsTotal.toLocaleString('en-IN');
+    }
+
+    // Number to Words Converter for Invoices & Ad Bills
+    function inWords(num) {
+      const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+      num = Math.floor(Number(num) || 0);
+      if (num === 0) return 'Zero Rupees Only';
+      if (num < 0) return 'Negative ' + inWords(-num);
+      function convertGroup(n) {
+        let str = '';
+        if (n >= 100) {
+          str += a[Math.floor(n / 100)] + 'Hundred ';
+          n %= 100;
+        }
+        if (n >= 20) {
+          str += b[Math.floor(n / 10)] + ' ' + a[n % 10];
+        } else if (n > 0) {
+          str += a[n];
+        }
+        return str;
+      }
+      let result = '';
+      const crore = Math.floor(num / 10000000);
+      num %= 10000000;
+      const lakh = Math.floor(num / 100000);
+      num %= 100000;
+      const thousand = Math.floor(num / 1000);
+      num %= 1000;
+      const remainder = num;
+      if (crore > 0) result += convertGroup(crore) + 'Crore ';
+      if (lakh > 0) result += convertGroup(lakh) + 'Lakh ';
+      if (thousand > 0) result += convertGroup(thousand) + 'Thousand ';
+      if (remainder > 0) result += convertGroup(remainder);
+      return result.trim() + ' Rupees Only';
+    }
+
+    // --- CUSTOM DATE AD BILL MODAL HANDLERS (SINGLE DATE & MULTIPLE DATES RANGE) ---
+    function openDailyBillModal(prefillClient = null, prefillDate = null) {
+      const clientSelect = document.getElementById('dailyBillClient');
+      const dateInput = document.getElementById('dailyBillDate');
+      const fromInput = document.getElementById('dailyBillFromDate');
+      const toInput = document.getElementById('dailyBillToDate');
+      
+      // Populate clients with ads
+      const recordClients = miscRecords.filter(r => r.category === 'Ad Funds' && r.client && r.client.trim()).map(r => r.client.trim());
+      const allClients = [...new Set([...recordClients, 'Marks Biotech', 'Acme Corporation', 'TechNova Global', 'Apex Retail & Fashion', 'Zenith Health Labs'])].filter(Boolean);
+      
+      clientSelect.innerHTML = allClients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+      
+      const filterClientVal = prefillClient || document.getElementById('miscFilterClient')?.value;
+      if (filterClientVal && allClients.includes(filterClientVal)) {
+        clientSelect.value = filterClientVal;
+      }
+      
+      const targetD = prefillDate || todayISO;
+      dateInput.value = targetD;
+      if (fromInput) fromInput.value = getPastDateISO(7);
+      if (toInput) toInput.value = targetD;
+
+      // Default to single date
+      toggleCustomBillDateMode('SINGLE');
+
+      document.getElementById('dailyBillModal').classList.add('active');
+    }
+
+    function closeDailyBillModal() {
+      document.getElementById('dailyBillModal').classList.remove('active');
+    }
+
+    function toggleCustomBillDateMode(mode) {
+      const singleBox = document.getElementById('containerSingleDate');
+      const rangeBox = document.getElementById('containerRangeDate');
+      const lblSingle = document.getElementById('labelDateTypeSingle');
+      const lblRange = document.getElementById('labelDateTypeRange');
+
+      if (mode === 'SINGLE') {
+        if (singleBox) singleBox.style.display = 'block';
+        if (rangeBox) rangeBox.style.display = 'none';
+        if (lblSingle) {
+          lblSingle.style.borderColor = '#0284c7';
+          lblSingle.style.background = '#f0f9ff';
+          lblSingle.style.color = '#0369a1';
+        }
+        if (lblRange) {
+          lblRange.style.borderColor = '#cbd5e1';
+          lblRange.style.background = '#ffffff';
+          lblRange.style.color = '#475569';
+        }
+      } else {
+        if (singleBox) singleBox.style.display = 'none';
+        if (rangeBox) rangeBox.style.display = 'block';
+        if (lblRange) {
+          lblRange.style.borderColor = '#0284c7';
+          lblRange.style.background = '#f0f9ff';
+          lblRange.style.color = '#0369a1';
+        }
+        if (lblSingle) {
+          lblSingle.style.borderColor = '#cbd5e1';
+          lblSingle.style.background = '#ffffff';
+          lblSingle.style.color = '#475569';
+        }
+      }
+    }
+
+    function setDailyBillDate(shortcut) {
+      const dateInput = document.getElementById('dailyBillDate');
+      if (!dateInput) return;
+      if (shortcut === 'today') {
+        dateInput.value = todayISO;
+      } else if (shortcut === 'yesterday') {
+        dateInput.value = getPastDateISO(1);
+      }
+    }
+
+    function setDailyBillRange(shortcut) {
+      const fromInput = document.getElementById('dailyBillFromDate');
+      const toInput = document.getElementById('dailyBillToDate');
+      if (!fromInput || !toInput) return;
+
+      if (shortcut === '7days') {
+        fromInput.value = getPastDateISO(7);
+        toInput.value = todayISO;
+      } else if (shortcut === 'month') {
+        const selectedMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
+        fromInput.value = `${selectedMonth}-01`;
+        toInput.value = todayISO;
+      }
+    }
+
+    function submitCustomDateBillModal(e) {
+      e.preventDefault();
+      const client = document.getElementById('dailyBillClient').value;
+      const typeRadio = document.querySelector('input[name="customBillType"]:checked')?.value || 'SINGLE';
+
+      if (!client) {
+        alert('Please select a client.');
+        return;
+      }
+
+      if (typeRadio === 'SINGLE') {
+        const singleDate = document.getElementById('dailyBillDate').value;
+        if (!singleDate) {
+          alert('Please select a date.');
+          return;
+        }
+        closeDailyBillModal();
+        generateClientAdReport(client, 'DAILY', singleDate);
+      } else {
+        const fromDate = document.getElementById('dailyBillFromDate').value;
+        const toDate = document.getElementById('dailyBillToDate').value;
+        if (!fromDate || !toDate) {
+          alert('Please select both From and To dates.');
+          return;
+        }
+        if (fromDate > toDate) {
+          alert('From Date cannot be after To Date.');
+          return;
+        }
+        closeDailyBillModal();
+        generateClientAdReport(client, 'RANGE', null, fromDate, toDate);
+      }
+    }
+
+    // --- CLIENT AD SPEND STATEMENT & REIMBURSEMENT BILL GENERATOR (SINGLE / RANGE / MONTHLY) ---
+    function generateClientAdReport(clientNameParam = null, forcedMode = null, specificDate = null, fromDateParam = null, toDateParam = null) {
+      let clientName = clientNameParam || document.getElementById('miscFilterClient')?.value;
+      const selectedMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
+      const reportMode = forcedMode || currentMiscPeriod;
+
+      if (!clientName) {
+        // Collect distinct clients from ad funds
+        const clientsWithAds = [...new Set(miscRecords.filter(r => r.category === 'Ad Funds' && r.client).map(r => r.client))];
+        if (clientsWithAds.length === 0) {
+          alert('No client ad funds recorded yet.');
+          return;
+        }
+        const chosen = prompt(`Select client for Ad Statement:\nAvailable: ${clientsWithAds.join(', ')}`, clientsWithAds[0]);
+        if (!chosen) return;
+        clientName = chosen.trim();
+      }
+
+      // Determine target date/month filter
+      const sevenDaysAgo = getPastDateISO(7);
+      const targetDate = specificDate || todayISO;
+
+      const clientAds = miscRecords.filter(r => {
+        if (r.category !== 'Ad Funds' || r.client !== clientName) return false;
+        const recDate = r.date || todayISO;
+
+        if (reportMode === 'DAILY' || reportMode === 'SINGLE') {
+          // Strictly single day only
+          return (recDate === targetDate);
+        }
+        if (reportMode === 'RANGE') {
+          return (recDate >= fromDateParam && recDate <= toDateParam);
+        }
+        if (reportMode === 'WEEKLY') {
+          return (recDate >= sevenDaysAgo && recDate <= todayISO);
+        }
+        if (reportMode === 'MONTHLY') {
+          // Whole month from Day 1 to Day 30/31
+          return recDate.startsWith(selectedMonth);
+        }
+        if (reportMode === 'OVERALL') return true;
+        if (reportMode === 'CUSTOM') {
+          if (miscCustomFromDate && recDate < miscCustomFromDate) return false;
+          if (miscCustomToDate && recDate > miscCustomToDate) return false;
+          return true;
+        }
+        return recDate.startsWith(selectedMonth);
+      });
+
+      // Sort client ads chronologically from Day 1 to Day 31
+      clientAds.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+      if (clientAds.length === 0) {
+        let periodTxt = `in ${selectedMonth}`;
+        if (reportMode === 'DAILY' || reportMode === 'SINGLE') periodTxt = `on ${formatDate(targetDate)}`;
+        else if (reportMode === 'RANGE') periodTxt = `between ${formatDate(fromDateParam)} and ${formatDate(toDateParam)}`;
+        alert(`No ad fund records found for "${clientName}" ${periodTxt}.`);
+        return;
+      }
+
+      // Company info
+      let company = {};
+      try {
+        const stored = localStorage.getItem('dgrow_settings');
+        if (stored) company = JSON.parse(stored);
+      } catch(e){}
+
+      const compName = company.company_name || 'D-GROW MARKETING AGENCY';
+      const compGstin = company.gstin || '33OUUPS5195G1ZJ';
+      const compAddress = company.address ? `${company.address}, ${company.city || 'Chennai'} - ${company.pincode || '600087'}` : 'SF No: 14/3, Plot No. 141, Radha Ave Main Rd, Ganga Nagar, Valasaravakkam, Chennai - 600087';
+      const compEmail = company.email || 'dgrowdigital@gmail.com';
+      const compPhone = company.phone || '+91 97901 23456';
+
+      // Month Name & Totals
+      const monthDate = new Date(selectedMonth + '-01');
+      const monthName = isNaN(monthDate.getTime()) ? selectedMonth : monthDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const totalMonthDays = isNaN(monthDate.getTime()) ? 30 : new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+
+      const totalSpend = clientAds.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+      const totalCampaigns = clientAds.length;
+      const distinctDays = [...new Set(clientAds.map(r => r.date))].length;
+      const avgDailySpend = distinctDays > 0 ? Math.round(totalSpend / distinctDays) : totalSpend;
+      const refNo = `DG-ADF-${(reportMode === 'DAILY' || reportMode === 'SINGLE' ? targetDate : selectedMonth).replace(/-/g,'')}-${Math.floor(100 + Math.random() * 900)}`;
+
+      let periodTitle = `Monthly Ad Spend Statement (Day 1 to ${totalMonthDays})`;
+      let dateSubtitle = `Billing Month: ${monthName} (Day 1 to Day ${totalMonthDays})`;
+      let cycleStatus = `Verified Monthly Ledger (Day 1 to ${totalMonthDays})`;
+      let footerTotalLbl = `Total Monthly Ad Spend Disbursed:`;
+      let netBoxTitle = `Total Monthly Ad Budget Reimbursement Due`;
+      let netBoxDesc = `Detailed Day 1 to Day ${totalMonthDays} Ledger automatically verified by D-GROW Ad Ops`;
+
+      if (reportMode === 'DAILY' || reportMode === 'SINGLE') {
+        const dObj = new Date(targetDate);
+        const dayIdx = isNaN(dObj.getTime()) ? '' : `Day ${dObj.getDate()}`;
+        periodTitle = 'Daily Client Ad Spend Statement & Bill';
+        dateSubtitle = `Date: ${formatDate(targetDate)} ${dayIdx ? '(' + dayIdx + ' of ' + monthName + ')' : ''}`;
+        cycleStatus = `Verified Single Day Spend (${formatDate(targetDate)})`;
+        footerTotalLbl = `Total Daily Ad Spend Disbursed:`;
+        netBoxTitle = `Total Daily Ad Budget Reimbursement Due`;
+        netBoxDesc = `Verified Single Day Ad Runs on ${formatDate(targetDate)} by D-GROW Ad Ops`;
+      } else if (reportMode === 'RANGE') {
+        periodTitle = 'Client Ad Spend Statement & Reimbursement Bill (Date Range)';
+        dateSubtitle = `Period: ${formatDate(fromDateParam)} to ${formatDate(toDateParam)}`;
+        cycleStatus = `Verified Date Range (${formatDate(fromDateParam)} - ${formatDate(toDateParam)})`;
+        footerTotalLbl = `Total Period Ad Spend Disbursed:`;
+        netBoxTitle = `Total Ad Budget Reimbursement Due`;
+        netBoxDesc = `Detailed Period Ad Spend Breakdown from ${formatDate(fromDateParam)} to ${formatDate(toDateParam)}`;
+      } else if (reportMode === 'WEEKLY') {
+        periodTitle = 'Weekly Ad Spend Statement & Reimbursement Bill';
+        dateSubtitle = `Week: ${formatDate(sevenDaysAgo)} to ${formatDate(todayISO)}`;
+        cycleStatus = `Verified 7-Day Rolling Ad Spend`;
+        footerTotalLbl = `Total Weekly Ad Spend:`;
+        netBoxTitle = `Total Weekly Ad Budget Reimbursement Due`;
+      } else if (reportMode === 'CUSTOM') {
+        periodTitle = 'Custom Range Ad Spend Statement';
+        dateSubtitle = `Period: ${formatDate(miscCustomFromDate)} to ${formatDate(miscCustomToDate)}`;
+        cycleStatus = `Verified Custom Period Spend`;
+        footerTotalLbl = `Total Period Ad Spend:`;
+        netBoxTitle = `Total Period Ad Budget Reimbursement Due`;
+      }
+
+      const printWindow = window.open('', '_blank', 'width=920,height=980');
+      if (!printWindow) {
+        alert('Please allow popups to download/print the Client Ad Statement.');
+        return;
+      }
+
+      const billHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ad Statement - ${escapeHtml(clientName)} - ${escapeHtml(reportMode === 'DAILY' ? targetDate : monthName)}<\/title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #f8fafc; padding: 2rem; color: #1e293b; }
+    .bill-container { max-width: 850px; margin: 0 auto; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #16a34a; padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
+    .company-name { font-size: 1.35rem; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; margin: 0; }
+    .bill-title-box { text-align: right; }
+    .bill-title { font-size: 1.2rem; font-weight: 900; color: #16a34a; text-transform: uppercase; margin: 0; }
+    .bill-period { font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-top: 0.2rem; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.15rem; margin-bottom: 1.5rem; }
+    .info-item { font-size: 0.84rem; }
+    .info-label { color: #64748b; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 0.15rem; }
+    .info-val { font-weight: 700; color: #0f172a; }
+    .ad-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+    .ad-table th { background: #f1f5f9; color: #334155; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; padding: 0.7rem 0.85rem; text-align: left; border: 1px solid #cbd5e1; }
+    .ad-table td { padding: 0.65rem 0.85rem; border: 1px solid #e2e8f0; font-size: 0.84rem; }
+    .ad-table .amount { text-align: right; font-weight: 700; color: #16a34a; }
+    .day-badge { background: #e0e7ff; color: #3730a3; font-weight: 800; font-size: 0.72rem; padding: 0.15rem 0.45rem; border-radius: 4px; display: inline-block; }
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.65rem; margin-bottom: 1.5rem; }
+    .kpi-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.85rem 0.75rem; text-align: center; }
+    .kpi-box-num { font-size: 1.25rem; font-weight: 800; color: #15803d; }
+    .kpi-box-lbl { font-size: 0.68rem; color: #166534; font-weight: 700; text-transform: uppercase; margin-top: 0.15rem; }
+    .net-box { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 1.15rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .net-title { font-size: 0.82rem; text-transform: uppercase; font-weight: 800; color: #166534; }
+    .net-val { font-size: 1.7rem; font-weight: 900; color: #15803d; }
+    .words-row { font-size: 0.82rem; color: #475569; font-style: italic; margin-bottom: 1.5rem; padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: 6px; border-left: 3px solid #16a34a; }
+    .footer-row { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 1.25rem; border-top: 1px solid #e2e8f0; }
+    .disclaimer { font-size: 0.74rem; color: #94a3b8; max-width: 460px; line-height: 1.4; }
+    .signatory { text-align: center; }
+    .signatory-title { font-weight: 700; color: #0f172a; margin-top: 0.25rem; border-top: 1px solid #cbd5e1; display: inline-block; padding-top: 0.35rem; font-size: 0.82rem; }
+    .print-btn-bar { text-align: center; margin-bottom: 1.5rem; }
+    .btn-print { background: #16a34a; color: #ffffff; border: none; padding: 0.65rem 1.5rem; font-size: 0.9rem; font-weight: 700; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(22,163,74,0.3); }
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .print-btn-bar { display: none; }
+      .bill-container { box-shadow: none; border: 1px solid #000; padding: 1.5rem; max-width: 100%; }
+    }
+  <\/style>
+<\/head>
+<body>
+  <div class="print-btn-bar">
+    <button class="btn-print" onclick="window.print()" style="display:inline-flex; align-items:center; gap:0.4rem;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print / Save as PDF<\/button>
+  <\/div>
+
+  <div class="bill-container">
+    <div class="header-row">
+      <div style="display:flex; align-items:flex-start; gap:1rem;">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height:48px; max-width:160px; object-fit:contain;">
+        <div>
+          <h1 class="company-name">${escapeHtml(compName)}<\/h1>
+          <p style="margin:0.2rem 0 0 0; font-size:0.75rem; color:#475569;"><strong>GSTIN:</strong> ${escapeHtml(compGstin)}<\/p>
+          <p style="margin:0.15rem 0 0 0; font-size:0.75rem; color:#64748b;">${escapeHtml(compAddress)}<\/p>
+          <p style="margin:0.15rem 0 0 0; font-size:0.75rem; color:#64748b;">Email: ${escapeHtml(compEmail)} | Contact: ${escapeHtml(compPhone)}<\/p>
+        <\/div>
+      <\/div>
+      <div class="bill-title-box">
+        <h2 class="bill-title">${escapeHtml(periodTitle)}<\/h2>
+        <div class="bill-period">${escapeHtml(reportMode === 'DAILY' ? formatDate(targetDate) : monthName)}<\/div>
+        <div style="font-size:0.75rem; color:#64748b; font-family:monospace; margin-top:0.2rem;">Ref: ${escapeHtml(refNo)}<\/div>
+      <\/div>
+    <\/div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Billed Client Company<\/span>
+        <span class="info-val" style="font-size:1.05rem; color:#16a34a;">${escapeHtml(clientName)}<\/span>
+      <\/div>
+      <div class="info-item">
+        <span class="info-label">Statement Period<\/span>
+        <span class="info-val">${escapeHtml(dateSubtitle)}<\/span>
+      <\/div>
+      <div class="info-item">
+        <span class="info-label">Active Days & Campaigns<\/span>
+        <span class="info-val">${distinctDays} Days Active | ${totalCampaigns} Ad Runs<\/span>
+      <\/div>
+      <div class="info-item">
+        <span class="info-label">Billing Cycle Status<\/span>
+        <span class="info-val" style="color:#16a34a;">${escapeHtml(cycleStatus)}<\/span>
+      <\/div>
+    <\/div>
+
+    <div class="kpi-row">
+      <div class="kpi-box">
+        <div class="kpi-box-num">₹${totalSpend.toLocaleString('en-IN')}<\/div>
+        <div class="kpi-box-lbl">${reportMode === 'DAILY' ? 'Total Day Spend' : 'Total Monthly Ad Spend'}<\/div>
+      <\/div>
+      <div class="kpi-box">
+        <div class="kpi-box-num">${totalCampaigns}<\/div>
+        <div class="kpi-box-lbl">Total Campaigns Run<\/div>
+      <\/div>
+      <div class="kpi-box">
+        <div class="kpi-box-num">₹${avgDailySpend.toLocaleString('en-IN')}<\/div>
+        <div class="kpi-box-lbl">Daily Run Rate<\/div>
+      <\/div>
+      <div class="kpi-box">
+        <div class="kpi-box-num">${distinctDays}/${reportMode === 'DAILY' ? '1' : totalMonthDays} Days<\/div>
+        <div class="kpi-box-lbl">Days Active<\/div>
+      <\/div>
+    <\/div>
+
+    <table class="ad-table">
+      <thead>
+        <tr>
+          <th style="width:14%;">Day # / Date<\/th>
+          <th style="width:16%;">Platform<\/th>
+          <th style="width:36%;">Campaign Name & Objective<\/th>
+          <th style="width:18%;">Total Campaigns / Metrics<\/th>
+          <th style="width:16%; text-align:right;">Ad Spend (₹)<\/th>
+        <\/tr>
+      <\/thead>
+      <tbody>
+        ${clientAds.map((ad) => {
+          const d = new Date(ad.date || todayISO);
+          const dayNumStr = isNaN(d.getTime()) ? 'Day -' : `Day ${d.getDate()}`;
+          return `
+            <tr>
+              <td>
+                <span class="day-badge">${dayNumStr}<\/span><br>
+                <span style="font-size:0.75rem; color:#475569; font-weight:600;">${formatDate(ad.date)}<\/span>
+              <\/td>
+              <td><strong style="color:#0f172a;">${escapeHtml(ad.subCategory || 'Ad Campaign')}<\/strong><\/td>
+              <td>
+                <strong style="color:#0f172a;">${escapeHtml(ad.title)}<\/strong>
+                ${ad.receipt ? `<div style="font-size:0.72rem; color:#64748b; font-family:monospace;">Ref: ${escapeHtml(ad.receipt)}<\/div>` : ''}
+              <\/td>
+              <td><span style="font-size:0.75rem; color:#15803d; font-family:monospace; background:#f0fdf4; padding:0.1rem 0.3rem; border-radius:3px;">${escapeHtml(ad.metrics || '1 Campaign')}</span><\/td>
+              <td class="amount">₹${Number(ad.amount || 0).toLocaleString('en-IN')}<\/td>
+            <\/tr>
+          `;
+        }).join('')}
+      <\/tbody>
+      <tfoot>
+        <tr style="background:#f8fafc; font-weight:800;">
+          <td colspan="4" style="text-align:right; font-size:0.88rem; padding:0.75rem;">${escapeHtml(footerTotalLbl)}<\/td>
+          <td style="text-align:right; font-size:1rem; color:#16a34a; padding:0.75rem;">₹${totalSpend.toLocaleString('en-IN')}<\/td>
+        <\/tr>
+      <\/tfoot>
+    <\/table>
+
+    <div class="net-box">
+      <div>
+        <div class="net-title">${escapeHtml(netBoxTitle)}<\/div>
+        <div style="font-size:0.75rem; color:#166534; margin-top:0.2rem;">${escapeHtml(netBoxDesc)}<\/div>
+      <\/div>
+      <div class="net-val">₹${totalSpend.toLocaleString('en-IN')}<\/div>
+    <\/div>
+
+    <div class="words-row">
+      <strong>Amount in words:<\/strong> ${escapeHtml(inWords(totalSpend))}
+    <\/div>
+
+    <div class="footer-row">
+      <div class="disclaimer">
+        This is an official certified <strong>${reportMode === 'DAILY' ? 'Daily Ad Spend Statement' : 'Monthly Ad Spend Statement'}</strong> issued by <strong>${escapeHtml(compName)}<\/strong> for <strong>${escapeHtml(clientName)}<\/strong>.<br>
+        All media spends verified with respective Ad Accounts (Meta Ads / Google Ads).
+      <\/div>
+      <div class="signatory">
+        <!-- Official Company Seal & Signature Stamp -->
+        <img src="../assets/seel.png" onerror="this.onerror=null; this.src='assets/seel.png'; if(!this.complete) this.src='/assets/seel.png';" alt="Official Seal & Signature Stamp" style="max-height:75px; max-width:160px; object-fit:contain; display:block; margin:0 auto 0.25rem auto;">
+        <div class="signatory-title">Authorized Signatory<\/div>
+        <div style="font-size:0.72rem; color:#64748b; margin-top:0.15rem;">D-GROW Ad Operations & Accounts<\/div>
+      <\/div>
+    <\/div>
+  <\/div>
+<\/body>
+<\/html>`;
+
+      printWindow.document.open();
+      printWindow.document.write(billHtml);
+      printWindow.document.close();
+      showToast(`Generating ${reportMode === 'DAILY' ? 'Daily' : 'Monthly'} Ad Bill for ${clientName}...`, 'success');
+    }
+  </script>
+</body>
+</html>

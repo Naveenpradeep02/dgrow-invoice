@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salary & Payroll - D-GROW Invoice System</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <style>
+    .type-badge-employee {
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .type-badge-freelancer {
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .preset-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.15s ease;
+    }
+    .preset-card:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    .account-detail-tag {
+      display: block;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.2rem;
+      font-family: monospace;
+      background: #f8fafc;
+      padding: 0.15rem 0.35rem;
+      border-radius: 3px;
+      border: 1px solid #e2e8f0;
+      width: fit-content;
+    }
+    .incentive-pill {
+      color: #15803d;
+      background: #dcfce7;
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .modal-box {
+      overflow-x: hidden !important;
+    }
+    .modal-box * {
+      box-sizing: border-box;
+    }
+    .staff-avatar-sm {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status-dot-active {
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #16a34a;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px rgba(22,163,74,0.2);
+    }
+    .status-dot-inactive {
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #94a3b8;
+      border: 2px solid #ffffff;
+    }
+    .icon-action-btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-action-btn:hover {
+      background: #f1f5f9;
+      color: var(--primary);
+      border-color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
+        <li class="nav-item"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item active"><a href="salary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Salary</a></li>
+        <li class="nav-item"><a href="miscellaneous.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Miscellaneous</a></li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search staff, payroll, expenses..." id="globalQuickSearch" onkeydown="handleGlobalSearch(event)">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell with Dropdown -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)" title="Notifications">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount" style="display:none;">0</span>
+            </button>
+            
+            <div class="nav-dropdown-menu notif-dropdown-menu" id="notifDropdownMenu">
+              <div class="notif-header">
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <h4 style="margin:0; font-size:0.92rem; font-weight:700; color:var(--text-main);">Notifications</h4>
+                  <span class="badge" style="background:#fee2e2; color:#dc2626; font-size:0.7rem; font-weight:700; padding:0.15rem 0.45rem;">0 Actions</span>
+                </div>
+                <button type="button" class="notif-clear-btn" onclick="clearAllNotifications()">Mark all read</button>
+              </div>
+              <div class="notif-list" id="topbarNotifList"></div>
+              <div class="notif-footer">
+                <a href="notifications.html" style="display:inline-flex; align-items:center; justify-content:center; gap:0.35rem; width:100%;">Show all notifications →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile Dropdown Menu -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" id="userProfileToggleBtn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle">
+                <span id="topbarUserInitials">AD</span>
+              </div>
+              <div class="topbar-user-text">
+                <span class="user-name" id="topbarUserName">D-GROW Admin</span>
+                <span class="user-role-badge" id="topbarUserRole">ADMIN</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <div class="nav-dropdown-menu profile-dropdown-menu" id="profileDropdownMenu">
+              <div class="profile-dropdown-header">
+                <div class="profile-avatar-large">
+                  <span id="dropdownAvatarInitials">AD</span>
+                </div>
+                <div class="profile-header-info">
+                  <strong id="dropdownUserName">D-GROW Admin</strong>
+                  <span id="dropdownUserEmail">admin@dgrow.com</span>
+                  <span class="badge badge-paid" style="margin-top:0.25rem; font-size:0.7rem; align-self:flex-start;" id="dropdownUserRole">ADMIN ROLE</span>
+                </div>
+              </div>
+              <div class="profile-dropdown-body">
+                <a href="settings.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Agency Settings
+                </a>
+                <a href="audit.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                  Audit Trail
+                </a>
+              </div>
+              <div class="profile-dropdown-footer">
+                <button type="button" class="profile-logout-btn" onclick="handleLogout()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Sign Out / Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Header with 2 Distinct Action Buttons -->
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Salary & Payroll Management</h1>
+          <p>Manage monthly salaries, overtime bonuses, incentives, staff directory, and payout disbursements.</p>
+        </div>
+        <div class="page-actions" style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary" onclick="openAddMemberModal()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            + Add Employee / Freelancer
+          </button>
+          
+          <button type="button" class="btn btn-primary" onclick="openSalaryModal()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + Record Payout
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN TOGGLE BAR: Payouts vs View Employees -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+        <div class="period-toggle-group" style="display:inline-flex; background:#f1f5f9; padding:0.3rem; border-radius:var(--radius-md); gap:0.3rem; border:1.5px solid #cbd5e1; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+          <button type="button" class="period-toggle-btn active" id="viewTogglePayouts" onclick="switchSalaryMainTab('PAYOUTS')" style="display:inline-flex; align-items:center; gap:0.45rem; font-weight:700; font-size:0.88rem; padding:0.45rem 1.25rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+            Payouts
+          </button>
+          <button type="button" class="period-toggle-btn" id="viewToggleEmployees" onclick="switchSalaryMainTab('EMPLOYEES')" style="display:inline-flex; align-items:center; gap:0.45rem; font-weight:700; font-size:0.88rem; padding:0.45rem 1.25rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            View Employees (<span id="viewEmployeeCountBadge">10</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- VIEW 1: PAYOUTS TAB CONTAINER                  -->
+      <!-- ============================================== -->
+      <div id="sectionPayoutsView">
+        
+        <!-- Period Filter Header Bar -->
+        <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.25rem; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <h2 style="margin:0; font-size:1.15rem; font-weight:700; color:var(--text-main);">Payroll Overview</h2>
+                <span class="badge" id="activeSalaryPeriodBadge" style="background:#e0e7ff; color:#3730a3; font-weight:700; font-size:0.75rem; padding:0.25rem 0.6rem;">Current Month</span>
+              </div>
+              <p style="margin:0.25rem 0 0 0; font-size:0.82rem; color:var(--text-muted);" id="activeSalaryPeriodSubtitle">Showing payroll for August 2026</p>
+            </div>
+
+            <!-- Period Toggle Buttons -->
+            <div class="period-toggle-group" style="display:inline-flex; background:#f1f5f9; padding:0.25rem; border-radius:var(--radius-md); gap:0.25rem; border:1px solid #e2e8f0;">
+              <button type="button" class="period-toggle-btn active" id="btnPeriodCurrent" onclick="switchSalaryPeriod('CURRENT_MONTH')">
+                Current Month
+              </button>
+              <button type="button" class="period-toggle-btn" id="btnPeriodLast" onclick="switchSalaryPeriod('LAST_MONTH')">
+                Last Month
+              </button>
+              <button type="button" class="period-toggle-btn" id="btnPeriodOverall" onclick="switchSalaryPeriod('OVERALL')">
+                Overall (All-Time)
+              </button>
+              <button type="button" class="period-toggle-btn" id="btnPeriodCustom" onclick="toggleSalaryCustomPeriod()">
+                Custom ▾
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Date Range Bar (Collapsible) -->
+          <div id="salaryCustomDateBar" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:var(--radius-md); padding:0.75rem 1rem; margin-top:1rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+              <span style="font-size:0.8rem; font-weight:700; color:var(--text-main);">Custom Range:</span>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <span style="font-size:0.75rem; color:var(--text-muted);">From:</span>
+                <input type="date" id="salaryCustomFrom" class="form-input" style="padding:0.35rem 0.6rem; font-size:0.82rem;">
+              </div>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <span style="font-size:0.75rem; color:var(--text-muted);">To:</span>
+                <input type="date" id="salaryCustomTo" class="form-input" style="padding:0.35rem 0.6rem; font-size:0.82rem;">
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="applySalaryCustomRange()" style="padding:0.4rem 0.85rem; font-size:0.82rem;">
+                Apply Range
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overview Metric Cards (4 KPI Cards) -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom:1.25rem;">
+          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid var(--primary); box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Total Payroll (Base + OT)</span>
+              <div style="width:28px; height:28px; border-radius:6px; background:rgba(220,38,38,0.08); color:var(--primary); display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+              </div>
+            </div>
+            <h3 id="statGrossSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:var(--text-main); font-weight:700;">₹1,97,500</h3>
+            <span style="font-size:0.72rem; color:var(--text-muted);" id="statCycleLabel">August 2026 Cycle</span>
+          </div>
+
+          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #4f46e5; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Team Members</span>
+              <div style="width:28px; height:28px; border-radius:6px; background:rgba(79,70,229,0.1); color:#4f46e5; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              </div>
+            </div>
+            <h3 id="statEmployeeSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#4f46e5; font-weight:700;">₹1,97,500</h3>
+            <span style="font-size:0.72rem; color:var(--text-muted);" id="statEmployeeSubtext">10 Staff Members (Preset: 1st of month)</span>
+          </div>
+
+          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #f59e0b; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Freelancers & Retainers</span>
+              <div style="width:28px; height:28px; border-radius:6px; background:rgba(245,158,11,0.1); color:#d97706; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </div>
+            </div>
+            <h3 id="statFreelancerSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#d97706; font-weight:700;">₹0</h3>
+            <span style="font-size:0.72rem; color:var(--text-muted);" id="statFreelancerSubtext">0 Freelancers</span>
+          </div>
+
+          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #16a34a; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Disbursed Status</span>
+              <div style="width:28px; height:28px; border-radius:6px; background:rgba(220,38,38,0.08); color:#16a34a; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+            <h3 id="statNetSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#16a34a; font-weight:700;">₹1,97,500</h3>
+            <span style="font-size:0.72rem; color:#16a34a; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              100% Cleared
+            </span>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card" style="padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="salarySearch" class="form-input" placeholder="Search staff name, role or UPI/account..." style="flex:2; min-width:180px;" oninput="applyAllSalaryFilters()">
+            
+            <select id="salaryFilterType" class="form-select" style="flex:1; min-width:160px;" onchange="applyAllSalaryFilters()">
+              <option value="">All Staff & Freelancers</option>
+              <option value="Employee">Full-Time Employees</option>
+              <option value="Freelancer">Freelancers / Retainers</option>
+            </select>
+
+            <select id="salaryFilterStatus" class="form-select" style="flex:1; min-width:120px;" onchange="applyAllSalaryFilters()">
+              <option value="">All Statuses</option>
+              <option value="PAID">PAID</option>
+              <option value="PENDING">PENDING</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Salary Records Table Card -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Member Name</th>
+                  <th>Type</th>
+                  <th>Base Salary</th>
+                  <th>Overtime / Incentive</th>
+                  <th>Deductions</th>
+                  <th>Net Paid</th>
+                  <th>Status</th>
+                  <th>Disbursement Date</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="salaryTableBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- VIEW 2: VIEW EMPLOYEES TAB CONTAINER           -->
+      <!-- ============================================== -->
+      <div id="sectionEmployeesView" style="display:none;">
+        
+        <!-- Employee Directory Filter Bar -->
+        <div class="card" style="padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+            <div style="display:flex; gap:0.75rem; flex:1; min-width:240px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="employeeSearch" class="form-input" placeholder="Search employee name or designation..." style="flex:2; min-width:180px;" oninput="applyEmployeeDirectoryFilters()">
+              
+              <select id="employeeFilterType" class="form-select" style="flex:1; min-width:140px;" onchange="applyEmployeeDirectoryFilters()">
+                <option value="">All Types</option>
+                <option value="Employee">Full-Time Employees</option>
+                <option value="Freelancer">Freelancers / Retainers</option>
+              </select>
+
+              <select id="employeeFilterStatus" class="form-select" style="flex:1; min-width:130px;" onchange="applyEmployeeDirectoryFilters()">
+                <option value="">All Statuses</option>
+                <option value="ACTIVE" selected>Active Only</option>
+                <option value="INACTIVE">Inactive Only</option>
+              </select>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-sm" onclick="openAddMemberModal()" style="display:inline-flex; align-items:center; gap:0.35rem;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              + Add New Staff Member
+            </button>
+          </div>
+        </div>
+
+        <!-- Clean Minimal Employees Directory Table Card (Preset Day, Bank details & Status columns hidden as requested) -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Employee / Staff Name</th>
+                  <th>Employment Type</th>
+                  <th>Role / Designation</th>
+                  <th>Preset Salary</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employeeDirectoryTableBody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- POPUP 1: Add Employee / Freelancer Modal with Status Field -->
+  <div class="modal-overlay" id="addMemberModal">
+    <div class="modal-box" style="max-width: 600px; width: 92%; padding: 1.5rem;">
+      <div class="modal-header" style="margin-bottom: 1rem; padding-bottom: 0.65rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700;">Add Employee / Freelancer</h3>
+          <span class="badge" style="background:#e0e7ff; color:#3730a3; font-size:0.72rem;">New Member</span>
+        </div>
+        <button type="button" class="modal-close" onclick="closeAddMemberModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <form id="addMemberForm" onsubmit="handleSaveNewMember(event)">
+        <div style="display:flex; flex-direction:column; gap:0.85rem;">
+          
+          <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Member Full Name</label>
+              <input type="text" id="newMemberName" class="form-input" placeholder="e.g. Ramesh Kumar" required style="width:100%;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Employment Type</label>
+              <select id="newMemberType" class="form-select" required onchange="onNewMemberTypeChange(this.value)" style="width:100%;">
+                <option value="Employee">Full-Time Employee</option>
+                <option value="Freelancer">Freelancer / Retainer</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.8rem;">Role / Designation</label>
+            <input type="text" id="newMemberRole" class="form-input" placeholder="e.g. UI/UX Designer / Performance Marketer" required style="width:100%;">
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Base Monthly Salary / Fee (₹)</label>
+              <input type="number" id="newMemberSalary" class="form-input" placeholder="40000" min="0" required style="width:100%;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Preset Salary Date / Day</label>
+              <select id="newMemberSalaryDay" class="form-select" required style="width:100%;">
+                <option value="1st of every month">1st of every month</option>
+                <option value="5th of every month">5th of every month</option>
+                <option value="10th of every month">10th of every month</option>
+                <option value="15th of every month">15th of every month</option>
+                <option value="Last day of month">End of month</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap:0.65rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Payment Method</label>
+              <select id="newMemberPaymentMode" class="form-select" onchange="toggleAccountInputs(this.value, 'newMember')" style="width:100%;">
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI / GPay">UPI / GPay / PhonePe</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Cash">Cash</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Status</label>
+              <select id="newMemberStatus" class="form-select" required style="width:100%;">
+                <option value="ACTIVE" selected>Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.8rem;">Contact</label>
+              <input type="text" id="newMemberContact" class="form-input" placeholder="e.g. 9876543210" style="width:100%;">
+            </div>
+          </div>
+
+          <!-- Dynamic UPI Details Section -->
+          <div id="newMemberUpiSection" style="display:none; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:0.75rem;">
+            <label class="form-label required" style="color:#1e40af; font-size:0.8rem; font-weight:700;">
+              UPI ID or GPay / PhonePe Mobile Number:
+            </label>
+            <input type="text" id="newMemberUpiId" class="form-input" placeholder="e.g. ramesh@okhdfcbank or 9876543210@paytm" style="width:100%;">
+          </div>
+
+          <!-- Dynamic Bank Account Details Section -->
+          <div id="newMemberBankSection" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.75rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:0.4rem;">Bank Account Details for Direct Disbursement:</div>
+            <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
+              <div>
+                <label style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Account Number</label>
+                <input type="text" id="newMemberAccountNo" class="form-input" placeholder="e.g. 50100234567890" style="font-size:0.85rem; width:100%;">
+              </div>
+              <div>
+                <label style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">IFSC Code</label>
+                <input type="text" id="newMemberIfsc" class="form-input" placeholder="e.g. SBIN0001234" style="font-size:0.85rem; text-transform:uppercase; width:100%;">
+              </div>
+            </div>
+            <div>
+              <label style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Bank & Branch Name</label>
+              <input type="text" id="newMemberBankName" class="form-input" placeholder="e.g. State Bank of India, Chennai" style="font-size:0.85rem; width:100%;">
+            </div>
+          </div>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.65rem 0.85rem; display:flex; align-items:center; gap:0.6rem;">
+            <input type="checkbox" id="newMemberAddToCurrentMonth" checked style="width:16px; height:16px; cursor:pointer;">
+            <label for="newMemberAddToCurrentMonth" style="font-size:0.82rem; color:var(--text-main); font-weight:600; cursor:pointer; margin:0;">
+              Also add to Current Month Payroll Ledger immediately
+            </label>
+          </div>
+
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <button type="button" class="btn btn-secondary" onclick="closeAddMemberModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Member & Account Details</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- POPUP 2: Record Salary / Freelancer Payout Modal -->
+  <div class="modal-overlay" id="salaryModal">
+    <div class="modal-box" style="max-width: 600px; width: 92%; padding: 1.5rem;">
+      <div class="modal-header" style="margin-bottom: 1rem; padding-bottom: 0.65rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700;" id="salaryModalTitle">Record Salary / Freelancer Payout</h3>
+        </div>
+        <button type="button" class="modal-close" onclick="closeSalaryModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <form id="salaryForm" onsubmit="handleSaveSalary(event)">
+        <div style="display:flex; flex-direction:column; gap:0.85rem;">
+          
+          <!-- Quick Preset Auto-Fill Dropdown -->
+          <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:0.65rem 0.85rem;">
+            <label class="form-label" style="font-size:0.76rem; font-weight:700; color:var(--primary); margin-bottom:0.25rem; display:inline-flex; align-items:center; gap:0.3rem;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Select From Presets (Auto-fills role, salary, date & account details):
+            </label>
+            <select id="modalPresetSelect" class="form-select" onchange="applyPresetToForm(this.value)" style="width:100%; font-size:0.85rem;">
+              <option value="">-- Choose Member Preset (Auto-Fills) --</option>
+              <!-- Populated dynamically from presets -->
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Member Name</label>
+              <input type="text" id="modalStaffName" class="form-input" placeholder="e.g. Srija" required style="width:100%;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Type</label>
+              <select id="modalStaffType" class="form-select" required style="width:100%;">
+                <option value="Employee">Full-Time Employee</option>
+                <option value="Freelancer">Freelancer / Contractor</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.8rem;">Role / Designation</label>
+            <input type="text" id="modalStaffRole" class="form-input" placeholder="e.g. Creative Head / Motion Designer" required style="width:100%;">
+          </div>
+
+          <!-- Base Salary, Overtime/Incentive & Deductions in Balanced 3-Columns Grid -->
+          <div style="display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:0.6rem;">
+            <div class="form-group" style="margin:0; min-width:0;">
+              <label class="form-label required" style="font-size:0.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="Base Salary">Base Salary (₹)</label>
+              <input type="number" id="modalGrossAmount" class="form-input" placeholder="50000" min="0" required oninput="calculateModalNet()" style="width:100%;">
+            </div>
+            <div class="form-group" style="margin:0; min-width:0;">
+              <label class="form-label" style="font-size:0.75rem; color:#15803d; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="+ OT / Incentive">+ OT / Incentive</label>
+              <input type="number" id="modalIncentiveAmount" class="form-input" placeholder="0" min="0" value="0" oninput="calculateModalNet()" style="width:100%; border-color:#86efac;">
+            </div>
+            <div class="form-group" style="margin:0; min-width:0;">
+              <label class="form-label" style="font-size:0.75rem; color:#dc2626; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="- Deductions">- Deductions</label>
+              <input type="number" id="modalDeductions" class="form-input" placeholder="0" min="0" value="0" oninput="calculateModalNet()" style="width:100%; border-color:#fca5a5;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.8rem;">Payment Mode</label>
+              <select id="modalPaymentMode" class="form-select" onchange="toggleAccountInputs(this.value, 'modal')" style="width:100%;">
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI / GPay">UPI / GPay</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Cash">Cash</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Disbursement Date</label>
+              <input type="date" id="modalDisbursementDate" class="form-input" required style="width:100%;">
+            </div>
+          </div>
+
+          <!-- Account Details for Payout -->
+          <div id="modalAccountDetailsBox" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.65rem 0.85rem;">
+            <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Recipient Account / UPI Details:</div>
+            <div id="modalAccountDetailsText" style="font-size:0.82rem; color:#1e293b; font-weight:600; margin-top:0.25rem; font-family:monospace; word-break:break-all;">
+              A/C: 50100489213456 | IFSC: HDFC0001234
+            </div>
+            <input type="hidden" id="modalAccountDetailsVal" value="">
+          </div>
+
+          <!-- Net Payout Breakdown Box -->
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:0.75rem 1rem;">
+            <div>
+              <span style="font-size:0.72rem; color:#15803d; font-weight:700; text-transform:uppercase;">Net Payable Payout (Base + OT - Deductions)</span>
+              <div style="font-size:1.35rem; font-weight:800; color:#15803d;" id="modalNetDisplay">₹0</div>
+            </div>
+            <span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700; font-size:0.78rem;">Status: PAID</span>
+          </div>
+
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <button type="button" class="btn btn-secondary" onclick="closeSalaryModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Payout Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- POPUP 3: VIEW EMPLOYEE PROFILE MODAL -->
+  <div class="modal-overlay" id="viewMemberModal">
+    <div class="modal-box" style="max-width: 520px; width: 92%; padding: 1.5rem;">
+      <div class="modal-header" style="margin-bottom: 1rem; padding-bottom: 0.65rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700;">Employee Details</h3>
+        </div>
+        <button type="button" class="modal-close" onclick="closeViewMemberModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        
+        <!-- Header Card with Avatar & Status Dot -->
+        <div style="display:flex; align-items:center; gap:0.85rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:1rem;">
+          <div style="position:relative; width:48px; height:48px; border-radius:50%; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; color:#334155;">
+            <span id="viewModalInitials">SA</span>
+            <span id="viewModalStatusDot" class="status-dot-active" style="width:12px; height:12px;"></span>
+          </div>
+          <div style="flex:1;">
+            <h3 id="viewModalName" style="margin:0; font-size:1.15rem; font-weight:700; color:var(--text-main);">Sarun</h3>
+            <div style="display:flex; align-items:center; gap:0.4rem; margin-top:0.25rem;">
+              <span id="viewModalTypeBadge" class="type-badge-employee">EMPLOYEE</span>
+              <span id="viewModalStatusBadge" class="badge badge-paid">ACTIVE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:1rem;">
+          <div>
+            <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Role / Designation</span>
+            <div id="viewModalRole" style="font-weight:600; font-size:0.9rem; color:var(--text-main); margin-top:0.15rem;">Graphic & UI Designer</div>
+          </div>
+          <div>
+            <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Preset Monthly Salary</span>
+            <div id="viewModalSalary" style="font-weight:800; font-size:1rem; color:#16a34a; margin-top:0.15rem;">₹25,000</div>
+          </div>
+          <div>
+            <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Preset Salary Day</span>
+            <div id="viewModalSalaryDay" style="font-weight:600; font-size:0.85rem; color:var(--text-main); margin-top:0.15rem;">1st of every month</div>
+          </div>
+          <div>
+            <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Payment Mode</span>
+            <div id="viewModalMode" style="font-weight:600; font-size:0.85rem; color:var(--text-main); margin-top:0.15rem;">Bank Transfer</div>
+          </div>
+        </div>
+
+        <!-- Account / UPI Details Box -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.85rem 1rem;">
+          <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Account / UPI Credentials:</span>
+          <div id="viewModalAccountDetails" style="font-family:monospace; font-weight:600; font-size:0.85rem; color:#1e293b; margin-top:0.25rem; word-break:break-all;">
+            A/C: 50100234891011 | IFSC: HDFC0001234
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+        <button type="button" class="btn btn-secondary" onclick="closeViewMemberModal()">Close</button>
+        <div style="display:inline-flex; gap:0.4rem;">
+          <button type="button" class="btn btn-secondary btn-sm" id="viewModalEditBtn" onclick="" style="display:inline-flex; align-items:center; gap:0.3rem;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Profile
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="viewModalPayBtn" onclick="" style="display:inline-flex; align-items:center; gap:0.3rem;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Pay Salary
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP 4: EDIT EMPLOYEE MODAL -->
+  <div class="modal-overlay" id="editMemberModal">
+    <div class="modal-box" style="max-width: 600px; width: 92%; padding: 1.5rem;">
+      <div class="modal-header" style="margin-bottom: 1rem; padding-bottom: 0.65rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700;">Edit Employee Profile</h3>
+        </div>
+        <button type="button" class="modal-close" onclick="closeEditMemberModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <form id="editMemberForm" onsubmit="handleSaveEditMember(event)">
+        <input type="hidden" id="editMemberId" value="">
+        <div style="display:flex; flex-direction:column; gap:0.85rem;">
+          
+          <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Member Full Name</label>
+              <input type="text" id="editMemberName" class="form-input" required style="width:100%;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Employment Type</label>
+              <select id="editMemberType" class="form-select" required style="width:100%;">
+                <option value="Employee">Full-Time Employee</option>
+                <option value="Freelancer">Freelancer / Retainer</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.8rem;">Role / Designation</label>
+            <input type="text" id="editMemberRole" class="form-input" required style="width:100%;">
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Base Monthly Salary / Fee (₹)</label>
+              <input type="number" id="editMemberSalary" class="form-input" min="0" required style="width:100%;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Preset Salary Date / Day</label>
+              <select id="editMemberSalaryDay" class="form-select" required style="width:100%;">
+                <option value="1st of every month">1st of every month</option>
+                <option value="5th of every month">5th of every month</option>
+                <option value="10th of every month">10th of every month</option>
+                <option value="15th of every month">15th of every month</option>
+                <option value="Last day of month">End of month</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:0.75rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Payment Method</label>
+              <select id="editMemberPaymentMode" class="form-select" onchange="toggleAccountInputs(this.value, 'editMember')" style="width:100%;">
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI / GPay">UPI / GPay / PhonePe</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Cash">Cash</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label required" style="font-size:0.8rem;">Status</label>
+              <select id="editMemberStatus" class="form-select" required style="width:100%;">
+                <option value="ACTIVE">Active (Green Dot)</option>
+                <option value="INACTIVE">Inactive (Gray Dot)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.8rem;">Account Number / UPI ID Details</label>
+            <input type="text" id="editMemberAccountInfo" class="form-input" placeholder="e.g. A/C: 50100234891011 | IFSC: HDFC0001234 or UPI: name@okhdfcbank" style="width:100%; font-family:monospace; font-size:0.85rem;">
+          </div>
+
+        </div>
+        
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditMemberModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    // Active Main Tab State ('PAYOUTS' or 'EMPLOYEES')
+    let currentSalaryMainTab = 'PAYOUTS';
+
+    // Current Active Period State ('CURRENT_MONTH', 'LAST_MONTH', 'OVERALL', 'CUSTOM')
+    let currentSalaryPeriod = 'CURRENT_MONTH';
+    let salaryCustomFromDate = '';
+    let salaryCustomToDate = '';
+
+    // Preset Employees & Freelancers Master with Active/Inactive status
+    let memberPresets = [
+      { id: 'p1', name: 'Sarun', role: 'Graphic & UI Designer', type: 'Employee', salary: 25000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 50100234891011 | IFSC: HDFC0001234' },
+      { id: 'p2', name: 'Debo', role: 'Motion Graphics & Video Lead', type: 'Employee', salary: 25000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: debo.motion@oksbi (9840123456)' },
+      { id: 'p3', name: 'Naveen', role: 'Lead Tech & Marketing Strategist', type: 'Employee', salary: 30000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 50100876543210 | IFSC: HDFC0001234' },
+      { id: 'p4', name: 'Srija', role: 'Creative Head & Brand Strategist', type: 'Employee', salary: 20000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 50100489213456 | IFSC: HDFC0001234' },
+      { id: 'p5', name: 'Subbu', role: 'Junior Content & Graphic Designer', type: 'Employee', salary: 12500, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: subbu.design@okaxis (9790123456)' },
+      { id: 'p6', name: 'Siva Mani', role: 'Performance Marketer & Ads', type: 'Employee', salary: 18000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 20349817263541 | IFSC: SBIN0004567' },
+      { id: 'p7', name: 'Jaleesh', role: 'Web Developer & SEO Specialist', type: 'Employee', salary: 20000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 91238475620193 | IFSC: ICIC0000987' },
+      { id: 'p8', name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', salary: 20000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: anand.edit@paytm (9884567890)' },
+      { id: 'p9', name: 'Ikot Siva', role: 'Social Media & Community Executive', type: 'Employee', salary: 15000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: ikot.siva@ybl (9940123456)' },
+      { id: 'p10', name: 'Thamarai Selvi', role: 'Accounts & Client Operations', type: 'Employee', salary: 12000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 60129384756102 | IFSC: HDFC0002345' },
+      // Added Fixed Office & Retainer Presets
+      { id: 'p11', name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', salary: 5000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234' },
+      { id: 'p12', name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', salary: 5400, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456' },
+      { id: 'p13', name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', salary: 23000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890' },
+      { id: 'p14', name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', salary: 2500, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: airtel.fiber@paytm' }
+    ];
+
+    // Historical & Active Payroll Records with Overtime/Incentives
+    let salaryRecords = [
+      // August 2026 (Current Month)
+      { id: 1, name: 'Sarun', role: 'Graphic & UI Designer', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100234891011 | IFSC: HDFC0001234', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 2, name: 'Debo', role: 'Motion Graphics & Video Lead', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: debo.motion@oksbi', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 3, name: 'Naveen', role: 'Lead Tech & Marketing Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100876543210 | IFSC: HDFC0001234', gross: 30000, incentive: 0, deductions: 0, net: 30000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 4, name: 'Srija', role: 'Creative Head & Brand Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100489213456 | IFSC: HDFC0001234', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 5, name: 'Subbu', role: 'Junior Content & Graphic Designer', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: subbu.design@okaxis', gross: 12500, incentive: 0, deductions: 0, net: 12500, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 6, name: 'Siva Mani', role: 'Performance Marketer & Ads', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 20349817263541 | IFSC: SBIN0004567', gross: 18000, incentive: 0, deductions: 0, net: 18000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 7, name: 'Jaleesh', role: 'Web Developer & SEO Specialist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 91238475620193 | IFSC: ICIC0000987', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 8, name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: anand.edit@paytm', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 9, name: 'Ikot Siva', role: 'Social Media & Community Executive', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: ikot.siva@ybl', gross: 15000, incentive: 0, deductions: 0, net: 15000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 10, name: 'Thamarai Selvi', role: 'Accounts & Client Operations', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 60129384756102 | IFSC: HDFC0002345', gross: 12000, incentive: 0, deductions: 0, net: 12000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 11, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 12, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 13, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      { id: 14, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+
+      // July 2026 (Last Month)
+      { id: 101, name: 'Sarun', role: 'Graphic & UI Designer', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100234891011', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 102, name: 'Debo', role: 'Motion Graphics & Video Lead', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: debo.motion@oksbi', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 103, name: 'Naveen', role: 'Lead Tech & Marketing Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100876543210', gross: 30000, incentive: 0, deductions: 0, net: 30000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 104, name: 'Srija', role: 'Creative Head & Brand Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100489213456', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 105, name: 'Subbu', role: 'Junior Content & Graphic Designer', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: subbu.design@okaxis', gross: 12500, incentive: 0, deductions: 0, net: 12500, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 106, name: 'Siva Mani', role: 'Performance Marketer & Ads', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 20349817263541', gross: 18000, incentive: 0, deductions: 0, net: 18000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 107, name: 'Jaleesh', role: 'Web Developer & SEO Specialist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 91238475620193', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 108, name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: anand.edit@paytm', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 109, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 110, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 111, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
+      { id: 112, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const storedPresets = localStorage.getItem('dgrow_member_presets_v5');
+      if (storedPresets) {
+        try { memberPresets = JSON.parse(storedPresets); } catch(e){}
+      }
+
+      // Ensure the 4 overheads exist in presets
+      const requiredPresets = [
+        { id: 'p11', name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', salary: 5000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234' },
+        { id: 'p12', name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', salary: 5400, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456' },
+        { id: 'p13', name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', salary: 23000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890' },
+        { id: 'p14', name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', salary: 2500, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: airtel.fiber@paytm' }
+      ];
+      requiredPresets.forEach(rp => {
+        if (!memberPresets.some(p => p.name.toLowerCase() === rp.name.toLowerCase())) {
+          memberPresets.push(rp);
+        }
+      });
+      savePresetsStorage();
+
+      const storedRecords = localStorage.getItem('dgrow_salary_records_v5');
+      if (storedRecords) {
+        try { salaryRecords = JSON.parse(storedRecords); } catch(e){}
+      }
+
+      // Ensure August 2026 payroll includes the 4 items
+      const requiredRecords = [
+        { id: 11, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+        { id: 12, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+        { id: 13, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+        { id: 14, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' }
+      ];
+      requiredRecords.forEach(rr => {
+        if (!salaryRecords.some(r => r.name.toLowerCase() === rr.name.toLowerCase() && r.month === 'August 2026')) {
+          salaryRecords.push(rr);
+        }
+      });
+      saveSalaryStorage();
+
+      document.getElementById('modalDisbursementDate').value = new Date().toISOString().split('T')[0];
+      populatePresetDropdown();
+      applyAllSalaryFilters();
+      applyEmployeeDirectoryFilters();
+    });
+
+    function savePresetsStorage() {
+      localStorage.setItem('dgrow_member_presets_v5', JSON.stringify(memberPresets));
+      populatePresetDropdown();
+      applyEmployeeDirectoryFilters();
+    }
+
+    function saveSalaryStorage() {
+      localStorage.setItem('dgrow_salary_records_v5', JSON.stringify(salaryRecords));
+    }
+
+    function populatePresetDropdown() {
+      const select = document.getElementById('modalPresetSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">-- Choose Member Preset (Auto-Fills) --</option>' + 
+        memberPresets.map(p => `
+          <option value="${p.id}">${escapeHtml(p.name)} (${p.type}) — ₹${p.salary.toLocaleString('en-IN')} [${p.status || 'ACTIVE'}]</option>
+        `).join('');
+
+      const badge = document.getElementById('viewEmployeeCountBadge');
+      if (badge) badge.textContent = memberPresets.length;
+    }
+
+    // --- MAIN TAB SWITCHING: PAYOUTS vs VIEW EMPLOYEES ---
+    function switchSalaryMainTab(tab) {
+      currentSalaryMainTab = tab;
+      const btnPayouts = document.getElementById('viewTogglePayouts');
+      const btnEmployees = document.getElementById('viewToggleEmployees');
+      const secPayouts = document.getElementById('sectionPayoutsView');
+      const secEmployees = document.getElementById('sectionEmployeesView');
+
+      if (tab === 'PAYOUTS') {
+        btnPayouts.classList.add('active');
+        btnEmployees.classList.remove('active');
+        secPayouts.style.display = 'block';
+        secEmployees.style.display = 'none';
+        applyAllSalaryFilters();
+      } else {
+        btnEmployees.classList.add('active');
+        btnPayouts.classList.remove('active');
+        secPayouts.style.display = 'none';
+        secEmployees.style.display = 'block';
+        applyEmployeeDirectoryFilters();
+      }
+    }
+
+    // --- PERIOD TOGGLE FILTER LOGIC (FOR PAYOUTS) ---
+    function switchSalaryPeriod(period) {
+      currentSalaryPeriod = period;
+      document.querySelectorAll('#sectionPayoutsView .period-toggle-btn').forEach(b => b.classList.remove('active'));
+      
+      const customBar = document.getElementById('salaryCustomDateBar');
+      if (customBar) customBar.style.display = 'none';
+
+      const badgeEl = document.getElementById('activeSalaryPeriodBadge');
+      const subtitleEl = document.getElementById('activeSalaryPeriodSubtitle');
+      const cycleLabel = document.getElementById('statCycleLabel');
+
+      if (period === 'CURRENT_MONTH') {
+        document.getElementById('btnPeriodCurrent').classList.add('active');
+        badgeEl.textContent = 'Current Month';
+        badgeEl.style.background = '#e0e7ff';
+        badgeEl.style.color = '#3730a3';
+        subtitleEl.textContent = 'Showing payroll for August 2026';
+        cycleLabel.textContent = 'August 2026 Cycle';
+      } else if (period === 'LAST_MONTH') {
+        document.getElementById('btnPeriodLast').classList.add('active');
+        badgeEl.textContent = 'Last Month';
+        badgeEl.style.background = '#fef3c7';
+        badgeEl.style.color = '#92400e';
+        subtitleEl.textContent = 'Showing payroll for July 2026';
+        cycleLabel.textContent = 'July 2026 Cycle';
+      } else if (period === 'OVERALL') {
+        document.getElementById('btnPeriodOverall').classList.add('active');
+        badgeEl.textContent = 'Overall (All-Time)';
+        badgeEl.style.background = '#dcfce7';
+        badgeEl.style.color = '#15803d';
+        subtitleEl.textContent = 'Showing cumulative payroll across all cycles';
+        cycleLabel.textContent = 'All-Time Cumulative';
+      }
+
+      applyAllSalaryFilters();
+    }
+
+    function toggleSalaryCustomPeriod() {
+      const customBar = document.getElementById('salaryCustomDateBar');
+      const isHidden = (customBar.style.display === 'none');
+      
+      document.querySelectorAll('#sectionPayoutsView .period-toggle-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btnPeriodCustom').classList.add('active');
+
+      if (isHidden) {
+        customBar.style.display = 'block';
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        if (!document.getElementById('salaryCustomFrom').value) {
+          document.getElementById('salaryCustomFrom').value = `${y}-${m}-01`;
+          document.getElementById('salaryCustomTo').value = now.toISOString().split('T')[0];
+        }
+      } else {
+        customBar.style.display = 'none';
+      }
+    }
+
+    function applySalaryCustomRange() {
+      currentSalaryPeriod = 'CUSTOM';
+      salaryCustomFromDate = document.getElementById('salaryCustomFrom').value;
+      salaryCustomToDate = document.getElementById('salaryCustomTo').value;
+
+      const badgeEl = document.getElementById('activeSalaryPeriodBadge');
+      const subtitleEl = document.getElementById('activeSalaryPeriodSubtitle');
+      const cycleLabel = document.getElementById('statCycleLabel');
+
+      badgeEl.textContent = 'Custom Range';
+      badgeEl.style.background = '#f3e8ff';
+      badgeEl.style.color = '#7e22ce';
+      subtitleEl.textContent = `Showing range: ${formatDate(salaryCustomFromDate)} to ${formatDate(salaryCustomToDate)}`;
+      cycleLabel.textContent = `${formatDate(salaryCustomFromDate)} - ${formatDate(salaryCustomToDate)}`;
+
+      applyAllSalaryFilters();
+    }
+
+    function applyAllSalaryFilters() {
+      const search = (document.getElementById('salarySearch')?.value || '').toLowerCase().trim();
+      const type = document.getElementById('salaryFilterType')?.value;
+      const status = document.getElementById('salaryFilterStatus')?.value;
+
+      const filtered = salaryRecords.filter(r => {
+        const matchesSearch = !search || 
+          r.name.toLowerCase().includes(search) || 
+          r.role.toLowerCase().includes(search) ||
+          (r.accountInfo && r.accountInfo.toLowerCase().includes(search));
+        
+        const matchesType = !type || r.type === type;
+        const matchesStatus = !status || r.status === status;
+
+        let matchesPeriod = true;
+        const recDate = r.date || '2026-08-01';
+
+        if (currentSalaryPeriod === 'CURRENT_MONTH') {
+          matchesPeriod = recDate.startsWith('2026-08') || r.month === 'August 2026';
+        } else if (currentSalaryPeriod === 'LAST_MONTH') {
+          matchesPeriod = recDate.startsWith('2026-07') || r.month === 'July 2026';
+        } else if (currentSalaryPeriod === 'OVERALL') {
+          matchesPeriod = true;
+        } else if (currentSalaryPeriod === 'CUSTOM') {
+          if (salaryCustomFromDate && recDate < salaryCustomFromDate) matchesPeriod = false;
+          if (salaryCustomToDate && recDate > salaryCustomToDate) matchesPeriod = false;
+        }
+
+        return matchesSearch && matchesType && matchesStatus && matchesPeriod;
+      });
+
+      renderSalaryTable(filtered);
+    }
+
+    // Toggle Dynamic Account / UPI Fields in Forms
+    function toggleAccountInputs(mode, prefix) {
+      if (prefix === 'newMember') {
+        const upiSec = document.getElementById('newMemberUpiSection');
+        const bankSec = document.getElementById('newMemberBankSection');
+        if (mode.includes('UPI')) {
+          upiSec.style.display = 'block';
+          bankSec.style.display = 'none';
+        } else if (mode.includes('Bank Transfer')) {
+          upiSec.style.display = 'none';
+          bankSec.style.display = 'block';
+        } else {
+          upiSec.style.display = 'none';
+          bankSec.style.display = 'none';
+        }
+      } else if (prefix === 'modal') {
+        const matched = memberPresets.find(p => p.name.toLowerCase() === (document.getElementById('modalStaffName')?.value || '').toLowerCase());
+        const display = document.getElementById('modalAccountDetailsText');
+        if (matched && matched.accountInfo) {
+          display.textContent = matched.accountInfo;
+        } else {
+          if (mode.includes('UPI')) display.textContent = 'UPI: (Manual Entry / GPay)';
+          else if (mode.includes('Bank')) display.textContent = 'Bank Transfer: Direct Account';
+          else display.textContent = mode;
+        }
+      }
+    }
+
+    // --- POPUP 1: ADD EMPLOYEE / FREELANCER ---
+    function openAddMemberModal() {
+      document.getElementById('addMemberForm').reset();
+      document.getElementById('newMemberStatus').value = 'ACTIVE';
+      document.getElementById('newMemberAddToCurrentMonth').checked = true;
+      toggleAccountInputs('Bank Transfer', 'newMember');
+      document.getElementById('addMemberModal').classList.add('active');
+    }
+
+    function closeAddMemberModal() {
+      document.getElementById('addMemberModal').classList.remove('active');
+    }
+
+    function onNewMemberTypeChange(type) {
+      const daySelect = document.getElementById('newMemberSalaryDay');
+      const modeSelect = document.getElementById('newMemberPaymentMode');
+      if (type === 'Freelancer') {
+        daySelect.value = '5th of every month';
+        modeSelect.value = 'UPI / GPay';
+        toggleAccountInputs('UPI / GPay', 'newMember');
+      } else {
+        daySelect.value = '1st of every month';
+        modeSelect.value = 'Bank Transfer';
+        toggleAccountInputs('Bank Transfer', 'newMember');
+      }
+    }
+
+    function handleSaveNewMember(e) {
+      e.preventDefault();
+      const name = document.getElementById('newMemberName').value.trim();
+      const type = document.getElementById('newMemberType').value;
+      const role = document.getElementById('newMemberRole').value.trim();
+      const salary = parseFloat(document.getElementById('newMemberSalary').value) || 0;
+      const salaryDay = document.getElementById('newMemberSalaryDay').value;
+      const mode = document.getElementById('newMemberPaymentMode').value;
+      const status = document.getElementById('newMemberStatus').value || 'ACTIVE';
+      const addToCurrentMonth = document.getElementById('newMemberAddToCurrentMonth').checked;
+
+      let accountInfo = '';
+      if (mode.includes('UPI')) {
+        const upiId = document.getElementById('newMemberUpiId').value.trim();
+        accountInfo = upiId ? `UPI: ${upiId}` : 'UPI / GPay';
+      } else if (mode.includes('Bank Transfer')) {
+        const accNo = document.getElementById('newMemberAccountNo').value.trim();
+        const ifsc = document.getElementById('newMemberIfsc').value.trim();
+        const bank = document.getElementById('newMemberBankName').value.trim();
+        accountInfo = accNo ? `A/C: ${accNo} | IFSC: ${ifsc || 'N/A'}${bank ? ` (${bank})` : ''}` : mode;
+      } else {
+        accountInfo = mode;
+      }
+
+      let defaultDateDay = 1;
+      if (salaryDay.startsWith('5th')) defaultDateDay = 5;
+      else if (salaryDay.startsWith('10th')) defaultDateDay = 10;
+      else if (salaryDay.startsWith('15th')) defaultDateDay = 15;
+      else if (salaryDay.startsWith('Last')) defaultDateDay = 28;
+
+      const newPreset = {
+        id: 'p_' + Date.now(),
+        name,
+        role,
+        type,
+        salary,
+        salaryDay,
+        defaultDateDay,
+        mode,
+        status,
+        accountInfo
+      };
+      memberPresets.push(newPreset);
+      savePresetsStorage();
+
+      if (addToCurrentMonth && status === 'ACTIVE') {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(defaultDateDay).padStart(2, '0');
+
+        const newRecord = {
+          id: Date.now(),
+          name,
+          role,
+          type,
+          gross: salary,
+          incentive: 0,
+          deductions: 0,
+          net: salary,
+          mode,
+          accountInfo,
+          salaryDay,
+          date: `${year}-${month}-${day}`,
+          status: 'PAID',
+          month: 'August 2026'
+        };
+        salaryRecords.unshift(newRecord);
+        saveSalaryStorage();
+        applyAllSalaryFilters();
+      }
+
+      closeAddMemberModal();
+      showToast(`${type === 'Employee' ? 'Employee' : 'Freelancer'} "${name}" saved!`, 'success');
+    }
+
+    // --- POPUP 2: RECORD PAYOUT WITH OVERTIME & INCENTIVE ---
+    function openSalaryModal(prefillMemberId = null) {
+      document.getElementById('salaryForm').reset();
+      document.getElementById('modalIncentiveAmount').value = '0';
+      document.getElementById('modalDeductions').value = '0';
+      document.getElementById('modalDisbursementDate').value = new Date().toISOString().split('T')[0];
+      
+      if (prefillMemberId) {
+        document.getElementById('modalPresetSelect').value = prefillMemberId;
+        applyPresetToForm(prefillMemberId);
+      } else {
+        calculateModalNet();
+        document.getElementById('modalAccountDetailsText').textContent = 'Select a preset or choose payment mode above';
+      }
+      
+      document.getElementById('salaryModal').classList.add('active');
+    }
+
+    function closeSalaryModal() {
+      document.getElementById('salaryModal').classList.remove('active');
+    }
+
+    function applyPresetToForm(presetId) {
+      if (!presetId) return;
+      const preset = memberPresets.find(p => p.id === presetId);
+      if (!preset) return;
+
+      document.getElementById('modalStaffName').value = preset.name;
+      document.getElementById('modalStaffRole').value = preset.role;
+      document.getElementById('modalStaffType').value = preset.type;
+      document.getElementById('modalGrossAmount').value = preset.salary;
+      document.getElementById('modalIncentiveAmount').value = 0;
+      document.getElementById('modalDeductions').value = 0;
+      document.getElementById('modalPaymentMode').value = preset.mode;
+
+      const display = document.getElementById('modalAccountDetailsText');
+      display.textContent = preset.accountInfo || preset.mode;
+      document.getElementById('modalAccountDetailsVal').value = preset.accountInfo || '';
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(preset.defaultDateDay || 1).padStart(2, '0');
+      document.getElementById('modalDisbursementDate').value = `${year}-${month}-${day}`;
+
+      calculateModalNet();
+    }
+
+    function calculateModalNet() {
+      const gross = parseFloat(document.getElementById('modalGrossAmount').value) || 0;
+      const incentive = parseFloat(document.getElementById('modalIncentiveAmount').value) || 0;
+      const deductions = parseFloat(document.getElementById('modalDeductions').value) || 0;
+      const net = Math.max(0, (gross + incentive) - deductions);
+      document.getElementById('modalNetDisplay').textContent = '₹' + net.toLocaleString('en-IN');
+    }
+
+    function handleSaveSalary(e) {
+      e.preventDefault();
+      const name = document.getElementById('modalStaffName').value.trim();
+      const role = document.getElementById('modalStaffRole').value.trim();
+      const type = document.getElementById('modalStaffType').value;
+      const gross = parseFloat(document.getElementById('modalGrossAmount').value) || 0;
+      const incentive = parseFloat(document.getElementById('modalIncentiveAmount').value) || 0;
+      const deductions = parseFloat(document.getElementById('modalDeductions').value) || 0;
+      const mode = document.getElementById('modalPaymentMode').value;
+      const date = document.getElementById('modalDisbursementDate').value;
+      const net = Math.max(0, (gross + incentive) - deductions);
+
+      const matched = memberPresets.find(p => p.name.toLowerCase() === name.toLowerCase());
+      const salaryDay = matched ? matched.salaryDay : (type === 'Employee' ? '1st of month' : '5th of month');
+      const accountInfo = matched ? matched.accountInfo : (document.getElementById('modalAccountDetailsVal').value || mode);
+
+      const newRecord = {
+        id: Date.now(),
+        name,
+        role,
+        type,
+        gross,
+        incentive,
+        deductions,
+        net,
+        mode,
+        accountInfo,
+        date,
+        salaryDay,
+        status: 'PAID',
+        month: 'August 2026'
+      };
+
+      salaryRecords.unshift(newRecord);
+      saveSalaryStorage();
+      applyAllSalaryFilters();
+      closeSalaryModal();
+      showToast('Salary payout recorded successfully', 'success');
+    }
+
+    // --- POPUP 3: VIEW EMPLOYEE PROFILE MODAL ---
+    function openViewMemberModal(memberId) {
+      const member = memberPresets.find(p => p.id === memberId);
+      if (!member) return;
+
+      const initials = member.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+      const isActive = (member.status || 'ACTIVE') === 'ACTIVE';
+
+      document.getElementById('viewModalInitials').textContent = initials;
+      document.getElementById('viewModalName').textContent = member.name;
+      document.getElementById('viewModalRole').textContent = member.role;
+      document.getElementById('viewModalSalary').textContent = '₹' + Number(member.salary || 0).toLocaleString('en-IN');
+      document.getElementById('viewModalSalaryDay').textContent = member.salaryDay || '1st of every month';
+      document.getElementById('viewModalMode').textContent = member.mode || 'Bank Transfer';
+      document.getElementById('viewModalAccountDetails').textContent = member.accountInfo || 'None specified';
+
+      const typeBadge = document.getElementById('viewModalTypeBadge');
+      typeBadge.className = member.type === 'Employee' ? 'type-badge-employee' : 'type-badge-freelancer';
+      typeBadge.textContent = member.type === 'Employee' ? 'EMPLOYEE' : 'FREELANCER';
+
+      const statusBadge = document.getElementById('viewModalStatusBadge');
+      const statusDot = document.getElementById('viewModalStatusDot');
+
+      if (isActive) {
+        statusBadge.className = 'badge badge-paid';
+        statusBadge.textContent = 'ACTIVE';
+        statusDot.className = 'status-dot-active';
+      } else {
+        statusBadge.className = 'badge';
+        statusBadge.style.background = '#f1f5f9';
+        statusBadge.style.color = '#64748b';
+        statusBadge.textContent = 'INACTIVE';
+        statusDot.className = 'status-dot-inactive';
+      }
+
+      document.getElementById('viewModalEditBtn').onclick = () => {
+        closeViewMemberModal();
+        openEditMemberModal(memberId);
+      };
+
+      document.getElementById('viewModalPayBtn').onclick = () => {
+        closeViewMemberModal();
+        openSalaryModal(memberId);
+      };
+
+      document.getElementById('viewMemberModal').classList.add('active');
+    }
+
+    function closeViewMemberModal() {
+      document.getElementById('viewMemberModal').classList.remove('active');
+    }
+
+    // --- POPUP 4: EDIT EMPLOYEE PROFILE MODAL ---
+    function openEditMemberModal(memberId) {
+      const member = memberPresets.find(p => p.id === memberId);
+      if (!member) return;
+
+      document.getElementById('editMemberId').value = member.id;
+      document.getElementById('editMemberName').value = member.name;
+      document.getElementById('editMemberType').value = member.type;
+      document.getElementById('editMemberRole').value = member.role;
+      document.getElementById('editMemberSalary').value = member.salary;
+      document.getElementById('editMemberSalaryDay').value = member.salaryDay || '1st of every month';
+      document.getElementById('editMemberPaymentMode').value = member.mode || 'Bank Transfer';
+      document.getElementById('editMemberStatus').value = member.status || 'ACTIVE';
+      document.getElementById('editMemberAccountInfo').value = member.accountInfo || '';
+
+      document.getElementById('editMemberModal').classList.add('active');
+    }
+
+    function closeEditMemberModal() {
+      document.getElementById('editMemberModal').classList.remove('active');
+    }
+
+    function handleSaveEditMember(e) {
+      e.preventDefault();
+      const id = document.getElementById('editMemberId').value;
+      const memberIndex = memberPresets.findIndex(p => p.id === id);
+      if (memberIndex === -1) return;
+
+      memberPresets[memberIndex].name = document.getElementById('editMemberName').value.trim();
+      memberPresets[memberIndex].type = document.getElementById('editMemberType').value;
+      memberPresets[memberIndex].role = document.getElementById('editMemberRole').value.trim();
+      memberPresets[memberIndex].salary = parseFloat(document.getElementById('editMemberSalary').value) || 0;
+      memberPresets[memberIndex].salaryDay = document.getElementById('editMemberSalaryDay').value;
+      memberPresets[memberIndex].mode = document.getElementById('editMemberPaymentMode').value;
+      memberPresets[memberIndex].status = document.getElementById('editMemberStatus').value;
+      memberPresets[memberIndex].accountInfo = document.getElementById('editMemberAccountInfo').value.trim();
+
+      savePresetsStorage();
+      closeEditMemberModal();
+      showToast(`Profile for "${memberPresets[memberIndex].name}" updated successfully!`, 'success');
+    }
+
+    // --- VIEW 2: EMPLOYEE DIRECTORY RENDERING ---
+    function applyEmployeeDirectoryFilters() {
+      const search = (document.getElementById('employeeSearch')?.value || '').toLowerCase().trim();
+      const type = document.getElementById('employeeFilterType')?.value;
+      const status = document.getElementById('employeeFilterStatus')?.value;
+
+      const filtered = memberPresets.filter(p => {
+        const matchesSearch = !search || 
+          p.name.toLowerCase().includes(search) || 
+          p.role.toLowerCase().includes(search);
+
+        const matchesType = !type || p.type === type;
+        const matchesStatus = !status || (p.status || 'ACTIVE') === status;
+
+        return matchesSearch && matchesType && matchesStatus;
+      });
+
+      renderEmployeeDirectoryTable(filtered);
+    }
+
+    function renderEmployeeDirectoryTable(members = memberPresets) {
+      const tbody = document.getElementById('employeeDirectoryTableBody');
+      if (!tbody) return;
+
+      if (members.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+              No employees found matching your search.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = members.map(p => {
+        const isEmp = (p.type === 'Employee');
+        const isActive = (p.status || 'ACTIVE') === 'ACTIVE';
+        const initials = p.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+        const typeBadge = isEmp ? 
+          `<span class="type-badge-employee">EMPLOYEE</span>` : 
+          `<span class="type-badge-freelancer">FREELANCER</span>`;
+
+        return `
+          <tr style="${!isActive ? 'opacity: 0.65; background:#fafafa;' : ''}">
+            <td>
+              <div style="display:flex; align-items:center; gap:0.65rem;">
+                <div style="position:relative; display:inline-flex;">
+                  <div class="staff-avatar-sm" style="${!isActive ? 'background:#cbd5e1; color:#64748b;' : ''}">${initials}</div>
+                  <span class="${isActive ? 'status-dot-active' : 'status-dot-inactive'}" title="${isActive ? 'Active Staff' : 'Inactive Staff'}"></span>
+                </div>
+                <div>
+                  <strong style="color:var(--text-main); font-size:0.92rem;">${escapeHtml(p.name)}</strong>
+                </div>
+              </div>
+            </td>
+            <td>${typeBadge}</td>
+            <td><span style="color:var(--text-muted); font-size:0.85rem;">${escapeHtml(p.role)}</span></td>
+            <td><strong style="color:#16a34a; font-size:0.95rem;">₹${Number(p.salary || 0).toLocaleString('en-IN')}</strong></td>
+            <td style="text-align:right;">
+              <div style="display:inline-flex; gap:0.4rem; align-items:center;">
+                <!-- 1. Pay Button -->
+                <button type="button" class="btn btn-primary btn-sm" onclick="openSalaryModal('${p.id}')" style="padding:0.28rem 0.75rem; font-size:0.78rem; display:inline-flex; align-items:center; gap:0.3rem;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Pay
+                </button>
+                
+                <!-- 2. View Icon Button -->
+                <button type="button" class="icon-action-btn" onclick="openViewMemberModal('${p.id}')" title="View Employee Details">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+
+                <!-- 3. Edit Icon Button -->
+                <button type="button" class="icon-action-btn" onclick="openEditMemberModal('${p.id}')" title="Edit Employee Profile">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function deleteSalaryRecord(id) {
+      if (confirm('Are you sure you want to delete this payout record?')) {
+        salaryRecords = salaryRecords.filter(r => r.id !== id);
+        saveSalaryStorage();
+        applyAllSalaryFilters();
+        showToast('Record deleted', 'info');
+      }
+    }
+
+    function renderSalaryTable(records = salaryRecords) {
+      const tbody = document.getElementById('salaryTableBody');
+      if (!tbody) return;
+
+      let totalGross = 0;
+      let totalNet = 0;
+      let employeeTotal = 0;
+      let freelancerTotal = 0;
+      let empCount = 0;
+      let freeCount = 0;
+
+      if (records.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+              No payroll records found for the selected period.
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = records.map(r => {
+          const gross = Number(r.gross || 0);
+          const incentive = Number(r.incentive || 0);
+          const deductions = Number(r.deductions || 0);
+          const net = Number(r.net || (gross + incentive - deductions));
+          
+          totalGross += (gross + incentive);
+          totalNet += net;
+
+          const isEmp = (r.type === 'Employee');
+          if (isEmp) {
+            employeeTotal += (gross + incentive);
+            empCount++;
+          } else {
+            freelancerTotal += (gross + incentive);
+            freeCount++;
+          }
+
+          const typeBadge = isEmp ? 
+            `<span class="type-badge-employee"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> EMPLOYEE</span>` : 
+            `<span class="type-badge-freelancer"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg> FREELANCER</span>`;
+
+          const incentiveBadge = incentive > 0 ? 
+            `<span class="incentive-pill">+₹${incentive.toLocaleString('en-IN')}</span>` : 
+            `<span style="color:var(--text-muted); font-size:0.82rem;">₹0</span>`;
+
+          const deductionBadge = deductions > 0 ? 
+            `<span style="color:#dc2626; font-weight:600; font-size:0.82rem;">-₹${deductions.toLocaleString('en-IN')}</span>` : 
+            `<span style="color:var(--text-muted); font-size:0.82rem;">₹0</span>`;
+
+          return `
+            <tr>
+              <td><strong style="color:var(--text-main); font-size:0.92rem;">${escapeHtml(r.name)}</strong></td>
+              <td>${typeBadge}</td>
+              <td><strong>₹${gross.toLocaleString('en-IN')}</strong></td>
+              <td>${incentiveBadge}</td>
+              <td>${deductionBadge}</td>
+              <td><strong style="color:#16a34a; font-size:0.95rem;">₹${net.toLocaleString('en-IN')}</strong></td>
+              <td><span class="badge ${r.status === 'PAID' ? 'badge-paid' : 'badge-overdue'}">${r.status}</span></td>
+              <td>${formatDate(r.date)}</td>
+              <td style="text-align:right;">
+                <div style="display:inline-flex; gap:0.35rem; align-items:center;">
+                  <!-- 1. Download Pay Slip Icon Button -->
+                  <button type="button" class="icon-action-btn" onclick="downloadSalarySlip(${r.id})" title="Download Salary Pay Slip" style="color:var(--primary);">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </button>
+
+                  <!-- 2. Delete Icon Button -->
+                  <button type="button" class="icon-action-btn" onclick="deleteSalaryRecord(${r.id})" title="Delete Record" style="color:#dc2626;">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      <line x1="10" y1="11" x2="10" y2="17"/>
+                      <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('statGrossSalary').textContent = '₹' + totalGross.toLocaleString('en-IN');
+      document.getElementById('statNetSalary').textContent = '₹' + totalNet.toLocaleString('en-IN');
+      document.getElementById('statEmployeeSalary').textContent = '₹' + employeeTotal.toLocaleString('en-IN');
+      document.getElementById('statEmployeeSubtext').textContent = `${empCount} Staff Members`;
+      document.getElementById('statFreelancerSalary').textContent = '₹' + freelancerTotal.toLocaleString('en-IN');
+      document.getElementById('statFreelancerSubtext').textContent = `${freeCount} Freelancers`;
+    }
+
+    // --- PAYSLIP DOWNLOAD / PRINT GENERATOR ---
+    function downloadSalarySlip(recordId) {
+      const record = salaryRecords.find(r => r.id === recordId);
+      if (!record) {
+        showToast('Payroll record not found', 'error');
+        return;
+      }
+
+      const gross = Number(record.gross || 0);
+      const incentive = Number(record.incentive || 0);
+      const deductions = Number(record.deductions || 0);
+      const net = Number(record.net || (gross + incentive - deductions));
+      const paySlipNo = `DG-PAY-${String(record.date || '2026-08-01').replace(/-/g, '').substring(0,6)}-${String(record.id).slice(-4)}`;
+      const monthYear = record.month || 'August 2026';
+      const disburseDate = formatDate(record.date);
+
+      // Find role and account info from record or preset roster
+      const matched = memberPresets.find(p => p.name.toLowerCase() === record.name.toLowerCase());
+      const role = record.role || (matched ? matched.role : 'Team Specialist');
+      const accountInfo = record.accountInfo || (matched ? matched.accountInfo : record.mode);
+
+      // Convert number to Indian words
+      function inWords(num) {
+        const a = ['','One ','Two ','Three ','Four ', 'Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+        const b = ['', '', 'Twenty','Thirty','Forty','Fifty', 'Sixty','Seventy','Eighty','Ninety'];
+        if ((num = num.toString()).length > 9) return 'overflow';
+        let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return '';
+        let str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Rupees Only' : 'Rupees Only';
+        return str;
+      }
+
+      const netInWords = inWords(net);
+
+      // Real Company Settings & Info
+      let company = {};
+      try {
+        const stored = localStorage.getItem('dgrow_settings');
+        if (stored) company = JSON.parse(stored);
+      } catch(e){}
+
+      const compName = company.company_name || 'D-GROW MARKETING AGENCY';
+      const compGstin = company.gstin || '33OUUPS5195G1ZJ';
+      const compAddress = company.address ? `${company.address}, ${company.city || 'Chennai'} - ${company.pincode || '600087'}` : 'SF No: 14/3, Plot No. 141, Radha Ave Main Rd, Ganga Nagar, Valasaravakkam, Chennai - 600087';
+      const compEmail = company.email || 'dgrowdigital@gmail.com';
+      const compPhone = company.phone || '+91 97901 23456';
+
+      // Open clean, standalone printable payslip window
+      const printWindow = window.open('', '_blank', 'width=850,height=950');
+      if (!printWindow) {
+        alert('Please allow popups to download/print the Pay Slip.');
+        return;
+      }
+
+      const payslipHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payslip - ${escapeHtml(record.name)} - ${escapeHtml(monthYear)}<\/title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #f8fafc; padding: 2rem; color: #1e293b; }
+    .payslip-container { max-width: 780px; margin: 0 auto; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #dc2626; padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
+    .company-name { font-size: 1.35rem; font-weight: 900; color: #0f172a; letter-spacing: -0.3px; margin: 0; }
+    .payslip-title-box { text-align: right; }
+    .payslip-title { font-size: 1.3rem; font-weight: 900; color: #0f172a; text-transform: uppercase; margin: 0; }
+    .payslip-period { font-size: 0.9rem; font-weight: 800; color: #dc2626; margin-top: 0.2rem; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.15rem; margin-bottom: 1.5rem; }
+    .info-item { font-size: 0.84rem; }
+    .info-label { color: #64748b; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 0.15rem; }
+    .info-val { font-weight: 700; color: #0f172a; }
+    .salary-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+    .salary-table th { background: #f1f5f9; color: #334155; font-size: 0.78rem; text-transform: uppercase; font-weight: 700; padding: 0.75rem 1rem; text-align: left; border: 1px solid #cbd5e1; }
+    .salary-table td { padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-size: 0.88rem; }
+    .salary-table .amount { text-align: right; font-weight: 700; }
+    .net-box { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 1.15rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .net-title { font-size: 0.82rem; text-transform: uppercase; font-weight: 800; color: #166534; }
+    .net-val { font-size: 1.7rem; font-weight: 900; color: #15803d; }
+    .words-row { font-size: 0.82rem; color: #475569; font-style: italic; margin-bottom: 1.5rem; padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: 6px; border-left: 3px solid #15803d; }
+    .footer-row { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 1.25rem; border-top: 1px solid #e2e8f0; }
+    .disclaimer { font-size: 0.75rem; color: #94a3b8; max-width: 420px; line-height: 1.4; }
+    .signatory { text-align: center; }
+    .signatory-title { font-weight: 700; color: #0f172a; margin-top: 0.25rem; border-top: 1px solid #cbd5e1; display: inline-block; padding-top: 0.35rem; font-size: 0.82rem; }
+    .print-btn-bar { text-align: center; margin-bottom: 1.5rem; }
+    .btn-print { background: #dc2626; color: #ffffff; border: none; padding: 0.65rem 1.5rem; font-size: 0.9rem; font-weight: 700; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(220,38,38,0.3); }
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .print-btn-bar { display: none; }
+      .payslip-container { box-shadow: none; border: 1px solid #000; padding: 1.5rem; max-width: 100%; }
+    }
+  <\/style>
+<\/head>
+<body>
+  <div class="print-btn-bar">
+    <button class="btn-print" onclick="window.print()" style="display:inline-flex; align-items:center; gap:0.4rem;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print / Save as PDF<\/button>
+  <\/div>
+
+  <div class="payslip-container">
+    <div class="header-row">
+      <div style="display:flex; align-items:flex-start; gap:1rem;">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height:48px; max-width:160px; object-fit:contain;">
+        <div>
+          <h1 class="company-name">${escapeHtml(compName)}<\/h1>
+          <p style="margin:0.2rem 0 0 0; font-size:0.75rem; color:#475569;"><strong>GSTIN:</strong> ${escapeHtml(compGstin)}<\/p>
+          <p style="margin:0.15rem 0 0 0; font-size:0.75rem; color:#64748b;">${escapeHtml(compAddress)}<\/p>
+          <p style="margin:0.15rem 0 0 0; font-size:0.75rem; color:#64748b;">Email: ${escapeHtml(compEmail)} | Contact: ${escapeHtml(compPhone)}<\/p>
+        <\/div>
+      <\/div>
+      <div class="payslip-title-box">
+        <h2 class="payslip-title">Salary Slip<\/h2>
+        <div class="payslip-period">${escapeHtml(monthYear)}<\/div>
+        <div style="font-size:0.75rem; color:#64748b; font-family:monospace; margin-top:0.2rem;">Ref: ${escapeHtml(paySlipNo)}<\/div>
+      <\/div>
+    <\/div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Employee / Member Name<\/span>
+        <span class="info-val" style="font-size:0.95rem;">${escapeHtml(record.name)}<\/span>
+      <\/div>
+      <div class="info-item">
+        <span class="info-label">Designation / Role<\/span>
+        <span class="info-val">${escapeHtml(role)}<\/span>
+      <\/div>
+      <div class="info-item">
+        <span class="info-label">Employment Type<\/span>
+        <span class="info-val">${record.type === 'Employee' ? 'Full-Time Employee' : 'Freelancer / Retainer'}<\/span>
+      <\/div>
+      <div class="info-item">
+        <span class="info-label">Disbursement Date<\/span>
+        <span class="info-val">${escapeHtml(disburseDate)}<\/span>
+      <\/div>
+      <div class="info-item" style="grid-column: span 2;">
+        <span class="info-label">Payment Mode & Account / UPI<\/span>
+        <span class="info-val" style="font-family:monospace; font-size:0.82rem;">${escapeHtml(record.mode)} — ${escapeHtml(accountInfo)}<\/span>
+      <\/div>
+    <\/div>
+
+    <table class="salary-table">
+      <thead>
+        <tr>
+          <th style="width:50%;">Earnings Breakdown<\/th>
+          <th class="amount" style="width:20%;">Amount (₹)<\/th>
+          <th style="width:50%;">Deductions Breakdown<\/th>
+          <th class="amount" style="width:20%;">Amount (₹)<\/th>
+        <\/tr>
+      <\/thead>
+      <tbody>
+        <tr>
+          <td>Basic & Fixed Pay<\/td>
+          <td class="amount">₹${gross.toLocaleString('en-IN')}<\/td>
+          <td>Professional Tax / TDS<\/td>
+          <td class="amount">₹${deductions.toLocaleString('en-IN')}<\/td>
+        <\/tr>
+        <tr>
+          <td>Overtime / Incentives<\/td>
+          <td class="amount">${incentive > 0 ? '+₹' + incentive.toLocaleString('en-IN') : '₹0'}<\/td>
+          <td>Other Deductions / Advance<\/td>
+          <td class="amount">₹0<\/td>
+        <\/tr>
+        <tr style="background:#f8fafc; font-weight:700;">
+          <td>Total Gross Earnings<\/td>
+          <td class="amount">₹${(gross + incentive).toLocaleString('en-IN')}<\/td>
+          <td>Total Deductions<\/td>
+          <td class="amount">₹${deductions.toLocaleString('en-IN')}<\/td>
+        <\/tr>
+      <\/tbody>
+    <\/table>
+
+    <div class="net-box">
+      <div>
+        <div class="net-title">Net Disbursed Salary (${escapeHtml(record.status)})<\/div>
+        <div style="font-size:0.75rem; color:#166534; margin-top:0.2rem;">Paid via ${escapeHtml(record.mode)} on ${escapeHtml(disburseDate)}<\/div>
+      <\/div>
+      <div class="net-val">₹${net.toLocaleString('en-IN')}<\/div>
+    <\/div>
+
+    <div class="words-row">
+      <strong>Amount in words:<\/strong> ${escapeHtml(netInWords)}
+    <\/div>
+
+    <div class="footer-row">
+      <div class="disclaimer">
+        This is an official computer-generated salary slip and payment receipt issued by <strong>${escapeHtml(compName)}<\/strong>.<br>
+        All taxes and disbursements processed as per agency payroll standards.
+      <\/div>
+      <div class="signatory">
+        <!-- Official Company Seal & Signature Stamp -->
+        <img src="../assets/seel.png" onerror="this.onerror=null; this.src='assets/seel.png'; if(!this.complete) this.src='/assets/seel.png';" alt="Official Seal & Signature Stamp" style="max-height:75px; max-width:160px; object-fit:contain; display:block; margin:0 auto 0.25rem auto;">
+        <div class="signatory-title">Authorized Signatory<\/div>
+        <div style="font-size:0.72rem; color:#64748b; margin-top:0.15rem;">D-GROW Accounts & HR<\/div>
+      <\/div>
+    <\/div>
+  <\/div>
+<\/body>
+<\/html>`;
+
+      printWindow.document.open();
+      printWindow.document.write(payslipHtml);
+      printWindow.document.close();
+      showToast(`Generating Pay Slip for ${record.name}...`, 'success');
+    }
+  </script>
+</body>
+</html>

@@ -484,19 +484,28 @@ async function updateInvoice(req, res) {
       place_of_supply
     });
 
+    const paidSoFar = parseFloat(oldInv.paid_amount) || 0;
+    const newBalance = Math.max(0, totals.grand_total - paidSoFar);
+    let newStatus = status || oldInv.status;
+    if (paidSoFar >= totals.grand_total && totals.grand_total > 0) {
+      newStatus = 'PAID';
+    } else if (paidSoFar > 0 && newStatus !== 'CANCELLED') {
+      newStatus = 'PARTIALLY_PAID';
+    }
+
     await db.transaction(async (tx) => {
       await tx.execute(
         `UPDATE invoices SET
           invoice_type = ?, place_of_supply = ?, invoice_date = ?, due_date = ?, payment_terms_text = ?,
           subtotal = ?, discount = ?, taxable_amount = ?, cgst_rate = ?, cgst_amount = ?,
           sgst_rate = ?, sgst_amount = ?, igst_rate = ?, igst_amount = ?, round_off = ?,
-          grand_total = ?, amount_in_words = ?, status = ?, notes = ?
+          grand_total = ?, balance_amount = ?, amount_in_words = ?, status = ?, notes = ?
          WHERE id = ?`,
         [
           invoice_type, place_of_supply, invoice_date, due_date, payment_terms_text,
           totals.subtotal, totals.discount, totals.taxable_amount, totals.cgst_rate, totals.cgst_amount,
           totals.sgst_rate, totals.sgst_amount, totals.igst_rate, totals.igst_amount, totals.round_off,
-          totals.grand_total, totals.amount_in_words, status, notes, id
+          totals.grand_total, newBalance, totals.amount_in_words, newStatus, notes, id
         ]
       );
 

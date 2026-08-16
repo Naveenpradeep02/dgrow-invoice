@@ -29,6 +29,75 @@ function clearAuthSession() {
   localStorage.removeItem('dgrow_user');
 }
 
+// Active requests tracker for Global Top Progress Bar
+let activeApiRequests = 0;
+let topLoaderTimeout = null;
+
+function getTopProgressBar() {
+  let bar = document.getElementById('topProgressBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'topProgressBar';
+    document.body.appendChild(bar);
+  }
+  return bar;
+}
+
+function startTopLoader() {
+  activeApiRequests++;
+  const bar = getTopProgressBar();
+  if (activeApiRequests === 1) {
+    clearTimeout(topLoaderTimeout);
+    bar.style.opacity = '1';
+    bar.style.width = '30%';
+    topLoaderTimeout = setTimeout(() => {
+      if (activeApiRequests > 0) {
+        bar.style.width = '75%';
+      }
+    }, 200);
+  }
+}
+
+function endTopLoader() {
+  activeApiRequests = Math.max(0, activeApiRequests - 1);
+  if (activeApiRequests === 0) {
+    clearTimeout(topLoaderTimeout);
+    const bar = getTopProgressBar();
+    bar.style.width = '100%';
+    topLoaderTimeout = setTimeout(() => {
+      bar.style.opacity = '0';
+      setTimeout(() => {
+        if (activeApiRequests === 0) {
+          bar.style.width = '0%';
+        }
+      }, 300);
+    }, 200);
+  }
+}
+
+// Reusable Loading Animation Renderers
+function renderTableLoader(colspan = 7, text = 'Loading data...') {
+  return `
+    <tr>
+      <td colspan="${colspan}" style="padding: 0; border: none;">
+        <div class="data-loader-container">
+          <div class="dgrow-spinner"></div>
+          <div class="data-loader-text">${text}</div>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function renderDataLoader(text = 'Loading details...', size = '') {
+  return `
+    <div class="data-loader-container">
+      <div class="dgrow-spinner ${size}"></div>
+      <div class="data-loader-text">${text}</div>
+    </div>
+  `;
+}
+
 async function apiFetch(endpoint, options = {}) {
   const token = getToken();
   const headers = {
@@ -36,6 +105,8 @@ async function apiFetch(endpoint, options = {}) {
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...options.headers
   };
+
+  startTopLoader();
 
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -70,6 +141,8 @@ async function apiFetch(endpoint, options = {}) {
   } catch (err) {
     console.error(`[API Error] ${endpoint}:`, err);
     throw err;
+  } finally {
+    endTopLoader();
   }
 }
 
@@ -84,8 +157,12 @@ function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
+  const iconSvg = type === 'success' ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' :
+                  type === 'error' ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' :
+                  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+
   toast.innerHTML = `
-    <span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span>
+    <span style="display:flex; align-items:center;">${iconSvg}</span>
     <div>${message}</div>
   `;
 
@@ -107,8 +184,23 @@ function formatINR(amount) {
 function formatDate(dateStr) {
   if (!dateStr) return '-';
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 }
+
+function escapeAttr(str) {
+  return String(str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+

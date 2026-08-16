@@ -58,16 +58,29 @@ async function initDatabase() {
     // Add preset_services_json column if missing
     try {
       await connection.query("ALTER TABLE clients ADD COLUMN preset_services_json TEXT NULL");
-    } catch (e) {
-      // Column already exists
-    }
+    } catch (e) {}
+
+    // Add onboarding_date, payment_terms_type, payment_schedule_json columns if missing
+    try {
+      await connection.query("ALTER TABLE clients ADD COLUMN onboarding_date VARCHAR(50) NULL");
+    } catch (e) {}
+
+    try {
+      await connection.query("ALTER TABLE clients ADD COLUMN payment_terms_type VARCHAR(50) DEFAULT 'SINGLE'");
+    } catch (e) {}
+
+    try {
+      await connection.query("ALTER TABLE clients ADD COLUMN payment_schedule_json TEXT NULL");
+    } catch (e) {}
+
+    try {
+      await connection.query("ALTER TABLE clients MODIFY COLUMN status VARCHAR(50) DEFAULT 'ACTIVE'");
+    } catch (e) {}
 
     // Ensure invoice_type column accommodates GST, GST_CLIENT, and NON_GST
     try {
       await connection.query("ALTER TABLE invoices MODIFY COLUMN invoice_type VARCHAR(20) DEFAULT 'GST'");
-    } catch (e) {
-      // Error adjusting column
-    }
+    } catch (e) {}
 
     connection.release();
     console.log(`[DB] Successfully connected to MySQL database '${database}'`);

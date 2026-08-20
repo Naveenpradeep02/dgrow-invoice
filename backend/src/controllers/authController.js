@@ -5,7 +5,7 @@ const { logAudit } = require('../services/auditService');
 
 async function seedDefaultUsersIfEmpty() {
   try {
-    const adminPass = await bcrypt.hash('admin123', 10);
+    const defaultAdminPass = await bcrypt.hash('Srija@345', 10);
     const clientPass = await bcrypt.hash('client123', 10);
     const auditorPass = await bcrypt.hash('auditor123', 10);
 
@@ -19,10 +19,14 @@ async function seedDefaultUsersIfEmpty() {
     const clients = await db.query('SELECT id FROM clients LIMIT 1');
     const clientId = clients[0] ? clients[0].id : 1;
 
-    // Insert Admin
-    const existingAdmin = await db.query("SELECT id FROM users WHERE email IN ('info@dgrowmarketing.com', 'admin@dgrow.com')");
-    if (!existingAdmin[0]) {
-      const defaultAdminPass = await bcrypt.hash('Srija@345', 10);
+    // Automatically update/migrate Admin in production DB on server startup
+    const existingAdmin = await db.query("SELECT id FROM users WHERE id = 1 OR email = 'admin@dgrow.com' OR email = 'info@dgrowmarketing.com' ORDER BY id ASC LIMIT 1");
+    if (existingAdmin && existingAdmin.length > 0) {
+      await db.query(
+        "UPDATE users SET name = 'D-GROW Admin', email = 'info@dgrowmarketing.com', password_hash = ?, role_id = 1, status = 'ACTIVE' WHERE id = ?",
+        [defaultAdminPass, existingAdmin[0].id]
+      );
+    } else {
       await db.query(
         'INSERT INTO users (name, email, password_hash, role_id) VALUES (?, ?, ?, ?)',
         ['D-GROW Admin', 'info@dgrowmarketing.com', defaultAdminPass, 1]

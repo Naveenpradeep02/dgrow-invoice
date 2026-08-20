@@ -259,7 +259,7 @@ function generateInvoicePDF(res, invoiceData) {
     }
 
     // Amount Column
-    doc.font('Helvetica-Bold').fontSize(9).fillColor('#111827').text(`₹${formatMoney(parsed.amount)}`, 458, y + 8, { width: 102, align: 'right' });
+    doc.font('Helvetica-Bold').fontSize(9).fillColor('#111827').text(`Rs. ${formatMoney(parsed.amount)}`, 458, y + 8, { width: 102, align: 'right' });
 
     y += rowHeight;
   });
@@ -303,10 +303,10 @@ function generateInvoicePDF(res, invoiceData) {
 
         if (isPaid) {
           doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#16a34a')
-            .text(`✓ Due ${idx + 1} (${percent}% - ₹${formatMoney(stageAmt)}): PAID`, 40, sY);
+            .text(`✓ Due ${idx + 1} (${percent}% - Rs. ${formatMoney(stageAmt)}): PAID`, 40, sY);
         } else {
           doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#b91c1c')
-            .text(`• Due ${idx + 1} (${percent}% - ₹${formatMoney(stageAmt)}): PENDING (Due: ${dueFormatted})`, 40, sY);
+            .text(`• Due ${idx + 1} (${percent}% - Rs. ${formatMoney(stageAmt)}): PENDING (Due: ${dueFormatted})`, 40, sY);
         }
         sY += 12;
       });
@@ -314,7 +314,7 @@ function generateInvoicePDF(res, invoiceData) {
     } else {
       doc.rect(33, wordsColY, 280, 20).fill('#f0fdf4').strokeColor('#86efac').lineWidth(0.5).stroke();
       doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#15803d')
-        .text(`Partial Payment: Paid ₹${formatMoney(paidAmount)}  |  Pending Due: ₹${formatMoney(balanceAmount)}`, 38, wordsColY + 6);
+        .text(`Partial Payment: Paid Rs. ${formatMoney(paidAmount)}  |  Pending Due: Rs. ${formatMoney(balanceAmount)}`, 38, wordsColY + 6);
       wordsColY += 26;
     }
   }
@@ -324,30 +324,30 @@ function generateInvoicePDF(res, invoiceData) {
   doc.fontSize(8.5).font('Helvetica').fillColor('#374151');
 
   doc.text('Sub Total', 370, rightY);
-  doc.text(`₹${formatMoney(invoice.subtotal)}`, 450, rightY, { width: 105, align: 'right' });
+  doc.text(`Rs. ${formatMoney(invoice.subtotal)}`, 450, rightY, { width: 105, align: 'right' });
   rightY += 14;
 
   if (invoice.invoice_type === 'GST' || invoice.invoice_type === 'GST_CLIENT') {
     if (invoice.cgst_amount > 0) {
       doc.text(`CGST ${invoice.cgst_rate}%`, 370, rightY);
-      doc.text(`₹${formatMoney(invoice.cgst_amount)}`, 450, rightY, { width: 105, align: 'right' });
+      doc.text(`Rs. ${formatMoney(invoice.cgst_amount)}`, 450, rightY, { width: 105, align: 'right' });
       rightY += 14;
     }
     if (invoice.sgst_amount > 0) {
       doc.text(`SGST ${invoice.sgst_rate}%`, 370, rightY);
-      doc.text(`₹${formatMoney(invoice.sgst_amount)}`, 450, rightY, { width: 105, align: 'right' });
+      doc.text(`Rs. ${formatMoney(invoice.sgst_amount)}`, 450, rightY, { width: 105, align: 'right' });
       rightY += 14;
     }
     if (invoice.igst_amount > 0) {
       doc.text(`IGST ${invoice.igst_rate}%`, 370, rightY);
-      doc.text(`₹${formatMoney(invoice.igst_amount)}`, 450, rightY, { width: 105, align: 'right' });
+      doc.text(`Rs. ${formatMoney(invoice.igst_amount)}`, 450, rightY, { width: 105, align: 'right' });
       rightY += 14;
     }
   }
 
   if (invoice.round_off !== 0) {
     doc.text('Round Off', 370, rightY);
-    doc.text(`₹${formatMoney(invoice.round_off)}`, 450, rightY, { width: 105, align: 'right' });
+    doc.text(`Rs. ${formatMoney(invoice.round_off)}`, 450, rightY, { width: 105, align: 'right' });
     rightY += 14;
   }
 
@@ -356,7 +356,7 @@ function generateInvoicePDF(res, invoiceData) {
   rightY += 6;
   doc.fontSize(10.5).font('Helvetica-Bold').fillColor('#0f172a');
   doc.text('Total', 370, rightY);
-  doc.text(`₹${formatMoney(invoice.grand_total)}`, 450, rightY, { width: 105, align: 'right' });
+  doc.text(`Rs. ${formatMoney(invoice.grand_total)}`, 450, rightY, { width: 105, align: 'right' });
   rightY += 15;
   doc.moveTo(370, rightY).lineTo(555, rightY).strokeColor('#0f172a').lineWidth(1.5).stroke();
   rightY += 6;
@@ -365,12 +365,12 @@ function generateInvoicePDF(res, invoiceData) {
   if (isPartiallyPaid) {
     doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#16a34a');
     doc.text('Paid Amount', 370, rightY);
-    doc.text(`₹${formatMoney(paidAmount)}`, 450, rightY, { width: 105, align: 'right' });
+    doc.text(`Rs. ${formatMoney(paidAmount)}`, 450, rightY, { width: 105, align: 'right' });
     rightY += 14;
 
     doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#dc2626');
     doc.text('Pending Amount', 370, rightY);
-    doc.text(`₹${formatMoney(balanceAmount)}`, 450, rightY, { width: 105, align: 'right' });
+    doc.text(`Rs. ${formatMoney(balanceAmount)}`, 450, rightY, { width: 105, align: 'right' });
     rightY += 15;
     doc.moveTo(370, rightY).lineTo(555, rightY).strokeColor('#dc2626').lineWidth(1).stroke();
     rightY += 4;

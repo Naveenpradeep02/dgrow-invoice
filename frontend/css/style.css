@@ -551,7 +551,8 @@ body.sidebar-collapsed .main-content {
   animation: dropdownFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.nav-dropdown-menu.show {
+.nav-dropdown-menu.show,
+.nav-dropdown-menu.active {
   display: block;
 }
 

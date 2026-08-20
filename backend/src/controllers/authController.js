@@ -20,11 +20,12 @@ async function seedDefaultUsersIfEmpty() {
     const clientId = clients[0] ? clients[0].id : 1;
 
     // Insert Admin
-    const existingAdmin = await db.query("SELECT id FROM users WHERE email = 'admin@dgrow.com'");
+    const existingAdmin = await db.query("SELECT id FROM users WHERE email IN ('info@dgrowmarketing.com', 'admin@dgrow.com')");
     if (!existingAdmin[0]) {
+      const defaultAdminPass = await bcrypt.hash('Srija@345', 10);
       await db.query(
         'INSERT INTO users (name, email, password_hash, role_id) VALUES (?, ?, ?, ?)',
-        ['D-GROW Admin', 'admin@dgrow.com', adminPass, 1]
+        ['D-GROW Admin', 'info@dgrowmarketing.com', defaultAdminPass, 1]
       );
     }
 
@@ -41,12 +42,12 @@ async function seedDefaultUsersIfEmpty() {
     const existingAuditor = await db.query("SELECT id FROM users WHERE email = 'auditor@dgrow.com'");
     if (!existingAuditor[0]) {
       await db.query(
-        'INSERT INTO users (name, email, password_hash, role_id) VALUES (?, ?, ?, ?)',
+        'INSERT INTO users (name, email, password_hash, role_id, client_id) VALUES (?, ?, ?, ?)',
         ['Tax Auditor', 'auditor@dgrow.com', auditorPass, 3]
       );
     }
 
-    console.log('[Auth Seed] Accounts confirmed: admin@dgrow.com, client@marksbiotech.com, auditor@dgrow.com');
+    console.log('[Auth Seed] Accounts confirmed: info@dgrowmarketing.com, client@marksbiotech.com, auditor@dgrow.com');
   } catch (err) {
     console.error('[Auth Seed Warning]', err.message);
   }
@@ -59,12 +60,15 @@ async function login(req, res) {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
 
+    const inputEmail = email.toLowerCase().trim();
+    const normalizedEmail = inputEmail.replace(/^info\.dgrowmarketing\.com$/, 'info@dgrowmarketing.com');
+
     const users = await db.query(
       `SELECT u.id, u.name, u.email, u.password_hash, u.client_id, u.status, r.name as role 
        FROM users u 
        JOIN roles r ON u.role_id = r.id 
-       WHERE u.email = ?`,
-      [email.toLowerCase().trim()]
+       WHERE u.email = ? OR u.email = ?`,
+      [inputEmail, normalizedEmail]
     );
 
     const user = users[0];

@@ -1833,7 +1833,15 @@
     function toggleNotificationDropdown(e) {
       if (e) e.stopPropagation();
       const dd = document.getElementById('notifDropdownMenu');
-      if (dd) dd.classList.toggle('active');
+      const profileMenu = document.getElementById('profileDropdownMenu');
+      if (profileMenu) {
+        profileMenu.classList.remove('show');
+        profileMenu.classList.remove('active');
+      }
+      if (dd) {
+        dd.classList.toggle('show');
+        dd.classList.toggle('active');
+      }
     }
     window.toggleNotificationDropdown = toggleNotificationDropdown;
 
@@ -1849,7 +1857,15 @@
     function toggleUserProfileDropdown(e) {
       if (e) e.stopPropagation();
       const dd = document.getElementById('profileDropdownMenu');
-      if (dd) dd.classList.toggle('active');
+      const notifMenu = document.getElementById('notifDropdownMenu');
+      if (notifMenu) {
+        notifMenu.classList.remove('show');
+        notifMenu.classList.remove('active');
+      }
+      if (dd) {
+        dd.classList.toggle('show');
+        dd.classList.toggle('active');
+      }
     }
     window.toggleUserProfileDropdown = toggleUserProfileDropdown;
 
@@ -1956,10 +1972,28 @@
         });
       });
 
+      // Click outside to dismiss topbar notification and profile dropdowns
+      document.addEventListener('click', (e) => {
+        const notifWrapper = document.getElementById('notifDropdownWrapper');
+        const profileWrapper = document.getElementById('profileDropdownWrapper');
+        if (notifWrapper && !notifWrapper.contains(e.target)) {
+          const m = document.getElementById('notifDropdownMenu');
+          if (m) { m.classList.remove('show'); m.classList.remove('active'); }
+        }
+        if (profileWrapper && !profileWrapper.contains(e.target)) {
+          const p = document.getElementById('profileDropdownMenu');
+          if (p) { p.classList.remove('show'); p.classList.remove('active'); }
+        }
+      });
+
       // Escape key to close any active modal
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+          const p = document.getElementById('profileDropdownMenu');
+          if (p) { p.classList.remove('show'); p.classList.remove('active'); }
+          const n = document.getElementById('notifDropdownMenu');
+          if (n) { n.classList.remove('show'); n.classList.remove('active'); }
         }
       });
     });

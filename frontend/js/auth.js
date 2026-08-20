@@ -113,7 +113,7 @@ function populateTopNavbarUser(user) {
   if (!user) return;
   const name = user.name || 'D-GROW Admin';
   const role = user.role || 'ADMIN';
-  const email = user.email || 'admin@dgrow.com';
+  const email = user.email || 'info@dgrowmarketing.com';
 
   const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AD';
 

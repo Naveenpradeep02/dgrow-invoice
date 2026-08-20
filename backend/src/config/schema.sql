@@ -274,5 +274,43 @@ VALUES (
   'AAACM1234F'
 ) ON DUPLICATE KEY UPDATE company_name=VALUES(company_name);
 
+-- 15. Enquiries Table
+CREATE TABLE IF NOT EXISTS enquiries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(150),
+  mobile VARCHAR(30) NOT NULL,
+  business_name VARCHAR(255) NOT NULL,
+  source ENUM('WEBSITE', 'CALL', 'GMB', 'ADS', 'MARKETING_PERSON', 'OTHER') NOT NULL DEFAULT 'WEBSITE',
+  marketing_person VARCHAR(150) NULL,
+  services_interested TEXT NULL,
+  estimated_budget DECIMAL(12,2) DEFAULT 0.00,
+  status ENUM('NEW', 'IN_DISCUSSION', 'QUOTATION_SENT', 'NEGOTIATION', 'ONBOARDED', 'LOST') NOT NULL DEFAULT 'NEW',
+  notes TEXT NULL,
+  converted_client_id INT NULL,
+  onboarded_at DATETIME NULL,
+  created_by INT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (converted_client_id) REFERENCES clients(id) ON DELETE SET NULL,
+  INDEX idx_enq_status (status),
+  INDEX idx_enq_source (source),
+  INDEX idx_enq_date (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 16. Enquiry Timeline / Interaction History Table
+CREATE TABLE IF NOT EXISTS enquiry_timeline (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  enquiry_id INT NOT NULL,
+  event_type ENUM('NOTE', 'CALL', 'NEGOTIATION', 'STATUS_CHANGE', 'QUOTATION', 'ONBOARDED') NOT NULL DEFAULT 'NOTE',
+  title VARCHAR(255) NOT NULL,
+  details TEXT NULL,
+  created_by_name VARCHAR(150) DEFAULT 'Admin',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (enquiry_id) REFERENCES enquiries(id) ON DELETE CASCADE,
+  INDEX idx_timeline_enq (enquiry_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Seed Default Users (Passwords: admin123, client123, auditor123 - bcrypt hashed)
 -- admin123 -> $2a$10$v7g9d1eK/.4T5F49q1cO9eW7pY3vH7K9wM1N4O2P3Q4R5S6T7U8V. (or generated at app startup)
+

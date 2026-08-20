@@ -1,10 +1,11 @@
-// Invoice Builder, Tax Calculation, and View Controller
+﻿// Invoice Builder, Tax Calculation, and View Controller
 
 let currentItems = [];
 let availableClients = [];
 let availableServices = [];
 
 function parseItemDetails(item) {
+  if (!item) return { serviceName: 'Service', subDetails: [], hsnSac: '998311', amount: 0 };
   const rawDesc = (item.description || item.name || '').trim();
   const lines = rawDesc.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
   
@@ -19,17 +20,41 @@ function parseItemDetails(item) {
     serviceName = parts[0].trim();
     subDetails = parts.slice(1).join(':').split(/[,;]/).map(s => s.trim()).filter(s => s.length > 0);
   } else {
-    serviceName = rawDesc || 'Service';
+    serviceName = rawDesc || 'Digital Marketing';
     subDetails = [];
   }
 
-  const cleanSubDetails = subDetails.map(d => d.replace(/^[•\-\*\+]\s*/, '').trim()).filter(d => d.length > 0);
+  if (subDetails.length === 0 && item.subDetails) {
+    if (Array.isArray(item.subDetails)) {
+      subDetails = item.subDetails;
+    } else if (typeof item.subDetails === 'string') {
+      subDetails = item.subDetails.split(/[\n,;]/);
+    }
+  }
+
+  const cleanSubDetails = subDetails.map(d => String(d).replace(/^[•\-\*\+]\s*/, '').trim()).filter(d => d.length > 0);
+
+  const rawHsn = item.hsn_sac || item.hsnSac || item.hsn;
+  const validHsn = (rawHsn && String(rawHsn) !== '0' && String(rawHsn) !== 'null' && String(rawHsn) !== 'undefined') ? String(rawHsn).trim() : '998311';
+
+  let parsedAmount = 0;
+  if (item.taxable_amount !== undefined && item.taxable_amount !== null && !isNaN(item.taxable_amount)) {
+    parsedAmount = parseFloat(item.taxable_amount);
+  } else if (item.amount !== undefined && item.amount !== null && !isNaN(item.amount)) {
+    parsedAmount = parseFloat(item.amount);
+  } else if (item.total_amount !== undefined && item.total_amount !== null && !isNaN(item.total_amount)) {
+    parsedAmount = parseFloat(item.total_amount);
+  } else {
+    const qty = parseFloat(item.quantity || item.qty || 1);
+    const rate = parseFloat(item.rate || item.unit_price || 0);
+    parsedAmount = qty * rate;
+  }
 
   return {
-    serviceName,
+    serviceName: serviceName || 'Digital Marketing',
     subDetails: cleanSubDetails,
-    hsnSac: (item.hsn_sac && item.hsn_sac !== '0' && item.hsn_sac !== 'null') ? item.hsn_sac : '-',
-    amount: parseFloat(item.taxable_amount || item.total_amount || ((item.quantity || 1) * (item.rate || 0)) || 0)
+    hsnSac: validHsn,
+    amount: parsedAmount || 0
   };
 }
 function escapeAttr(str) {
@@ -633,29 +658,6 @@ async function handleCancelInvoice(id, invNum) {
   }
 }
 
-function parseItemDetails(item) {
-  const fullText = (item.description || item.name || '').trim();
-  const lines = fullText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-  
-  let serviceName = '';
-  let subDetails = [];
-
-  if (lines.length > 1) {
-    serviceName = lines[0];
-    subDetails = lines.slice(1);
-  } else if (fullText.includes(':')) {
-    const parts = fullText.split(':');
-    serviceName = parts[0].trim();
-    subDetails = parts.slice(1).join(':').split(/[,;]/).map(s => s.trim()).filter(s => s.length > 0);
-  } else {
-    serviceName = fullText || '';
-    subDetails = [];
-  }
-
-  const cleanSubDetails = subDetails.map(d => d.replace(/^[•\-\*\+]\s*/, '').trim()).filter(d => d.length > 0);
-  return { serviceName, subDetails: cleanSubDetails };
-}
-
 // --- CREATE / EDIT INVOICE PAGE ---
 async function initCreateInvoicePage() {
   try {
@@ -731,6 +733,16 @@ async function loadQuotationDataForInvoice(quoteId, clientName) {
         }
       }
 
+      // Check With vs Without GST from quote
+      const quoteGstRate = (quote.gstRate !== undefined) ? parseFloat(quote.gstRate) : 18;
+      const isWithGst = quoteGstRate > 0;
+
+      const invoiceTypeSelect = document.getElementById('invoice_type');
+      if (invoiceTypeSelect) {
+        invoiceTypeSelect.value = isWithGst ? 'GST' : 'NON_GST';
+        if (typeof toggleGstFields === 'function') toggleGstFields();
+      }
+
       // Populate items
       const itemsTableBody = document.getElementById('itemsTableBody');
       if (itemsTableBody && Array.isArray(quote.items) && quote.items.length > 0) {
@@ -746,17 +758,22 @@ async function loadQuotationDataForInvoice(quoteId, clientName) {
             hsn_sac: it.hsnSac || '998311',
             quantity: it.qty || 1,
             rate: it.rate || 0,
-            gst_rate: quote.gstRate || 18
+            gst_rate: isWithGst ? quoteGstRate : 0
           });
         });
       }
 
+      // Apply negotiation discount if present
+      if (quote.negotiationAmount > 0 && document.getElementById('discount_amount')) {
+        document.getElementById('discount_amount').value = quote.negotiationAmount;
+      }
+
       if (document.getElementById('notes')) {
-        document.getElementById('notes').value = `Generated from Quotation ${quote.quoteNumber}. ${quote.notes || ''}`;
+        document.getElementById('notes').value = `Generated from Quotation ${quote.quoteNumber} (${isWithGst ? 'With 18% GST' : 'Without GST'}). ${quote.notes || ''}`;
       }
 
       updateInvoiceCalculations();
-      showToast(`Prefilled from Quotation ${quote.quoteNumber}!`, 'success');
+      showToast(`Prefilled from Quotation ${quote.quoteNumber} (${isWithGst ? 'With GST' : 'Without GST'})!`, 'success');
     }
   } catch(e) {
     console.error('Error loading quotation for invoice:', e);
@@ -1252,13 +1269,26 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
 
   const client = invoice.client_snapshot || {};
   const isGST = (invoice.invoice_type === 'GST' || invoice.invoice_type === 'GST_CLIENT');
+  const grandTotal = parseFloat(invoice.grand_total || 0);
+  const paidAmount = parseFloat(invoice.paid_amount || 0);
+  const balanceAmount = parseFloat(invoice.balance_amount !== undefined ? invoice.balance_amount : Math.max(0, grandTotal - paidAmount));
+  const isPartiallyPaid = (invoice.status === 'PARTIALLY_PAID' || (paidAmount > 0 && paidAmount < grandTotal));
+
+  let schedule = null;
+  if (client.payment_schedule_json) {
+    try {
+      schedule = typeof client.payment_schedule_json === 'string' ? JSON.parse(client.payment_schedule_json) : client.payment_schedule_json;
+    } catch (e) {}
+  }
+
+  let cumulativeSchedule = 0;
 
   container.innerHTML = `
     <div class="invoice-sheet" id="printableInvoice">
       <!-- Agency Header -->
       <div class="inv-agency-header">
         <div class="inv-brand-left">
-          <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height: 48px; max-width: 200px; object-fit: contain;">
+          <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png'; if(!this.complete) this.src='/assets/Logosym.png';" alt="D-GROW Marketing Agency Logo" style="max-height: 48px; max-width: 200px; object-fit: contain;">
           <div class="inv-agency-details" style="margin-left: 10px;">
             <h2>${company.company_name || 'D-GROW MARKETING AGENCY'}</h2>
             <p><strong>GSTIN Number:</strong> ${company.gstin || '33OUUPS5195G1ZJ'}</p>
@@ -1267,8 +1297,9 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
             <p><strong>Email:</strong> ${company.email || ''}</p>
           </div>
         </div>
-        <div class="inv-title-right">
+        <div class="inv-title-right" style="text-align:right;">
           <h1>Invoice</h1>
+          ${isPartiallyPaid ? `<div class="inv-partial-badge">Partially Paid</div>` : ''}
         </div>
       </div>
 
@@ -1340,6 +1371,38 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
           <div class="inv-words-title">Total In Words</div>
           <div class="inv-words-text">${invoice.amount_in_words || 'Rupees Only.'}</div>
           ${invoice.notes ? `<div style="margin-top:8px; font-size:9.5px;"><strong>Notes:</strong> ${invoice.notes}</div>` : ''}
+
+          <!-- For partially paid invoices: render Payment Schedule / Dues Summary -->
+          ${isPartiallyPaid ? (
+            (schedule && Array.isArray(schedule.milestones) && schedule.milestones.length > 0) ? `
+              <div class="inv-split-breakdown-box">
+                <div style="font-size:8.5px; font-weight:700; color:#0f172a; margin-bottom:3px; display:flex; align-items:center; gap:4px;">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Payment Schedule & Dues Summary:
+                </div>
+                ${schedule.milestones.map((m, idx) => {
+                  const percent = parseFloat(m.percent || 0);
+                  const stageAmt = Math.round((percent / 100) * grandTotal);
+                  cumulativeSchedule += stageAmt;
+                  const isPaid = paidAmount >= cumulativeSchedule;
+                  const dueFormatted = addDaysToDate(invoice.invoice_date, m.due_days || 0);
+                  return `
+                    <div class="inv-split-due-item">
+                      <span><strong>Due ${idx + 1}</strong> (${percent}%): ${formatINR(stageAmt)}</span>
+                      ${isPaid 
+                        ? `<span style="color:#16a34a; font-weight:700; background:#dcfce7; padding:1px 5px; border-radius:3px; font-size:8px;">✓ PAID</span>`
+                        : `<span style="color:#b91c1c; font-weight:700; background:#fee2e2; padding:1px 5px; border-radius:3px; font-size:8px;">PENDING (Due: ${dueFormatted})</span>`
+                      }
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            ` : `
+              <div style="margin-top:8px; font-size:8.5px; color:#15803d; background:#f0fdf4; padding:5px 8px; border-radius:4px; border:1px solid #86efac;">
+                <strong>Partial Payment Recorded:</strong> Paid ${formatINR(paidAmount)} &bull; Remaining Due: <strong>${formatINR(balanceAmount)}</strong>
+              </div>
+            `
+          ) : ''}
         </div>
         <div>
           <table class="inv-totals-table">
@@ -1349,6 +1412,16 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
             ${isGST && invoice.igst_amount > 0 ? `<tr><td class="total-label">IGST ${invoice.igst_rate}%</td><td class="total-amount">${formatINR(invoice.igst_amount)}</td></tr>` : ''}
             ${invoice.round_off !== 0 ? `<tr><td class="total-label">Round Off</td><td class="total-amount">${formatINR(invoice.round_off)}</td></tr>` : ''}
             <tr class="inv-grand-total-row"><td>Total</td><td style="text-align:right;">${formatINR(invoice.grand_total)}</td></tr>
+            ${isPartiallyPaid ? `
+              <tr class="inv-paid-row">
+                <td class="total-label">Paid Amount</td>
+                <td class="total-amount">${formatINR(paidAmount)}</td>
+              </tr>
+              <tr class="inv-pending-row">
+                <td class="total-label">Pending Amount</td>
+                <td class="total-amount">${formatINR(balanceAmount)}</td>
+              </tr>
+            ` : ''}
           </table>
         </div>
       </div>

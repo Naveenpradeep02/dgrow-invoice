@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 function parseItemDetails(item) {
+  if (!item) return { serviceName: 'Digital Marketing', subDetails: [], hsnSac: '998311', amount: 0 };
   const rawDesc = (item.description || item.name || '').trim();
   const lines = rawDesc.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
   
@@ -17,17 +18,41 @@ function parseItemDetails(item) {
     serviceName = parts[0].trim();
     subDetails = parts.slice(1).join(':').split(/[,;]/).map(s => s.trim()).filter(s => s.length > 0);
   } else {
-    serviceName = rawDesc || 'Service';
+    serviceName = rawDesc || 'Digital Marketing';
     subDetails = [];
   }
 
-  const cleanSubDetails = subDetails.map(d => d.replace(/^[•\-\*\+]\s*/, '').trim()).filter(d => d.length > 0);
+  if (subDetails.length === 0 && item.subDetails) {
+    if (Array.isArray(item.subDetails)) {
+      subDetails = item.subDetails;
+    } else if (typeof item.subDetails === 'string') {
+      subDetails = item.subDetails.split(/[\n,;]/);
+    }
+  }
+
+  const cleanSubDetails = subDetails.map(d => String(d).replace(/^[•\-\*\+]\s*/, '').trim()).filter(d => d.length > 0);
+
+  const rawHsn = item.hsn_sac || item.hsnSac || item.hsn;
+  const validHsn = (rawHsn && String(rawHsn) !== '0' && String(rawHsn) !== 'null' && String(rawHsn) !== 'undefined') ? String(rawHsn).trim() : '998311';
+
+  let parsedAmount = 0;
+  if (item.taxable_amount !== undefined && item.taxable_amount !== null && !isNaN(item.taxable_amount)) {
+    parsedAmount = parseFloat(item.taxable_amount);
+  } else if (item.amount !== undefined && item.amount !== null && !isNaN(item.amount)) {
+    parsedAmount = parseFloat(item.amount);
+  } else if (item.total_amount !== undefined && item.total_amount !== null && !isNaN(item.total_amount)) {
+    parsedAmount = parseFloat(item.total_amount);
+  } else {
+    const qty = parseFloat(item.quantity || item.qty || 1);
+    const rate = parseFloat(item.rate || item.unit_price || 0);
+    parsedAmount = qty * rate;
+  }
 
   return {
-    serviceName,
+    serviceName: serviceName || 'Digital Marketing',
     subDetails: cleanSubDetails,
-    hsnSac: (item.hsn_sac && item.hsn_sac !== '0' && item.hsn_sac !== 'null') ? item.hsn_sac : '-',
-    amount: parseFloat(item.taxable_amount || item.total_amount || ((item.quantity || 1) * (item.rate || 0)) || 0)
+    hsnSac: validHsn,
+    amount: parsedAmount || 0
   };
 }
 
@@ -71,8 +96,19 @@ function formatAddress3Lines(client = {}) {
   return [line1, line2, line3];
 }
 
+function addDaysToDate(dateStr, days = 0) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '-';
+  d.setDate(d.getDate() + parseInt(days || 0, 10));
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 function generateInvoicePDF(res, invoiceData) {
-  const { invoice, items = [], company = {}, terms = {} } = invoiceData;
+  const { invoice, items = [], payments = [], company = {}, terms = {} } = invoiceData;
 
   const doc = new PDFDocument({ margin: 30, size: 'A4' });
 
@@ -82,6 +118,12 @@ function generateInvoicePDF(res, invoiceData) {
   const primaryColor = '#111827';
   const lightBg = '#F9FAFB';
   const borderColor = '#E5E7EB';
+
+  const client = invoice.client_snapshot || {};
+  const grandTotal = parseFloat(invoice.grand_total || 0);
+  const paidAmount = parseFloat(invoice.paid_amount || 0);
+  const balanceAmount = parseFloat(invoice.balance_amount !== undefined ? invoice.balance_amount : Math.max(0, grandTotal - paidAmount));
+  const isPartiallyPaid = (invoice.status === 'PARTIALLY_PAID' || (paidAmount > 0 && paidAmount < grandTotal));
 
   // --- HEADER SECTION WITH LOGO ---
   const logoPath = path.join(__dirname, '../../../frontend/assets/Logo.png');
@@ -105,7 +147,10 @@ function generateInvoicePDF(res, invoiceData) {
   doc.text(`Email: ${company.email || 'dgrowmarketing@gmail.com'}`, startX, 88);
 
   // Large INVOICE Title on right
-  doc.fillColor('#0f172a').fontSize(24).font('Helvetica-Bold').text('INVOICE', 400, 32, { align: 'right' });
+  doc.fillColor('#0f172a').fontSize(24).font('Helvetica-Bold').text('INVOICE', 350, 30, { align: 'right', width: 215 });
+  if (isPartiallyPaid) {
+    doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#dc2626').text('PARTIALLY PAID', 350, 58, { align: 'right', width: 215 });
+  }
 
   // Divider Line
   doc.moveTo(30, 110).lineTo(565, 110).strokeColor(borderColor).lineWidth(1).stroke();
@@ -136,8 +181,6 @@ function generateInvoicePDF(res, invoiceData) {
   y += 62;
   doc.rect(30, y, 535, 18).fill('#f1f5f9').strokeColor('#d1d5db').lineWidth(0.5).stroke();
   doc.fillColor('#0f172a').fontSize(9).font('Helvetica-Bold').text('Billed To', 38, y + 4);
-
-  const client = invoice.client_snapshot || {};
   
   let leftY = y + 24;
   let boxY = y + 18;
@@ -226,15 +269,57 @@ function generateInvoicePDF(res, invoiceData) {
   const totalsBoxY = y;
 
   // Amount In Words (Left Column)
-  doc.fontSize(8).font('Helvetica-Bold').fillColor('#374151').text('Total In Words', 35, y);
-  doc.fontSize(8).font('Helvetica-BoldOblique').fillColor('#1F2937').text(invoice.amount_in_words || 'Rupees Eleven Thousand Three Hundred Only.', 35, y + 12, { width: 280 });
+  let wordsColY = totalsBoxY;
+  doc.fontSize(8).font('Helvetica-Bold').fillColor('#374151').text('Total In Words', 35, wordsColY);
+  doc.fontSize(8).font('Helvetica-BoldOblique').fillColor('#1F2937').text(invoice.amount_in_words || 'Rupees Only.', 35, wordsColY + 12, { width: 280 });
+  wordsColY += 30;
 
   if (invoice.notes) {
-    doc.fontSize(8).font('Helvetica-Bold').fillColor('#374151').text('Notes:', 35, y + 42);
-    doc.fontSize(8).font('Helvetica').fillColor('#4B5563').text(invoice.notes, 35, y + 54, { width: 280 });
+    doc.fontSize(8).font('Helvetica-Bold').fillColor('#374151').text('Notes:', 35, wordsColY);
+    doc.fontSize(8).font('Helvetica').fillColor('#4B5563').text(invoice.notes, 35, wordsColY + 10, { width: 280 });
+    wordsColY += 22;
   }
 
-  // Subtotal & Taxes Breakdown
+  // For partially paid invoices: render Payment Dues Summary on left
+  if (isPartiallyPaid) {
+    let schedule = null;
+    if (client.payment_schedule_json) {
+      try {
+        schedule = typeof client.payment_schedule_json === 'string' ? JSON.parse(client.payment_schedule_json) : client.payment_schedule_json;
+      } catch (e) {}
+    }
+
+    if (schedule && Array.isArray(schedule.milestones) && schedule.milestones.length > 0) {
+      doc.rect(33, wordsColY, 280, 16 + schedule.milestones.length * 13).fill('#f8fafc').strokeColor('#cbd5e1').lineWidth(0.5).stroke();
+      doc.fontSize(8).font('Helvetica-Bold').fillColor('#0f172a').text('Payment Schedule & Dues Summary:', 38, wordsColY + 4);
+      let sY = wordsColY + 16;
+      let cumulative = 0;
+      schedule.milestones.forEach((m, idx) => {
+        const percent = parseFloat(m.percent || 0);
+        const stageAmt = Math.round((percent / 100) * grandTotal);
+        cumulative += stageAmt;
+        const isPaid = paidAmount >= cumulative;
+        const dueFormatted = addDaysToDate(invoice.invoice_date, m.due_days || 0);
+
+        if (isPaid) {
+          doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#16a34a')
+            .text(`✓ Due ${idx + 1} (${percent}% - ₹${formatMoney(stageAmt)}): PAID`, 40, sY);
+        } else {
+          doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#b91c1c')
+            .text(`• Due ${idx + 1} (${percent}% - ₹${formatMoney(stageAmt)}): PENDING (Due: ${dueFormatted})`, 40, sY);
+        }
+        sY += 12;
+      });
+      wordsColY = sY + 6;
+    } else {
+      doc.rect(33, wordsColY, 280, 20).fill('#f0fdf4').strokeColor('#86efac').lineWidth(0.5).stroke();
+      doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#15803d')
+        .text(`Partial Payment: Paid ₹${formatMoney(paidAmount)}  |  Pending Due: ₹${formatMoney(balanceAmount)}`, 38, wordsColY + 6);
+      wordsColY += 26;
+    }
+  }
+
+  // Subtotal & Taxes Breakdown (Right Column)
   rightY = totalsBoxY;
   doc.fontSize(8.5).font('Helvetica').fillColor('#374151');
 
@@ -269,11 +354,27 @@ function generateInvoicePDF(res, invoiceData) {
   // Grand Total Lines (double underline styling)
   doc.moveTo(370, rightY).lineTo(555, rightY).strokeColor('#0f172a').lineWidth(1).stroke();
   rightY += 6;
-  doc.fontSize(11).font('Helvetica-Bold').fillColor('#0f172a');
+  doc.fontSize(10.5).font('Helvetica-Bold').fillColor('#0f172a');
   doc.text('Total', 370, rightY);
   doc.text(`₹${formatMoney(invoice.grand_total)}`, 450, rightY, { width: 105, align: 'right' });
-  rightY += 16;
+  rightY += 15;
   doc.moveTo(370, rightY).lineTo(555, rightY).strokeColor('#0f172a').lineWidth(1.5).stroke();
+  rightY += 6;
+
+  // Render Paid Amount and Pending Amount ONLY if invoice is partially paid
+  if (isPartiallyPaid) {
+    doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#16a34a');
+    doc.text('Paid Amount', 370, rightY);
+    doc.text(`₹${formatMoney(paidAmount)}`, 450, rightY, { width: 105, align: 'right' });
+    rightY += 14;
+
+    doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#dc2626');
+    doc.text('Pending Amount', 370, rightY);
+    doc.text(`₹${formatMoney(balanceAmount)}`, 450, rightY, { width: 105, align: 'right' });
+    rightY += 15;
+    doc.moveTo(370, rightY).lineTo(555, rightY).strokeColor('#dc2626').lineWidth(1).stroke();
+    rightY += 4;
+  }
 
   // --- TERMS & PAYMENT DETAILS / SIGNATURE ---
   y = Math.max(rightY + 25, totalsBoxY + 80);

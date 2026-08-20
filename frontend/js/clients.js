@@ -61,8 +61,10 @@ async function loadClients() {
       return `
         <tr>
           <td>
-            <strong>${c.company_name}</strong>
-            ${c.contact_person ? `<div style="font-size:0.8rem; color:var(--text-muted);">${c.contact_person}</div>` : ''}
+            <a href="client-view.html?id=${c.id}" style="color:var(--text-main); font-weight:700; text-decoration:none; font-size:0.92rem;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-main)'">
+              ${c.company_name}
+            </a>
+            ${c.contact_person ? `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${c.contact_person}</div>` : ''}
           </td>
           <td>${c.mobile}<br><span style="font-size:0.75rem; color:var(--text-muted);">${c.email}</span></td>
           <td>${c.onboarding_date ? formatDate(c.onboarding_date) : '-'}</td>
@@ -70,7 +72,16 @@ async function loadClients() {
           <td>${termsLabel}</td>
           <td>${c.gstin ? `<code>${c.gstin}</code>` : '<span class="text-muted">Unregistered</span>'}</td>
           <td>
-            <a href="client-edit.html?id=${c.id}" class="btn btn-secondary btn-sm">Edit</a>
+            <div style="display:flex; gap:0.35rem; align-items:center;">
+              <a href="client-view.html?id=${c.id}" class="btn btn-secondary btn-sm" title="View 360° History & Financials" style="padding:0.3rem 0.55rem; display:inline-flex; align-items:center; gap:0.25rem; font-weight:700; text-decoration:none; color:var(--primary); border-color:#fecdd3; background:#fff1f2;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View
+              </a>
+              <a href="client-edit.html?id=${c.id}" class="btn btn-secondary btn-sm" title="Edit Client Details" style="padding:0.3rem 0.5rem; display:inline-flex; align-items:center; gap:0.25rem;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit
+              </a>
+            </div>
           </td>
         </tr>
       `;
@@ -388,10 +399,10 @@ function addPresetSubDetailLine(btn, text = '') {
 }
 
 function addClientPresetRow(data = null) {
-  const container = document.getElementById('clientPresetServicesBody');
+  const container = document.getElementById('clientPresetRows');
   if (!container) return;
 
-  const parsed = parseDescriptionWithSubDetails(data?.description || '');
+  const parsed = parsePresetDetails(data?.description || '');
   const serviceName = parsed.serviceName || (data?.name || '');
   const subDetails = parsed.subDetails || [];
 
@@ -447,7 +458,7 @@ function getClientPresetServicesArray() {
   const rows = document.querySelectorAll('#clientPresetRows tr');
   const items = [];
   rows.forEach(tr => {
-    const serviceName = tr.querySelector('.preset-service-name')?.value.trim() || '';
+    const serviceName = tr.querySelector('.preset-name')?.value.trim() || '';
     const subDetailInputs = tr.querySelectorAll('.preset-subdetail-input');
     const subDetails = Array.from(subDetailInputs)
       .map(inp => inp.value.trim())

@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   checkAuthGuard();
+  initSidebarCollapse();
 });
 
 function getAppPathPrefix() {
@@ -302,6 +303,85 @@ function handleGlobalSearch(e) {
   }
 }
 
+// Sidebar Collapse / Expand Functionality
+function toggleSidebarCollapse() {
+  const container = document.querySelector('.app-container') || document.body;
+  const isCollapsed = container.classList.toggle('sidebar-collapsed');
+  if (container !== document.body) {
+    document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+  }
+  try {
+    localStorage.setItem('dgrow_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+  } catch(e) {}
+  updateSidebarToggleBtn();
+}
+
+function initSidebarCollapse() {
+  const container = document.querySelector('.app-container') || document.body;
+  let isCollapsed = false;
+  try {
+    isCollapsed = localStorage.getItem('dgrow_sidebar_collapsed') === 'true';
+  } catch(e) {}
+
+  if (isCollapsed) {
+    container.classList.add('sidebar-collapsed');
+    document.body.classList.add('sidebar-collapsed');
+  } else {
+    container.classList.remove('sidebar-collapsed');
+    document.body.classList.remove('sidebar-collapsed');
+  }
+
+  // Ensure mini logo icon is present in brand header
+  const brandHeader = document.querySelector('.brand-header');
+  if (brandHeader && !brandHeader.querySelector('.brand-mini-icon')) {
+    const miniSpan = document.createElement('span');
+    miniSpan.className = 'brand-mini-icon';
+    miniSpan.textContent = 'DG';
+    brandHeader.appendChild(miniSpan);
+  }
+
+  // Ensure sidebar toggle button exists in navbar
+  const navbarLeft = document.querySelector('.top-navbar-left');
+  if (navbarLeft && !document.getElementById('sidebarToggleBtn')) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.className = 'sidebar-toggle-btn';
+    toggleBtn.id = 'sidebarToggleBtn';
+    toggleBtn.title = isCollapsed ? 'Expand Sidebar (Ctrl+B)' : 'Collapse Sidebar (Ctrl+B)';
+    toggleBtn.onclick = toggleSidebarCollapse;
+    toggleBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    `;
+    navbarLeft.insertBefore(toggleBtn, navbarLeft.firstChild);
+  }
+
+  updateSidebarToggleBtn();
+}
+
+function updateSidebarToggleBtn() {
+  const btn = document.getElementById('sidebarToggleBtn');
+  if (!btn) return;
+  const container = document.querySelector('.app-container') || document.body;
+  const isCollapsed = container.classList.contains('sidebar-collapsed');
+  btn.title = isCollapsed ? 'Expand Sidebar (Ctrl+B)' : 'Collapse Sidebar (Ctrl+B)';
+}
+
+// Global hotkey Ctrl+B to toggle sidebar
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+    // Avoid triggering when focused on input
+    const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+    if (tag !== 'input' && tag !== 'textarea') {
+      e.preventDefault();
+      toggleSidebarCollapse();
+    }
+  }
+});
+
 // Close dropdowns on outside click
 document.addEventListener('click', (e) => {
   const notifWrapper = document.getElementById('notifDropdownWrapper');
@@ -329,3 +409,5 @@ window.handleLogout = handleLogout;
 window.loadTopbarRealNotifications = loadTopbarRealNotifications;
 window.getStoredReadNotifIds = getStoredReadNotifIds;
 window.addStoredReadNotifIds = addStoredReadNotifIds;
+window.toggleSidebarCollapse = toggleSidebarCollapse;
+window.initSidebarCollapse = initSidebarCollapse;

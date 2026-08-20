@@ -1,0 +1,606 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enquiries & Leads Master - D-GROW Invoice System</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="../css/invoice.css">
+  <style>
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-md, 8px);
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary, #e11d48);
+    }
+    .stat-card.stat-green::after { background: #16a34a; }
+    .stat-card.stat-amber::after { background: #d97706; }
+    .stat-card.stat-blue::after { background: #0284c7; }
+    .stat-card.stat-purple::after { background: #7c3aed; }
+
+    .stat-card .stat-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-card .stat-value {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: var(--text-main, #0f172a);
+      line-height: 1.2;
+    }
+    .stat-card .stat-meta {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    /* Period Filter Pills */
+    .period-filter-group {
+      display: inline-flex;
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 3px;
+      gap: 2px;
+      align-items: center;
+    }
+    .period-btn {
+      border: none;
+      background: transparent;
+      padding: 0.35rem 0.85rem;
+      border-radius: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .period-btn.active {
+      background: #ffffff;
+      color: var(--primary, #e11d48);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Source Metrics Bars */
+    .source-metrics-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-md, 8px);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .source-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.75rem;
+    }
+    .source-metric-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.65rem 0.85rem;
+    }
+    .source-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+    .source-title {
+      font-size: 0.82rem;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .source-stats {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .source-progress-track {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .source-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #e11d48, #f43f5e);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    /* Timeline Styling */
+    .timeline-feed {
+      position: relative;
+      padding-left: 28px;
+      margin-top: 0.85rem;
+    }
+    .timeline-feed::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: #e2e8f0;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -28px;
+      top: 2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .timeline-body {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.65rem 0.9rem;
+    }
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+        <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png';" alt="DG" class="brand-mini-icon" style="display:none; width:36px; height:36px; object-fit:contain; border-radius:8px; background:none; box-shadow:none;">
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item active"><a href="enquiries.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Enquiries</a></li>
+        <li class="nav-item"><a href="meetings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg> Meetings</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
+        <li class="nav-item"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item"><a href="salary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Salary</a></li>
+        <li class="nav-item"><a href="miscellaneous.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Miscellaneous</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search enquiries, clients, quotes..." id="globalQuickSearch" onkeydown="handleGlobalSearch(event)">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell with Dropdown -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)" title="Notifications">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount">3</span>
+            </button>
+            <div class="nav-dropdown-menu notif-dropdown-menu" id="notifDropdownMenu">
+              <div class="notif-header">
+                <h4 style="margin:0; font-size:0.92rem; font-weight:700; color:var(--text-main);">Notifications</h4>
+                <button type="button" class="notif-clear-btn" onclick="clearAllNotifications()">Mark all read</button>
+              </div>
+              <div class="notif-list" id="topbarNotifList">
+                <div class="notif-item unread">
+                  <div class="notif-icon invoice">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                  </div>
+                  <div class="notif-body">
+                    <p class="notif-title">New Inbound Enquiry</p>
+                    <span class="notif-desc">Sundaram Silk Sarees enquired via Phone Call</span>
+                    <span class="notif-time">Just now</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile Dropdown -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" id="userProfileToggleBtn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle">
+                <span id="topbarUserInitials">AD</span>
+              </div>
+              <div class="topbar-user-text">
+                <span class="user-name" id="topbarUserName">D-GROW Admin</span>
+                <span class="user-role-badge" id="topbarUserRole">ADMIN</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="nav-dropdown-menu profile-dropdown-menu" id="profileDropdownMenu">
+              <div class="profile-dropdown-header">
+                <div class="profile-avatar-large"><span id="dropdownAvatarInitials">AD</span></div>
+                <div class="profile-header-info">
+                  <strong id="dropdownUserName">D-GROW Admin</strong>
+                  <span id="dropdownUserEmail">admin@dgrow.com</span>
+                  <span class="badge badge-paid" style="margin-top:0.25rem; font-size:0.7rem; align-self:flex-start;" id="dropdownUserRole">ADMIN ROLE</span>
+                </div>
+              </div>
+              <div class="profile-dropdown-footer">
+                <button type="button" class="profile-logout-btn" onclick="handleLogout()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Sign Out / Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Header & Period Selector -->
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Enquiries & Lead Management</h1>
+          <p>Track incoming leads, negotiation logs, quotation proposals & onboarding conversion rates.</p>
+        </div>
+        <div class="page-actions" style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+          <!-- Period Filter Toggle -->
+          <div class="period-filter-group">
+            <button type="button" class="period-btn" data-period="weekly" onclick="setPeriodFilter('weekly')">Weekly</button>
+            <button type="button" class="period-btn active" data-period="monthly" onclick="setPeriodFilter('monthly')">Monthly</button>
+            <button type="button" class="period-btn" data-period="custom" onclick="setPeriodFilter('custom')">Custom Range</button>
+          </div>
+
+          <!-- Custom Date Range Inputs (hidden by default) -->
+          <div id="customRangeInputs" style="display:none; align-items:center; gap:0.4rem;">
+            <input type="date" id="filterCustomFrom" class="form-input" style="padding:0.35rem 0.5rem; font-size:0.8rem;" onchange="applyCustomDateFilter()">
+            <span style="font-size:0.8rem; color:#64748b;">to</span>
+            <input type="date" id="filterCustomTo" class="form-input" style="padding:0.35rem 0.5rem; font-size:0.8rem;" onchange="applyCustomDateFilter()">
+          </div>
+
+          <button type="button" class="btn btn-primary" onclick="openNewEnquiryModal()" style="display:inline-flex; align-items:center; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            + Add New Enquiry
+          </button>
+        </div>
+      </div>
+
+      <!-- Lead Conversion KPI Metric Cards -->
+      <div class="metrics-grid">
+        <div class="stat-card">
+          <div class="stat-title">Total Entry Leads</div>
+          <div class="stat-value" id="metricTotalLeads">0</div>
+          <div class="stat-meta">Inbound inquiries in period</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-title">Converted & Onboarded</div>
+          <div class="stat-value" id="metricOnboarded" style="color:#15803d;">0</div>
+          <div class="stat-meta">Added to active Client Master</div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-title">Lead Conversion Rate</div>
+          <div class="stat-value" id="metricConversionRate" style="color:#0284c7;">0%</div>
+          <div class="stat-meta">Leads won to onboarded</div>
+        </div>
+        <div class="stat-card stat-amber">
+          <div class="stat-title">In Discussion / Negotiation</div>
+          <div class="stat-value" id="metricNegotiation" style="color:#d97706;">0</div>
+          <div class="stat-meta">Active prospect deals</div>
+        </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-title">Pipeline Deal Value</div>
+          <div class="stat-value" id="metricPipelineValue" style="color:#7c3aed;">₹0</div>
+          <div class="stat-meta">Total estimated budget</div>
+        </div>
+      </div>
+
+      <!-- Lead Source Breakdown Progress Card -->
+      <div class="source-metrics-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h4 style="margin:0; font-size:0.92rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.4rem;">
+            <span>📊</span> Lead Source Channels & Conversion Performance
+          </h4>
+          <span style="font-size:0.75rem; color:#64748b;">Source performance breakdown for selected timeframe</span>
+        </div>
+        <div class="source-metrics-grid" id="sourceMetricsContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Enquiries Filter & Controls Card -->
+      <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:260px;">
+            <input type="text" id="filterEnquirySearch" class="form-input" placeholder="Search by name, company, mobile, email, or service..." oninput="loadEnquiries()" style="width:100%;">
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <!-- Source Filter -->
+            <select id="filterEnquirySource" class="form-select" onchange="loadEnquiries()" style="font-size:0.82rem; font-weight:600;">
+              <option value="ALL">All Sources</option>
+              <option value="WEBSITE">🌐 Websites</option>
+              <option value="CALL">📞 Phone Call</option>
+              <option value="GMB">📍 Google My Business</option>
+              <option value="ADS">📢 Paid Ads</option>
+              <option value="MARKETING_PERSON">👤 Marketing Person</option>
+              <option value="OTHER">⚡ Other</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select id="filterEnquiryStatus" class="form-select" onchange="loadEnquiries()" style="font-size:0.82rem; font-weight:600;">
+              <option value="ALL">All Statuses</option>
+              <option value="NEW">New Lead</option>
+              <option value="IN_DISCUSSION">In Discussion</option>
+              <option value="QUOTATION_SENT">Quotation Sent</option>
+              <option value="NEGOTIATION">In Negotiation</option>
+              <option value="ONBOARDED">Onboarded / Won</option>
+              <option value="LOST">Lost</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enquiries Master Table Card -->
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-responsive">
+          <table class="table" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569; width:90px;">DATE</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">CONTACT PERSON</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">BUSINESS / COMPANY</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">LEAD SOURCE</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">BUDGET</th>
+                <th style="padding:0.75rem 1rem; text-align:center; font-size:0.75rem; font-weight:700; color:#475569;">STATUS</th>
+                <th style="padding:0.75rem 1rem; text-align:right; font-size:0.75rem; font-weight:700; color:#475569;">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="enquiriesTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ADD NEW ENQUIRY MODAL -->
+  <div class="modal-overlay" id="newEnquiryModal">
+    <div class="modal-box" style="max-width: 580px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div style="width:32px; height:32px; border-radius:6px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:var(--text-main);">Add New Client Enquiry</h3>
+            <p style="margin:0; font-size:0.75rem; color:#64748b;">Record new lead & prospect details</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick="closeNewEnquiryModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="newEnquiryForm" onsubmit="submitNewEnquiry(event)">
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Contact Person Name *</label>
+            <input type="text" id="newEnqName" class="form-input" placeholder="e.g. Rajesh Kumar" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile Number *</label>
+            <input type="text" id="newEnqMobile" class="form-input" placeholder="e.g. +91 9840012345" required>
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Business / Company Name *</label>
+            <input type="text" id="newEnqBusiness" class="form-input" placeholder="e.g. Apex Tech Labs" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address (Optional)</label>
+            <input type="email" id="newEnqEmail" class="form-input" placeholder="e.g. contact@business.com">
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Leading From (Lead Source) *</label>
+            <select id="newEnqSource" class="form-select" onchange="toggleMarketingPersonField('newEnqSource', 'newEnqRepContainer')" required>
+              <option value="WEBSITE">Website Contact Form / Landing Page</option>
+              <option value="CALL">Inbound Phone Call</option>
+              <option value="GMB">Google My Business (GMB)</option>
+              <option value="ADS">Paid Ads (Meta / Google)</option>
+              <option value="MARKETING_PERSON">By Marketing Person / Field Rep</option>
+              <option value="OTHER">Other Direct Referral</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Initial Lead Status</label>
+            <select id="newEnqStatus" class="form-select">
+              <option value="NEW">New Lead</option>
+              <option value="IN_DISCUSSION">In Discussion</option>
+              <option value="QUOTATION_SENT">Quotation Sent</option>
+              <option value="NEGOTIATION">In Negotiation</option>
+              <option value="ONBOARDED">Onboarded / Won</option>
+              <option value="LOST">Lost</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Marketing Person Field (Shown if source is Marketing Person) -->
+        <div class="form-group" id="newEnqRepContainer" style="display:none; margin-bottom:0.75rem; background:#faf5ff; padding:0.6rem 0.8rem; border-radius:6px; border:1px solid #e9d5ff;">
+          <label class="form-label" style="color:#6b21a8; font-weight:700;">Marketing Person / Executive Name *</label>
+          <input type="text" id="newEnqMarketingPerson" class="form-input" placeholder="e.g. Vimal (Field Executive) or Rahul">
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1.5fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Services Interested / Requirements</label>
+            <input type="text" id="newEnqServices" class="form-input" placeholder="e.g. SEO, Meta Ads, WhatsApp Marketing">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimated Budget (₹)</label>
+            <input type="number" id="newEnqBudget" class="form-input" placeholder="e.g. 35000" min="0">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem;">
+          <label class="form-label">Discussion Notes / Client Context</label>
+          <textarea id="newEnqNotes" class="form-input" rows="2" placeholder="Brief requirement notes, client expectations, or callback request..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeNewEnquiryModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitNewEnquiry">Save & Track Enquiry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT ENQUIRY MODAL -->
+  <div class="modal-overlay" id="editEnquiryModal">
+    <div class="modal-box" style="max-width: 580px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:var(--text-main);">Edit Enquiry Details</h3>
+        <button type="button" class="modal-close" onclick="closeEditEnquiryModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="editEnquiryForm" onsubmit="submitEditEnquiry(event)">
+        <input type="hidden" id="editEnqId">
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Contact Person Name *</label>
+            <input type="text" id="editEnqName" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile Number *</label>
+            <input type="text" id="editEnqMobile" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Business / Company Name *</label>
+            <input type="text" id="editEnqBusiness" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="editEnqEmail" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Lead Source *</label>
+            <select id="editEnqSource" class="form-select" onchange="toggleMarketingPersonField('editEnqSource', 'editEnqRepContainer')" required>
+              <option value="WEBSITE">Website Contact Form</option>
+              <option value="CALL">Inbound Phone Call</option>
+              <option value="GMB">Google My Business (GMB)</option>
+              <option value="ADS">Paid Ads (Meta / Google)</option>
+              <option value="MARKETING_PERSON">By Marketing Person</option>
+              <option value="OTHER">Other Direct Referral</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lead Status</label>
+            <select id="editEnqStatus" class="form-select">
+              <option value="NEW">New Lead</option>
+              <option value="IN_DISCUSSION">In Discussion</option>
+              <option value="QUOTATION_SENT">Quotation Sent</option>
+              <option value="NEGOTIATION">In Negotiation</option>
+              <option value="ONBOARDED">Onboarded / Won</option>
+              <option value="LOST">Lost</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="editEnqRepContainer" style="display:none; margin-bottom:0.75rem; background:#faf5ff; padding:0.6rem 0.8rem; border-radius:6px; border:1px solid #e9d5ff;">
+          <label class="form-label" style="color:#6b21a8; font-weight:700;">Marketing Person Name</label>
+          <input type="text" id="editEnqMarketingPerson" class="form-input">
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1.5fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Services Interested</label>
+            <input type="text" id="editEnqServices" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimated Budget (₹)</label>
+            <input type="number" id="editEnqBudget" class="form-input" min="0">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem;">
+          <label class="form-label">Notes</label>
+          <textarea id="editEnqNotes" class="form-input" rows="2"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditEnquiryModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitEditEnquiry">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- VIEW ENQUIRY & TIMELINE HISTORY MODAL -->
+  <div class="modal-overlay" id="viewEnquiryModal">
+    <div class="modal-box" style="max-width: 720px; border-radius: 12px; padding: 1.25rem 1.4rem; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.65rem; margin-bottom: 0.85rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main);">Enquiry Details & History Trail</h3>
+        <button type="button" class="modal-close" onclick="closeViewEnquiryModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+      <div id="viewEnquiryModalBody">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/enquiries.js"></script>
+</body>
+</html>

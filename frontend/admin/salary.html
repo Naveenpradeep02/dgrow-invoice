@@ -130,10 +130,13 @@
     <aside class="sidebar">
       <div class="brand-header">
         <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+        <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png';" alt="DG" class="brand-mini-icon" style="display:none; width:36px; height:36px; object-fit:contain; border-radius:8px; background:none; box-shadow:none;">
       </div>
 
       <ul class="nav-list">
         <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="enquiries.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Enquiries</a></li>
+        <li class="nav-item"><a href="meetings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg> Meetings</a></li>
         <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
         <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
         <li class="nav-item"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
@@ -309,8 +312,10 @@
           </div>
         </div>
 
-        <!-- Overview Metric Cards (4 KPI Cards) -->
+        <!-- Overview Metric Cards (4 KPI Cards: Total Payroll, Completed, Pending, Staff) -->
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom:1.25rem;">
+          
+          <!-- Card 1: Total Payroll -->
           <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid var(--primary); box-shadow:0 1px 3px rgba(0,0,0,0.02);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Total Payroll (Base + OT)</span>
@@ -318,49 +323,80 @@
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
               </div>
             </div>
-            <h3 id="statGrossSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:var(--text-main); font-weight:700;">₹1,97,500</h3>
+            <h3 id="statGrossSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:var(--text-main); font-weight:700;">₹0</h3>
             <span style="font-size:0.72rem; color:var(--text-muted);" id="statCycleLabel">August 2026 Cycle</span>
           </div>
 
+          <!-- Card 2: Completed Payments (Paid) -->
+          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #16a34a; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.75rem; color:#15803d; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Completed Payments (Paid)</span>
+              <div style="width:28px; height:28px; border-radius:6px; background:rgba(22,163,74,0.1); color:#16a34a; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+            <h3 id="statNetSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#16a34a; font-weight:700;">₹0</h3>
+            <span style="font-size:0.72rem; color:#16a34a; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;" id="statPaidCountSubtext">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              0 Cleared
+            </span>
+          </div>
+
+          <!-- Card 3: Pending Payments -->
+          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #d97706; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.75rem; color:#d97706; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Pending Payments</span>
+              <div style="width:28px; height:28px; border-radius:6px; background:rgba(245,158,11,0.12); color:#d97706; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+            </div>
+            <h3 id="statPendingSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#d97706; font-weight:700;">₹0</h3>
+            <span style="font-size:0.72rem; color:#d97706; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;" id="statPendingCountSubtext">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              0 Pending
+            </span>
+          </div>
+
+          <!-- Card 4: Team Directory / Retainers -->
           <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #4f46e5; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Team Members</span>
+              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Staff & Retainers</span>
               <div style="width:28px; height:28px; border-radius:6px; background:rgba(79,70,229,0.1); color:#4f46e5; display:flex; align-items:center; justify-content:center;">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
               </div>
             </div>
-            <h3 id="statEmployeeSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#4f46e5; font-weight:700;">₹1,97,500</h3>
-            <span style="font-size:0.72rem; color:var(--text-muted);" id="statEmployeeSubtext">10 Staff Members (Preset: 1st of month)</span>
+            <h3 id="statEmployeeSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#4f46e5; font-weight:700;">14 Staff</h3>
+            <span style="font-size:0.72rem; color:var(--text-muted);" id="statEmployeeSubtext">10 Employees • 4 Freelancers/Rent</span>
           </div>
 
-          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #f59e0b; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Freelancers & Retainers</span>
-              <div style="width:28px; height:28px; border-radius:6px; background:rgba(245,158,11,0.1); color:#d97706; display:flex; align-items:center; justify-content:center;">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-              </div>
-            </div>
-            <h3 id="statFreelancerSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#d97706; font-weight:700;">₹0</h3>
-            <span style="font-size:0.72rem; color:var(--text-muted);" id="statFreelancerSubtext">0 Freelancers</span>
-          </div>
-
-          <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:var(--radius-md); padding:1.15rem; border-left:4px solid #16a34a; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Disbursed Status</span>
-              <div style="width:28px; height:28px; border-radius:6px; background:rgba(220,38,38,0.08); color:#16a34a; display:flex; align-items:center; justify-content:center;">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-            </div>
-            <h3 id="statNetSalary" style="font-size:1.6rem; margin:0.4rem 0 0.15rem 0; color:#16a34a; font-weight:700;">₹1,97,500</h3>
-            <span style="font-size:0.72rem; color:#16a34a; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;">
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              100% Cleared
-            </span>
-          </div>
         </div>
 
-        <!-- Filter Bar -->
+        <!-- Quick Status Filter Pills & Search Bar -->
         <div class="card" style="padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:0.75rem;">
+            <!-- Status Tabs: All, Completed (Paid), Pending -->
+            <div class="period-toggle-group" style="display:inline-flex; background:#f1f5f9; padding:0.25rem; border-radius:var(--radius-md); gap:0.25rem; border:1px solid #cbd5e1;">
+              <button type="button" class="period-toggle-btn active" id="tabStatusAll" onclick="setSalaryStatusFilter('')" style="font-weight:700; font-size:0.82rem; display:inline-flex; align-items:center; gap:0.3rem;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                All Records (<span id="badgeCountAll">0</span>)
+              </button>
+              <button type="button" class="period-toggle-btn" id="tabStatusPaid" onclick="setSalaryStatusFilter('PAID')" style="font-weight:700; font-size:0.82rem; color:#15803d; display:inline-flex; align-items:center; gap:0.3rem;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Completed / Paid (<span id="badgeCountPaid">0</span>)
+              </button>
+              <button type="button" class="period-toggle-btn" id="tabStatusPending" onclick="setSalaryStatusFilter('PENDING')" style="font-weight:700; font-size:0.82rem; color:#d97706; display:inline-flex; align-items:center; gap:0.3rem;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Pending Payments (<span id="badgeCountPending">0</span>)
+              </button>
+            </div>
+
+            <!-- Quick Auto-Sync Month Roster Action Button -->
+            <button type="button" class="btn btn-secondary btn-sm" onclick="triggerMonthlyRosterSync()" style="font-size:0.78rem; display:inline-flex; align-items:center; gap:0.35rem;" title="Ensure all active employees are listed in Pending for current month">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Refresh Monthly Roster
+            </button>
+          </div>
+
           <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
             <input type="text" id="salarySearch" class="form-input" placeholder="Search staff name, role or UPI/account..." style="flex:2; min-width:180px;" oninput="applyAllSalaryFilters()">
             
@@ -370,9 +406,9 @@
               <option value="Freelancer">Freelancers / Retainers</option>
             </select>
 
-            <select id="salaryFilterStatus" class="form-select" style="flex:1; min-width:120px;" onchange="applyAllSalaryFilters()">
+            <select id="salaryFilterStatus" class="form-select" style="flex:1; min-width:120px;" onchange="onStatusDropdownChange(this.value)">
               <option value="">All Statuses</option>
-              <option value="PAID">PAID</option>
+              <option value="PAID">PAID (Completed)</option>
               <option value="PENDING">PENDING</option>
             </select>
           </div>
@@ -389,7 +425,7 @@
                   <th>Base Salary</th>
                   <th>Overtime / Incentive</th>
                   <th>Deductions</th>
-                  <th>Net Paid</th>
+                  <th>Net Amount</th>
                   <th>Status</th>
                   <th>Disbursement Date</th>
                   <th style="text-align:right;">Actions</th>
@@ -845,6 +881,8 @@
 
     // Current Active Period State ('CURRENT_MONTH', 'LAST_MONTH', 'OVERALL', 'CUSTOM')
     let currentSalaryPeriod = 'CURRENT_MONTH';
+    let currentSalaryStatusFilter = ''; // '' (All), 'PAID', or 'PENDING'
+    let currentEditingSalaryRecordId = null; // Track which pending record is being paid
     let salaryCustomFromDate = '';
     let salaryCustomToDate = '';
 
@@ -860,48 +898,52 @@
       { id: 'p8', name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', salary: 20000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: anand.edit@paytm (9884567890)' },
       { id: 'p9', name: 'Ikot Siva', role: 'Social Media & Community Executive', type: 'Employee', salary: 15000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: ikot.siva@ybl (9940123456)' },
       { id: 'p10', name: 'Thamarai Selvi', role: 'Accounts & Client Operations', type: 'Employee', salary: 12000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 60129384756102 | IFSC: HDFC0002345' },
-      // Added Fixed Office & Retainer Presets
+      // Fixed Office & Retainer Presets
       { id: 'p11', name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', salary: 5000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234' },
       { id: 'p12', name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', salary: 5400, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456' },
       { id: 'p13', name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', salary: 23000, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'Bank Transfer', status: 'ACTIVE', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890' },
       { id: 'p14', name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', salary: 2500, salaryDay: '1st of every month', defaultDateDay: 1, mode: 'UPI / GPay', status: 'ACTIVE', accountInfo: 'UPI: airtel.fiber@paytm' }
     ];
 
-    // Historical & Active Payroll Records with Overtime/Incentives
+    // Initial Historical & Active Payroll Records (with Completed and Pending state for August 2026)
     let salaryRecords = [
-      // August 2026 (Current Month)
-      { id: 1, name: 'Sarun', role: 'Graphic & UI Designer', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100234891011 | IFSC: HDFC0001234', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 2, name: 'Debo', role: 'Motion Graphics & Video Lead', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: debo.motion@oksbi', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 3, name: 'Naveen', role: 'Lead Tech & Marketing Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100876543210 | IFSC: HDFC0001234', gross: 30000, incentive: 0, deductions: 0, net: 30000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 4, name: 'Srija', role: 'Creative Head & Brand Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100489213456 | IFSC: HDFC0001234', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 5, name: 'Subbu', role: 'Junior Content & Graphic Designer', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: subbu.design@okaxis', gross: 12500, incentive: 0, deductions: 0, net: 12500, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 6, name: 'Siva Mani', role: 'Performance Marketer & Ads', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 20349817263541 | IFSC: SBIN0004567', gross: 18000, incentive: 0, deductions: 0, net: 18000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 7, name: 'Jaleesh', role: 'Web Developer & SEO Specialist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 91238475620193 | IFSC: ICIC0000987', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 8, name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: anand.edit@paytm', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 9, name: 'Ikot Siva', role: 'Social Media & Community Executive', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: ikot.siva@ybl', gross: 15000, incentive: 0, deductions: 0, net: 15000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 10, name: 'Thamarai Selvi', role: 'Accounts & Client Operations', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 60129384756102 | IFSC: HDFC0002345', gross: 12000, incentive: 0, deductions: 0, net: 12000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 11, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 12, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 13, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-      { id: 14, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
+      // August 2026 - Completed (Paid)
+      { id: 1, name: 'Sarun', role: 'Graphic & UI Designer', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100234891011 | IFSC: HDFC0001234', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 2, name: 'Debo', role: 'Motion Graphics & Video Lead', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: debo.motion@oksbi', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 3, name: 'Naveen', role: 'Lead Tech & Marketing Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100876543210 | IFSC: HDFC0001234', gross: 30000, incentive: 0, deductions: 0, net: 30000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 4, name: 'Srija', role: 'Creative Head & Brand Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100489213456 | IFSC: HDFC0001234', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 5, name: 'Subbu', role: 'Junior Content & Graphic Designer', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: subbu.design@okaxis', gross: 12500, incentive: 0, deductions: 0, net: 12500, status: 'PAID', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 11, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 12, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
 
-      // July 2026 (Last Month)
-      { id: 101, name: 'Sarun', role: 'Graphic & UI Designer', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100234891011', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 102, name: 'Debo', role: 'Motion Graphics & Video Lead', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: debo.motion@oksbi', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 103, name: 'Naveen', role: 'Lead Tech & Marketing Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100876543210', gross: 30000, incentive: 0, deductions: 0, net: 30000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 104, name: 'Srija', role: 'Creative Head & Brand Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100489213456', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 105, name: 'Subbu', role: 'Junior Content & Graphic Designer', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: subbu.design@okaxis', gross: 12500, incentive: 0, deductions: 0, net: 12500, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 106, name: 'Siva Mani', role: 'Performance Marketer & Ads', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 20349817263541', gross: 18000, incentive: 0, deductions: 0, net: 18000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 107, name: 'Jaleesh', role: 'Web Developer & SEO Specialist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 91238475620193', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 108, name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: anand.edit@paytm', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 109, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 110, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 111, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' },
-      { id: 112, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PAID', date: '2026-07-01', salaryDay: '1st of month', month: 'July 2026' }
+      // August 2026 - Pending Payments (Ready with Pay Button)
+      { id: 6, name: 'Siva Mani', role: 'Performance Marketer & Ads', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 20349817263541 | IFSC: SBIN0004567', gross: 18000, incentive: 0, deductions: 0, net: 18000, status: 'PENDING', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 7, name: 'Jaleesh', role: 'Web Developer & SEO Specialist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 91238475620193 | IFSC: ICIC0000987', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PENDING', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 8, name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: anand.edit@paytm', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PENDING', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 9, name: 'Ikot Siva', role: 'Social Media & Community Executive', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: ikot.siva@ybl', gross: 15000, incentive: 0, deductions: 0, net: 15000, status: 'PENDING', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 10, name: 'Thamarai Selvi', role: 'Accounts & Client Operations', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 60129384756102 | IFSC: HDFC0002345', gross: 12000, incentive: 0, deductions: 0, net: 12000, status: 'PENDING', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 13, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PENDING', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+      { id: 14, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PENDING', date: '2026-08-01', salaryDay: '1st of every month', month: 'August 2026' },
+
+      // July 2026 (Last Month - All Paid)
+      { id: 101, name: 'Sarun', role: 'Graphic & UI Designer', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100234891011', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 102, name: 'Debo', role: 'Motion Graphics & Video Lead', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: debo.motion@oksbi', gross: 25000, incentive: 0, deductions: 0, net: 25000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 103, name: 'Naveen', role: 'Lead Tech & Marketing Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100876543210', gross: 30000, incentive: 0, deductions: 0, net: 30000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 104, name: 'Srija', role: 'Creative Head & Brand Strategist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 50100489213456', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 105, name: 'Subbu', role: 'Junior Content & Graphic Designer', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: subbu.design@okaxis', gross: 12500, incentive: 0, deductions: 0, net: 12500, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 106, name: 'Siva Mani', role: 'Performance Marketer & Ads', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 20349817263541', gross: 18000, incentive: 0, deductions: 0, net: 18000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 107, name: 'Jaleesh', role: 'Web Developer & SEO Specialist', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 91238475620193', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 108, name: 'Ananda Kumar', role: 'Senior Video Editor & Production', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: anand.edit@paytm', gross: 20000, incentive: 0, deductions: 0, net: 20000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 109, name: 'Ikot Siva', role: 'Social Media & Community Executive', type: 'Employee', mode: 'UPI / GPay', accountInfo: 'UPI: ikot.siva@ybl', gross: 15000, incentive: 0, deductions: 0, net: 15000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 110, name: 'Thamarai Selvi', role: 'Accounts & Client Operations', type: 'Employee', mode: 'Bank Transfer', accountInfo: 'A/C: 60129384756102', gross: 12000, incentive: 0, deductions: 0, net: 12000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 111, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 112, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 113, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' },
+      { id: 114, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PAID', date: '2026-07-01', salaryDay: '1st of every month', month: 'July 2026' }
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-      const storedPresets = localStorage.getItem('dgrow_member_presets_v5');
+      const storedPresets = localStorage.getItem('dgrow_member_presets_v6');
       if (storedPresets) {
         try { memberPresets = JSON.parse(storedPresets); } catch(e){}
       }
@@ -920,24 +962,13 @@
       });
       savePresetsStorage();
 
-      const storedRecords = localStorage.getItem('dgrow_salary_records_v5');
+      const storedRecords = localStorage.getItem('dgrow_salary_records_v6');
       if (storedRecords) {
         try { salaryRecords = JSON.parse(storedRecords); } catch(e){}
       }
 
-      // Ensure August 2026 payroll includes the 4 items
-      const requiredRecords = [
-        { id: 11, name: 'Auditor Bill', role: 'Chartered Accountant & GST Audit Fee', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 301294857610 | IFSC: HDFC0001234', gross: 5000, incentive: 0, deductions: 0, net: 5000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-        { id: 12, name: 'Office Rent 1', role: 'Office Space Commercial Lease #1', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 409182736450 | IFSC: ICIC0000456', gross: 5400, incentive: 0, deductions: 0, net: 5400, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-        { id: 13, name: 'Office Rent 2', role: 'Main Office Workspace Lease #2', type: 'Freelancer', mode: 'Bank Transfer', accountInfo: 'A/C: 501928374650 | IFSC: SBIN0007890', gross: 23000, incentive: 0, deductions: 0, net: 23000, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' },
-        { id: 14, name: 'Wifi + Recharge bills', role: 'High-Speed Fiber Internet & Team Mobile', type: 'Freelancer', mode: 'UPI / GPay', accountInfo: 'UPI: airtel.fiber@paytm', gross: 2500, incentive: 0, deductions: 0, net: 2500, status: 'PAID', date: '2026-08-01', salaryDay: '1st of month', month: 'August 2026' }
-      ];
-      requiredRecords.forEach(rr => {
-        if (!salaryRecords.some(r => r.name.toLowerCase() === rr.name.toLowerCase() && r.month === 'August 2026')) {
-          salaryRecords.push(rr);
-        }
-      });
-      saveSalaryStorage();
+      // Auto sync monthly roster for the current active month (August 2026)
+      syncMonthlySalaryRoster('August 2026', '2026-08');
 
       document.getElementById('modalDisbursementDate').value = new Date().toISOString().split('T')[0];
       populatePresetDropdown();
@@ -946,13 +977,67 @@
     });
 
     function savePresetsStorage() {
-      localStorage.setItem('dgrow_member_presets_v5', JSON.stringify(memberPresets));
+      localStorage.setItem('dgrow_member_presets_v6', JSON.stringify(memberPresets));
       populatePresetDropdown();
       applyEmployeeDirectoryFilters();
     }
 
     function saveSalaryStorage() {
-      localStorage.setItem('dgrow_salary_records_v5', JSON.stringify(salaryRecords));
+      localStorage.setItem('dgrow_salary_records_v6', JSON.stringify(salaryRecords));
+    }
+
+    // --- AUTO-ROSTER MONTHLY SYNC LOGIC ---
+    // Ensures that at the start of every month cycle, all active employees appear in Pending if not yet paid
+    function syncMonthlySalaryRoster(targetMonth = 'August 2026', targetYearMonth = '2026-08') {
+      let addedCount = 0;
+      const activeMembers = memberPresets.filter(p => (p.status || 'ACTIVE') === 'ACTIVE');
+
+      activeMembers.forEach(p => {
+        // Check if member already has a payroll record for this month
+        const hasRecord = salaryRecords.some(r => 
+          r.name.toLowerCase() === p.name.toLowerCase() && 
+          (r.month === targetMonth || (r.date && r.date.startsWith(targetYearMonth)))
+        );
+
+        if (!hasRecord) {
+          const day = String(p.defaultDateDay || 1).padStart(2, '0');
+          const newPendingRecord = {
+            id: Date.now() + Math.floor(Math.random() * 100000),
+            name: p.name,
+            role: p.role,
+            type: p.type,
+            mode: p.mode || 'Bank Transfer',
+            accountInfo: p.accountInfo || '',
+            gross: Number(p.salary || 0),
+            incentive: 0,
+            deductions: 0,
+            net: Number(p.salary || 0),
+            status: 'PENDING',
+            date: `${targetYearMonth}-${day}`,
+            salaryDay: p.salaryDay || '1st of every month',
+            month: targetMonth
+          };
+          salaryRecords.push(newPendingRecord);
+          addedCount++;
+        }
+      });
+
+      if (addedCount > 0) {
+        saveSalaryStorage();
+      }
+      return addedCount;
+    }
+
+    function triggerMonthlyRosterSync() {
+      const activeMonthName = currentSalaryPeriod === 'LAST_MONTH' ? 'July 2026' : 'August 2026';
+      const yearMonth = currentSalaryPeriod === 'LAST_MONTH' ? '2026-07' : '2026-08';
+      const added = syncMonthlySalaryRoster(activeMonthName, yearMonth);
+      applyAllSalaryFilters();
+      if (added > 0) {
+        showToast(`Added ${added} active staff members to Pending Payments for ${activeMonthName}!`, 'success');
+      } else {
+        showToast(`All active staff members are already synchronized for ${activeMonthName}.`, 'info');
+      }
     }
 
     function populatePresetDropdown() {
@@ -993,7 +1078,9 @@
     // --- PERIOD TOGGLE FILTER LOGIC (FOR PAYOUTS) ---
     function switchSalaryPeriod(period) {
       currentSalaryPeriod = period;
-      document.querySelectorAll('#sectionPayoutsView .period-toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#sectionPayoutsView .period-toggle-btn').forEach(b => {
+        if (b.id && b.id.startsWith('btnPeriod')) b.classList.remove('active');
+      });
       
       const customBar = document.getElementById('salaryCustomDateBar');
       if (customBar) customBar.style.display = 'none';
@@ -1009,6 +1096,7 @@
         badgeEl.style.color = '#3730a3';
         subtitleEl.textContent = 'Showing payroll for August 2026';
         cycleLabel.textContent = 'August 2026 Cycle';
+        syncMonthlySalaryRoster('August 2026', '2026-08');
       } else if (period === 'LAST_MONTH') {
         document.getElementById('btnPeriodLast').classList.add('active');
         badgeEl.textContent = 'Last Month';
@@ -1016,6 +1104,7 @@
         badgeEl.style.color = '#92400e';
         subtitleEl.textContent = 'Showing payroll for July 2026';
         cycleLabel.textContent = 'July 2026 Cycle';
+        syncMonthlySalaryRoster('July 2026', '2026-07');
       } else if (period === 'OVERALL') {
         document.getElementById('btnPeriodOverall').classList.add('active');
         badgeEl.textContent = 'Overall (All-Time)';
@@ -1032,7 +1121,9 @@
       const customBar = document.getElementById('salaryCustomDateBar');
       const isHidden = (customBar.style.display === 'none');
       
-      document.querySelectorAll('#sectionPayoutsView .period-toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#sectionPayoutsView .period-toggle-btn').forEach(b => {
+        if (b.id && b.id.startsWith('btnPeriod')) b.classList.remove('active');
+      });
       document.getElementById('btnPeriodCustom').classList.add('active');
 
       if (isHidden) {
@@ -1067,20 +1158,44 @@
       applyAllSalaryFilters();
     }
 
+    // --- STATUS TABS FILTER LOGIC ---
+    function setSalaryStatusFilter(status) {
+      currentSalaryStatusFilter = status;
+      
+      // Update Tab button states
+      const tabAll = document.getElementById('tabStatusAll');
+      const tabPaid = document.getElementById('tabStatusPaid');
+      const tabPending = document.getElementById('tabStatusPending');
+      if (tabAll) tabAll.classList.toggle('active', status === '');
+      if (tabPaid) tabPaid.classList.toggle('active', status === 'PAID');
+      if (tabPending) tabPending.classList.toggle('active', status === 'PENDING');
+
+      // Sync dropdown select
+      const selectStatus = document.getElementById('salaryFilterStatus');
+      if (selectStatus) selectStatus.value = status;
+
+      applyAllSalaryFilters();
+    }
+
+    function onStatusDropdownChange(val) {
+      currentSalaryStatusFilter = val;
+      const tabAll = document.getElementById('tabStatusAll');
+      const tabPaid = document.getElementById('tabStatusPaid');
+      const tabPending = document.getElementById('tabStatusPending');
+      if (tabAll) tabAll.classList.toggle('active', val === '');
+      if (tabPaid) tabPaid.classList.toggle('active', val === 'PAID');
+      if (tabPending) tabPending.classList.toggle('active', val === 'PENDING');
+
+      applyAllSalaryFilters();
+    }
+
     function applyAllSalaryFilters() {
       const search = (document.getElementById('salarySearch')?.value || '').toLowerCase().trim();
       const type = document.getElementById('salaryFilterType')?.value;
-      const status = document.getElementById('salaryFilterStatus')?.value;
+      const status = currentSalaryStatusFilter;
 
-      const filtered = salaryRecords.filter(r => {
-        const matchesSearch = !search || 
-          r.name.toLowerCase().includes(search) || 
-          r.role.toLowerCase().includes(search) ||
-          (r.accountInfo && r.accountInfo.toLowerCase().includes(search));
-        
-        const matchesType = !type || r.type === type;
-        const matchesStatus = !status || r.status === status;
-
+      // 1. Period Records (for accurate total overview KPIs)
+      const periodRecords = salaryRecords.filter(r => {
         let matchesPeriod = true;
         const recDate = r.date || '2026-08-01';
 
@@ -1094,11 +1209,23 @@
           if (salaryCustomFromDate && recDate < salaryCustomFromDate) matchesPeriod = false;
           if (salaryCustomToDate && recDate > salaryCustomToDate) matchesPeriod = false;
         }
-
-        return matchesSearch && matchesType && matchesStatus && matchesPeriod;
+        return matchesPeriod;
       });
 
-      renderSalaryTable(filtered);
+      // 2. Table Filtered Records
+      const filtered = periodRecords.filter(r => {
+        const matchesSearch = !search || 
+          r.name.toLowerCase().includes(search) || 
+          r.role.toLowerCase().includes(search) ||
+          (r.accountInfo && r.accountInfo.toLowerCase().includes(search));
+        
+        const matchesType = !type || r.type === type;
+        const matchesStatus = !status || r.status === status;
+
+        return matchesSearch && matchesType && matchesStatus;
+      });
+
+      renderSalaryTable(filtered, periodRecords);
     }
 
     // Toggle Dynamic Account / UPI Fields in Forms
@@ -1220,7 +1347,7 @@
           accountInfo,
           salaryDay,
           date: `${year}-${month}-${day}`,
-          status: 'PAID',
+          status: 'PENDING', // starts as pending for easy payout
           month: 'August 2026'
         };
         salaryRecords.unshift(newRecord);
@@ -1232,14 +1359,39 @@
       showToast(`${type === 'Employee' ? 'Employee' : 'Freelancer'} "${name}" saved!`, 'success');
     }
 
-    // --- POPUP 2: RECORD PAYOUT WITH OVERTIME & INCENTIVE ---
-    function openSalaryModal(prefillMemberId = null) {
+    // --- POPUP 2: RECORD / PAY SALARY MODAL ---
+    function openSalaryModal(prefillMemberId = null, existingRecordId = null) {
       document.getElementById('salaryForm').reset();
+      currentEditingSalaryRecordId = existingRecordId;
       document.getElementById('modalIncentiveAmount').value = '0';
       document.getElementById('modalDeductions').value = '0';
       document.getElementById('modalDisbursementDate').value = new Date().toISOString().split('T')[0];
       
-      if (prefillMemberId) {
+      const modalTitle = document.getElementById('salaryModalTitle');
+      if (modalTitle) {
+        modalTitle.textContent = existingRecordId ? 'Process Salary Payment (Disburse)' : 'Record Salary / Freelancer Payout';
+      }
+
+      if (existingRecordId) {
+        const record = salaryRecords.find(r => r.id === existingRecordId);
+        if (record) {
+          document.getElementById('modalStaffName').value = record.name;
+          document.getElementById('modalStaffRole').value = record.role;
+          document.getElementById('modalStaffType').value = record.type;
+          document.getElementById('modalGrossAmount').value = record.gross;
+          document.getElementById('modalIncentiveAmount').value = record.incentive || 0;
+          document.getElementById('modalDeductions').value = record.deductions || 0;
+          document.getElementById('modalPaymentMode').value = record.mode || 'Bank Transfer';
+          document.getElementById('modalAccountDetailsText').textContent = record.accountInfo || record.mode;
+          document.getElementById('modalAccountDetailsVal').value = record.accountInfo || '';
+          
+          const preset = memberPresets.find(p => p.name.toLowerCase() === record.name.toLowerCase());
+          if (preset) {
+            document.getElementById('modalPresetSelect').value = preset.id;
+          }
+          calculateModalNet();
+        }
+      } else if (prefillMemberId) {
         document.getElementById('modalPresetSelect').value = prefillMemberId;
         applyPresetToForm(prefillMemberId);
       } else {
@@ -1251,6 +1403,7 @@
     }
 
     function closeSalaryModal() {
+      currentEditingSalaryRecordId = null;
       document.getElementById('salaryModal').classList.remove('active');
     }
 
@@ -1301,31 +1454,80 @@
       const net = Math.max(0, (gross + incentive) - deductions);
 
       const matched = memberPresets.find(p => p.name.toLowerCase() === name.toLowerCase());
-      const salaryDay = matched ? matched.salaryDay : (type === 'Employee' ? '1st of month' : '5th of month');
+      const salaryDay = matched ? matched.salaryDay : (type === 'Employee' ? '1st of every month' : '5th of every month');
       const accountInfo = matched ? matched.accountInfo : (document.getElementById('modalAccountDetailsVal').value || mode);
 
-      const newRecord = {
-        id: Date.now(),
-        name,
-        role,
-        type,
-        gross,
-        incentive,
-        deductions,
-        net,
-        mode,
-        accountInfo,
-        date,
-        salaryDay,
-        status: 'PAID',
-        month: 'August 2026'
-      };
+      // Determine month label
+      const activeMonthName = currentSalaryPeriod === 'LAST_MONTH' ? 'July 2026' : 'August 2026';
 
-      salaryRecords.unshift(newRecord);
+      if (currentEditingSalaryRecordId) {
+        // Updating an existing pending/draft record to PAID
+        const recIndex = salaryRecords.findIndex(r => r.id === currentEditingSalaryRecordId);
+        if (recIndex !== -1) {
+          salaryRecords[recIndex].name = name;
+          salaryRecords[recIndex].role = role;
+          salaryRecords[recIndex].type = type;
+          salaryRecords[recIndex].gross = gross;
+          salaryRecords[recIndex].incentive = incentive;
+          salaryRecords[recIndex].deductions = deductions;
+          salaryRecords[recIndex].net = net;
+          salaryRecords[recIndex].mode = mode;
+          salaryRecords[recIndex].accountInfo = accountInfo;
+          salaryRecords[recIndex].date = date;
+          salaryRecords[recIndex].status = 'PAID';
+        }
+        currentEditingSalaryRecordId = null;
+      } else {
+        // Creating a new direct payment
+        const newRecord = {
+          id: Date.now(),
+          name,
+          role,
+          type,
+          gross,
+          incentive,
+          deductions,
+          net,
+          mode,
+          accountInfo,
+          date,
+          salaryDay,
+          status: 'PAID',
+          month: activeMonthName
+        };
+        salaryRecords.unshift(newRecord);
+      }
+
       saveSalaryStorage();
       applyAllSalaryFilters();
       closeSalaryModal();
-      showToast('Salary payout recorded successfully', 'success');
+      showToast(`Payment of ₹${net.toLocaleString('en-IN')} marked as PAID for ${name}!`, 'success');
+    }
+
+    // --- QUICK 1-CLICK PAY & STATUS TOGGLE ---
+    function quickMarkPaid(recordId) {
+      const record = salaryRecords.find(r => r.id === recordId);
+      if (!record) return;
+
+      record.status = 'PAID';
+      record.date = new Date().toISOString().split('T')[0];
+      saveSalaryStorage();
+      applyAllSalaryFilters();
+      showToast(`Salary payment of ₹${Number(record.net || record.gross).toLocaleString('en-IN')} marked as PAID for ${record.name}!`, 'success');
+    }
+
+    function toggleSalaryRecordStatus(recordId) {
+      const record = salaryRecords.find(r => r.id === recordId);
+      if (!record) return;
+
+      const newStatus = record.status === 'PAID' ? 'PENDING' : 'PAID';
+      record.status = newStatus;
+      if (newStatus === 'PAID') {
+        record.date = new Date().toISOString().split('T')[0];
+      }
+      saveSalaryStorage();
+      applyAllSalaryFilters();
+      showToast(`Status updated to ${newStatus} for ${record.name}`, 'info');
     }
 
     // --- POPUP 3: VIEW EMPLOYEE PROFILE MODAL ---
@@ -1514,22 +1716,74 @@
       }
     }
 
-    function renderSalaryTable(records = salaryRecords) {
+    // --- PAYROLL TABLE RENDERING WITH COMPLETED & PENDING METRICS ---
+    function renderSalaryTable(records = salaryRecords, allPeriodRecords = salaryRecords) {
       const tbody = document.getElementById('salaryTableBody');
       if (!tbody) return;
 
+      // Calculate Total Payroll, Completed (Paid) & Pending stats across all records in the active period
       let totalGross = 0;
-      let totalNet = 0;
-      let employeeTotal = 0;
-      let freelancerTotal = 0;
+      let totalPaidAmount = 0;
+      let totalPendingAmount = 0;
+      let paidCount = 0;
+      let pendingCount = 0;
       let empCount = 0;
       let freeCount = 0;
 
+      allPeriodRecords.forEach(r => {
+        const gross = Number(r.gross || 0);
+        const incentive = Number(r.incentive || 0);
+        const deductions = Number(r.deductions || 0);
+        const net = Number(r.net || (gross + incentive - deductions));
+
+        totalGross += (gross + incentive);
+        
+        if (r.status === 'PAID') {
+          totalPaidAmount += net;
+          paidCount++;
+        } else {
+          totalPendingAmount += net;
+          pendingCount++;
+        }
+
+        if (r.type === 'Employee') {
+          empCount++;
+        } else {
+          freeCount++;
+        }
+      });
+
+      // Update KPI Metric Cards
+      document.getElementById('statGrossSalary').textContent = '₹' + totalGross.toLocaleString('en-IN');
+      document.getElementById('statNetSalary').textContent = '₹' + totalPaidAmount.toLocaleString('en-IN');
+      document.getElementById('statPendingSalary').textContent = '₹' + totalPendingAmount.toLocaleString('en-IN');
+      document.getElementById('statEmployeeSalary').textContent = `${allPeriodRecords.length} Staff`;
+      document.getElementById('statEmployeeSubtext').textContent = `${empCount} Employees • ${freeCount} Freelancers/Rent`;
+
+      const pctCleared = totalGross > 0 ? Math.round((totalPaidAmount / totalGross) * 100) : (pendingCount === 0 && paidCount > 0 ? 100 : 0);
+      document.getElementById('statPaidCountSubtext').innerHTML = `
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        ${paidCount} Paid / Cleared (${pctCleared}%)
+      `;
+      document.getElementById('statPendingCountSubtext').innerHTML = `
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ${pendingCount} Pending Staff Payouts
+      `;
+
+      // Update Status Filter Tab Badges
+      const badgeAll = document.getElementById('badgeCountAll');
+      const badgePaid = document.getElementById('badgeCountPaid');
+      const badgePending = document.getElementById('badgeCountPending');
+      if (badgeAll) badgeAll.textContent = allPeriodRecords.length;
+      if (badgePaid) badgePaid.textContent = paidCount;
+      if (badgePending) badgePending.textContent = pendingCount;
+
+      // Render table rows
       if (records.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="9" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
-              No payroll records found for the selected period.
+              No payroll records found for the selected status and period.
             </td>
           </tr>
         `;
@@ -1539,19 +1793,9 @@
           const incentive = Number(r.incentive || 0);
           const deductions = Number(r.deductions || 0);
           const net = Number(r.net || (gross + incentive - deductions));
-          
-          totalGross += (gross + incentive);
-          totalNet += net;
+          const isPaid = (r.status === 'PAID');
 
           const isEmp = (r.type === 'Employee');
-          if (isEmp) {
-            employeeTotal += (gross + incentive);
-            empCount++;
-          } else {
-            freelancerTotal += (gross + incentive);
-            freeCount++;
-          }
-
           const typeBadge = isEmp ? 
             `<span class="type-badge-employee"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> EMPLOYEE</span>` : 
             `<span class="type-badge-freelancer"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg> FREELANCER</span>`;
@@ -1564,28 +1808,53 @@
             `<span style="color:#dc2626; font-weight:600; font-size:0.82rem;">-₹${deductions.toLocaleString('en-IN')}</span>` : 
             `<span style="color:var(--text-muted); font-size:0.82rem;">₹0</span>`;
 
+          const matchedPreset = memberPresets.find(p => p.name.toLowerCase() === r.name.toLowerCase());
+          const presetId = matchedPreset ? matchedPreset.id : '';
+
+          const statusBadge = isPaid ?
+            `<span class="badge badge-paid" style="cursor:pointer;" onclick="toggleSalaryRecordStatus(${r.id})" title="Click to toggle status">PAID</span>` :
+            `<span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700; border:1px solid #fde68a; cursor:pointer;" onclick="toggleSalaryRecordStatus(${r.id})" title="Click to toggle status">PENDING</span>`;
+
           return `
-            <tr>
-              <td><strong style="color:var(--text-main); font-size:0.92rem;">${escapeHtml(r.name)}</strong></td>
+            <tr style="${!isPaid ? 'background:#fffdf7;' : ''}">
+              <td>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <strong style="color:var(--text-main); font-size:0.92rem;">${escapeHtml(r.name)}</strong>
+                  ${!isPaid ? '<span style="width:8px; height:8px; border-radius:50%; background:#d97706; display:inline-block;" title="Payment Pending"></span>' : ''}
+                </div>
+                ${r.accountInfo ? `<span class="account-detail-tag">${escapeHtml(r.accountInfo)}</span>` : ''}
+              </td>
               <td>${typeBadge}</td>
               <td><strong>₹${gross.toLocaleString('en-IN')}</strong></td>
               <td>${incentiveBadge}</td>
               <td>${deductionBadge}</td>
-              <td><strong style="color:#16a34a; font-size:0.95rem;">₹${net.toLocaleString('en-IN')}</strong></td>
-              <td><span class="badge ${r.status === 'PAID' ? 'badge-paid' : 'badge-overdue'}">${r.status}</span></td>
+              <td><strong style="color:${isPaid ? '#16a34a' : '#d97706'}; font-size:0.95rem;">₹${net.toLocaleString('en-IN')}</strong></td>
+              <td>${statusBadge}</td>
               <td>${formatDate(r.date)}</td>
               <td style="text-align:right;">
                 <div style="display:inline-flex; gap:0.35rem; align-items:center;">
-                  <!-- 1. Download Pay Slip Icon Button -->
-                  <button type="button" class="icon-action-btn" onclick="downloadSalarySlip(${r.id})" title="Download Salary Pay Slip" style="color:var(--primary);">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                  </button>
+                  ${!isPaid ? `
+                    <!-- 1. Pay Button (Opens Modal with Prefill & Bonus options) -->
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openSalaryModal('${presetId}', ${r.id})" style="padding:0.28rem 0.75rem; font-size:0.78rem; display:inline-flex; align-items:center; gap:0.3rem; font-weight:700; box-shadow:0 1px 3px rgba(220,38,38,0.2);">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      Pay
+                    </button>
+                    <!-- 2. Quick 1-Click Pay Button -->
+                    <button type="button" class="icon-action-btn" onclick="quickMarkPaid(${r.id})" title="Quick 1-Click Mark as Paid" style="color:#16a34a; border-color:#86efac; background:#f0fdf4;">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                  ` : `
+                    <!-- 1. Download Pay Slip Icon Button -->
+                    <button type="button" class="icon-action-btn" onclick="downloadSalarySlip(${r.id})" title="Download Salary Pay Slip" style="color:var(--primary);">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                    </button>
+                  `}
 
-                  <!-- 2. Delete Icon Button -->
+                  <!-- Delete Icon Button -->
                   <button type="button" class="icon-action-btn" onclick="deleteSalaryRecord(${r.id})" title="Delete Record" style="color:#dc2626;">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="3 6 5 6 21 6"/>
@@ -1600,13 +1869,6 @@
           `;
         }).join('');
       }
-
-      document.getElementById('statGrossSalary').textContent = '₹' + totalGross.toLocaleString('en-IN');
-      document.getElementById('statNetSalary').textContent = '₹' + totalNet.toLocaleString('en-IN');
-      document.getElementById('statEmployeeSalary').textContent = '₹' + employeeTotal.toLocaleString('en-IN');
-      document.getElementById('statEmployeeSubtext').textContent = `${empCount} Staff Members`;
-      document.getElementById('statFreelancerSalary').textContent = '₹' + freelancerTotal.toLocaleString('en-IN');
-      document.getElementById('statFreelancerSubtext').textContent = `${freeCount} Freelancers`;
     }
 
     // --- PAYSLIP DOWNLOAD / PRINT GENERATOR ---
@@ -1714,9 +1976,9 @@
 
   <div class="payslip-container">
     <div class="header-row">
-      <div style="display:flex; align-items:flex-start; gap:1rem;">
-        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height:48px; max-width:160px; object-fit:contain;">
-        <div>
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="height:56px; width:auto; object-fit:contain; flex-shrink:0;">
+        <div style="border-left:2px solid #e2e8f0; padding-left:14px;">
           <h1 class="company-name">${escapeHtml(compName)}<\/h1>
           <p style="margin:0.2rem 0 0 0; font-size:0.75rem; color:#475569;"><strong>GSTIN:</strong> ${escapeHtml(compGstin)}<\/p>
           <p style="margin:0.15rem 0 0 0; font-size:0.75rem; color:#64748b;">${escapeHtml(compAddress)}<\/p>

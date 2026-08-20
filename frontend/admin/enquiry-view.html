@@ -1,0 +1,567 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enquiry Details & History - D-GROW Invoice System</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="../css/invoice.css">
+  <style>
+    /* D-GROW Clean White Theme for Enquiry Detail Hero */
+    .enquiry-hero-clean {
+      background: #ffffff;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-top: 4px solid var(--primary, #e11d48);
+      border-radius: var(--radius-lg, 12px);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+    .hero-clean-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+    .hero-clean-title-area {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+    }
+    .hero-clean-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 900;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+      flex-shrink: 0;
+    }
+    .hero-clean-meta-list {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.4rem;
+    }
+    .hero-clean-meta-list a {
+      color: #0284c7;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .hero-clean-meta-list a:hover {
+      text-decoration: underline;
+    }
+
+    .hero-stat-card {
+      text-align: center;
+      border-radius: 10px;
+      padding: 0.65rem 1.1rem;
+      min-width: 135px;
+      transition: transform 0.15s ease;
+    }
+    .hero-stat-card:hover {
+      transform: translateY(-2px);
+    }
+    .hero-stat-card.negotiation {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #c2410c;
+    }
+    .hero-stat-card.calls {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      color: #0369a1;
+    }
+    .hero-stat-card.budget {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #15803d;
+    }
+
+    .hero-stat-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .hero-stat-val {
+      font-size: 1.3rem;
+      font-weight: 900;
+    }
+
+    .hero-clean-actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    /* Quick Action Cards Strip */
+    .quick-action-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .quick-action-card-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .quick-action-card-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .quick-action-card-btn.call-action {
+      border-color: #bae6fd;
+      color: #0369a1;
+      background: #f8fafc;
+    }
+    .quick-action-card-btn.call-action:hover {
+      background: #f0f9ff;
+      border-color: #7dd3fc;
+    }
+    .quick-action-card-btn.neg-action {
+      border-color: #fed7aa;
+      color: #c2410c;
+      background: #f8fafc;
+    }
+    .quick-action-card-btn.neg-action:hover {
+      background: #fff7ed;
+      border-color: #fdba74;
+    }
+    .quick-action-card-btn.quote-action {
+      border-color: #e9d5ff;
+      color: #7e22ce;
+      background: #f8fafc;
+    }
+    .quick-action-card-btn.quote-action:hover {
+      background: #faf5ff;
+      border-color: #d8b4fe;
+    }
+
+    /* 2-Column Nested Layout */
+    .nested-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.25rem;
+    }
+    @media (max-width: 960px) {
+      .nested-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-lg, 10px);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .info-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .info-card-title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.85rem;
+      font-size: 0.84rem;
+    }
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+    .info-label {
+      color: #64748b;
+      font-weight: 600;
+      width: 110px;
+      flex-shrink: 0;
+    }
+    .info-val {
+      color: var(--text-main, #0f172a);
+      font-weight: 600;
+      text-align: right;
+      word-break: break-word;
+      flex: 1;
+    }
+
+    /* Timeline Stream on Nested Page */
+    .timeline-stream {
+      position: relative;
+      padding-left: 32px;
+      margin-top: 1rem;
+    }
+    .timeline-stream::before {
+      content: '';
+      position: absolute;
+      left: 13px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: #e2e8f0;
+    }
+    .timeline-stream-item {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+    .timeline-stream-item:last-child {
+      margin-bottom: 0;
+    }
+    .timeline-stream-dot {
+      position: absolute;
+      left: -32px;
+      top: 2px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .timeline-stream-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .timeline-stream-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .timeline-stream-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.35rem;
+    }
+
+    .timeline-filter-pills {
+      display: inline-flex;
+      background: #f1f5f9;
+      padding: 2px;
+      border-radius: 6px;
+      gap: 2px;
+    }
+    .timeline-filter-pill {
+      border: none;
+      background: transparent;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+    }
+    .timeline-filter-pill.active {
+      background: #ffffff;
+      color: var(--primary, #e11d48);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+        <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png';" alt="DG" class="brand-mini-icon" style="display:none; width:36px; height:36px; object-fit:contain; border-radius:8px; background:none; box-shadow:none;">
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item active"><a href="enquiries.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Enquiries</a></li>
+        <li class="nav-item"><a href="meetings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg> Meetings</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
+        <li class="nav-item"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item"><a href="salary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Salary</a></li>
+        <li class="nav-item"><a href="miscellaneous.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Miscellaneous</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search..." id="globalQuickSearch">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount">1</span>
+            </button>
+          </div>
+
+          <!-- User Profile -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle"><span>AD</span></div>
+              <div class="topbar-user-text">
+                <span class="user-name">D-GROW Admin</span>
+                <span class="user-role-badge">ADMIN</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Navigation Breadcrumb & Back Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:#64748b;">
+          <a href="enquiries.html" style="color:var(--primary, #e11d48); font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Enquiries
+          </a>
+          <span>/</span>
+          <span>Lead Details</span>
+          <span>/</span>
+          <span style="font-weight:700; color:var(--text-main);" id="breadcrumbTitle">Enquiry</span>
+        </div>
+      </div>
+
+      <!-- Main Nested Page Container -->
+      <div id="enquiryNestedPageContent">
+        <div style="padding: 3rem; text-align:center; color:#64748b;">
+          <div class="spinner" style="margin:0 auto 1rem auto; width:36px; height:36px; border:3px solid #e2e8f0; border-top-color:#e11d48; border-radius:50%; animation: spin 0.8s linear infinite;"></div>
+          Loading complete enquiry profile & negotiation records...
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MANUAL CALL LOG MODAL -->
+  <div class="modal-overlay" id="manualCallLogModal">
+    <div class="modal-box" style="max-width: 540px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.4rem;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0284c7" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Log Manual Call Interaction
+        </h3>
+        <button type="button" class="modal-close" onclick="closeManualCallLogModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="manualCallLogForm" onsubmit="submitManualCallLog(event)">
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Call Type / Direction *</label>
+            <select id="callLogType" class="form-select" required>
+              <option value="Outbound Call">Outbound Call (We Called)</option>
+              <option value="Inbound Call">Inbound Call (Client Called)</option>
+              <option value="WhatsApp Call">WhatsApp Audio/Video Call</option>
+              <option value="Site Meeting">In-Person / Site Meeting</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Call Duration</label>
+            <select id="callLogDuration" class="form-select">
+              <option value="2 mins">Quick (2 mins)</option>
+              <option value="5 mins" selected>5 mins</option>
+              <option value="10 mins">10 mins</option>
+              <option value="15 mins">15 mins</option>
+              <option value="30 mins">30 mins</option>
+              <option value="45+ mins">45+ mins (Deep Discussion)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label class="form-label">Call Outcome / Response *</label>
+          <select id="callLogOutcome" class="form-select" onchange="handleCallOutcomeChange(this.value)" required>
+            <option value="Connected: Interested & Requirements Discussed">Connected: Interested & Requirements Discussed</option>
+            <option value="Connected: Requested Quotation / Proposal">Connected: Requested Quotation / Proposal</option>
+            <option value="Connected: Price / Terms Negotiation">Connected: Price / Terms Negotiation</option>
+            <option value="Callback Requested / Rescheduled">Callback Requested / Rescheduled</option>
+            <option value="Not Reachable / Busy / Left Message">Not Reachable / Busy / Left Message</option>
+            <option value="Not Interested / Closed">Not Interested / Closed</option>
+          </select>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1.2fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Call Summary / Title *</label>
+            <input type="text" id="callLogTitle" class="form-input" placeholder="e.g. Discussed local SEO scope & 3-month package" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Next Follow-Up Date</label>
+            <input type="date" id="callLogFollowUp" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.85rem;">
+          <label class="form-label">Discussion Notes & Action Items</label>
+          <textarea id="callLogNotes" class="form-input" rows="3" placeholder="Key points discussed, client objections, requested changes, or next steps..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem; background:#f8fafc; padding:0.6rem 0.8rem; border-radius:6px; border:1px solid #e2e8f0;">
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; font-weight:600; color:var(--text-main); cursor:pointer;">
+            <input type="checkbox" id="callLogAutoStatus" checked style="accent-color:var(--primary);">
+            <span>Auto-update lead status based on call outcome</span>
+          </label>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeManualCallLogModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitCallLog" style="background:linear-gradient(135deg, #0284c7, #0369a1); border:none; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Call Log to History
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT ENQUIRY MODAL -->
+  <div class="modal-overlay" id="editEnquiryModal">
+    <div class="modal-box" style="max-width: 580px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:var(--text-main);">Edit Enquiry Details</h3>
+        <button type="button" class="modal-close" onclick="closeEditEnquiryModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="editEnquiryForm" onsubmit="submitEditEnquiry(event)">
+        <input type="hidden" id="editEnqId">
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Contact Person Name *</label>
+            <input type="text" id="editEnqName" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile Number *</label>
+            <input type="text" id="editEnqMobile" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Business / Company Name *</label>
+            <input type="text" id="editEnqBusiness" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="editEnqEmail" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Lead Source *</label>
+            <select id="editEnqSource" class="form-select" onchange="toggleMarketingPersonField('editEnqSource', 'editEnqRepContainer')" required>
+              <option value="WEBSITE">Website Contact Form</option>
+              <option value="CALL">Inbound Phone Call</option>
+              <option value="GMB">Google My Business (GMB)</option>
+              <option value="ADS">Paid Ads (Meta / Google)</option>
+              <option value="MARKETING_PERSON">By Marketing Person</option>
+              <option value="OTHER">Other Direct Referral</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lead Status</label>
+            <select id="editEnqStatus" class="form-select">
+              <option value="NEW">New Lead</option>
+              <option value="IN_DISCUSSION">In Discussion</option>
+              <option value="QUOTATION_SENT">Quotation Sent</option>
+              <option value="NEGOTIATION">In Negotiation</option>
+              <option value="ONBOARDED">Onboarded / Won</option>
+              <option value="LOST">Lost</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="editEnqRepContainer" style="display:none; margin-bottom:0.75rem; background:#faf5ff; padding:0.6rem 0.8rem; border-radius:6px; border:1px solid #e9d5ff;">
+          <label class="form-label" style="color:#6b21a8; font-weight:700;">Marketing Person Name</label>
+          <input type="text" id="editEnqMarketingPerson" class="form-input">
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1.5fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Services Interested</label>
+            <input type="text" id="editEnqServices" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimated Budget (₹)</label>
+            <input type="number" id="editEnqBudget" class="form-input" min="0">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem;">
+          <label class="form-label">Notes</label>
+          <textarea id="editEnqNotes" class="form-input" rows="2"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditEnquiryModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitEditEnquiry">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/enquiry-view.js"></script>
+</body>
+</html>

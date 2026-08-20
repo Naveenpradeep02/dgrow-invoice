@@ -17,6 +17,8 @@ const settingsRoutes = require('./src/routes/settingsRoutes');
 const auditRoutes = require('./src/routes/auditRoutes');
 const reportRoutes = require('./src/routes/reportRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
+const enquiryRoutes = require('./src/routes/enquiryRoutes');
+const meetingRoutes = require('./src/routes/meetingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,6 +46,8 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/audit-logs', auditRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/enquiries', enquiryRoutes);
+app.use('/api/meetings', meetingRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

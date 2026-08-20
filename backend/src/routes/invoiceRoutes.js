@@ -22,17 +22,43 @@ router.get('/:id/pdf', authenticateToken, async (req, res) => {
       return res.status(403).send('Unauthorized');
     }
 
+    if (req.user.role === 'AUDITOR' && invoice.invoice_type !== 'GST') {
+      return res.status(403).send('Unauthorized access to non-GST invoice');
+    }
+
     const items = await db.query('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY item_order ASC', [invoice.id]);
+    const payments = await db.query('SELECT * FROM payments WHERE invoice_id = ? ORDER BY payment_date ASC, created_at ASC', [invoice.id]);
     const company = await db.query('SELECT * FROM company_settings WHERE id = 1');
     const terms = await db.query('SELECT * FROM invoice_terms WHERE id = 1');
     const clientSnapshot = invoice.client_snapshot_json ? JSON.parse(invoice.client_snapshot_json) : {};
+
+    // Compute live paid and balance amounts
+    const paid = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+    const grandTotal = parseFloat(invoice.grand_total || 0);
+    const balance = Math.max(0, grandTotal - paid);
+
+    let currentStatus = invoice.status;
+    if (invoice.status !== 'CANCELLED' && invoice.status !== 'DRAFT') {
+      if (paid >= grandTotal && grandTotal > 0) {
+        currentStatus = 'PAID';
+      } else if (paid > 0 && paid < grandTotal) {
+        currentStatus = 'PARTIALLY_PAID';
+      }
+    }
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename=${invoice.invoice_number}.pdf`);
 
     generateInvoicePDF(res, {
-      invoice: { ...invoice, client_snapshot: clientSnapshot },
+      invoice: {
+        ...invoice,
+        status: currentStatus,
+        paid_amount: paid,
+        balance_amount: balance,
+        client_snapshot: clientSnapshot
+      },
       items,
+      payments: payments || [],
       company: company[0] || {},
       terms: terms[0] || {}
     });

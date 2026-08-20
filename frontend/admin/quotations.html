@@ -188,10 +188,13 @@
     <aside class="sidebar">
       <div class="brand-header">
         <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+        <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png';" alt="DG" class="brand-mini-icon" style="display:none; width:36px; height:36px; object-fit:contain; border-radius:8px; background:none; box-shadow:none;">
       </div>
 
       <ul class="nav-list">
         <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="enquiries.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Enquiries</a></li>
+        <li class="nav-item"><a href="meetings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg> Meetings</a></li>
         <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
         <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
         <li class="nav-item active"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
@@ -350,8 +353,13 @@
           <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:260px;">
             <input type="text" id="quoteSearchInput" class="form-input" placeholder="Search by Quote # (QUO00...), client name, or service..." oninput="applyQuotationFilters()" style="width:100%;">
           </div>
-          <div style="display:flex; align-items:center; gap:0.5rem;">
-            <select id="quoteStatusFilter" class="form-select" onchange="applyQuotationFilters()">
+          <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <select id="quoteGstFilter" class="form-select" onchange="applyQuotationFilters()" style="min-width:160px;">
+              <option value="">All GST Types</option>
+              <option value="WITH_GST">With GST (18%)</option>
+              <option value="WITHOUT_GST">Without GST (0%)</option>
+            </select>
+            <select id="quoteStatusFilter" class="form-select" onchange="applyQuotationFilters()" style="min-width:150px;">
               <option value="">All Statuses</option>
               <option value="DRAFT">Draft</option>
               <option value="SENT">Sent to Client</option>
@@ -374,6 +382,7 @@
                 <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">CLIENT / PROSPECT</th>
                 <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">DATE & VALIDITY</th>
                 <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">SERVICES & SCOPE</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.75rem; font-weight:700; color:#475569;">BILL MODE</th>
                 <th style="padding:0.75rem 1rem; text-align:right; font-size:0.75rem; font-weight:700; color:#475569;">QUOTE AMOUNT</th>
                 <th style="padding:0.75rem 1rem; text-align:center; font-size:0.75rem; font-weight:700; color:#475569;">STATUS</th>
                 <th style="padding:0.75rem 1rem; text-align:right; font-size:0.75rem; font-weight:700; color:#475569;">ACTIONS</th>
@@ -400,6 +409,7 @@
 
       <form id="quotationForm" onsubmit="handleSaveQuotation(event)">
         <input type="hidden" id="modalQuoteEditId" value="">
+        <input type="hidden" id="modalQuoteEnquiryId" value="">
 
         <div style="display:flex; flex-direction:column; gap:0.85rem;">
           
@@ -415,8 +425,8 @@
 
             <div id="sectionExistingClient" style="display:block;">
               <div class="form-group" style="margin:0;">
-                <label class="form-label required" style="font-size:0.8rem;">Select Client</label>
-                <select id="modalQuoteClientSelect" class="form-select">
+                <label class="form-label required" style="font-size:0.78rem;">Select Client / Prospect</label>
+                <select id="modalQuoteClientSelect" class="form-select" style="font-weight:600;">
                   <!-- Populated dynamically -->
                 </select>
               </div>
@@ -424,25 +434,25 @@
 
             <!-- New Non-onboarded lead fields -->
             <div id="sectionNewLeadClient" style="display:none; margin-top:0.5rem; padding-top:0.5rem; border-top:1px dashed #cbd5e1;">
-              <div class="modal-grid-2" style="margin-bottom:0.6rem;">
+              <div class="modal-grid-2" style="margin-bottom:0.5rem;">
                 <div class="form-group" style="margin:0;">
-                  <label class="form-label required" style="font-size:0.78rem;">Company / Client Name</label>
-                  <input type="text" id="newLeadCompany" class="form-input" placeholder="e.g. Acme Tech Innovations">
+                  <label class="form-label required" style="font-size:0.78rem;">Company / Business Name</label>
+                  <input type="text" id="newLeadCompany" class="form-input" placeholder="e.g. Skyline Logistics">
                 </div>
                 <div class="form-group" style="margin:0;">
                   <label class="form-label" style="font-size:0.78rem;">Contact Person</label>
-                  <input type="text" id="newLeadPerson" class="form-input" placeholder="e.g. Rahul Sharma">
+                  <input type="text" id="newLeadPerson" class="form-input" placeholder="e.g. Rajesh Kumar">
                 </div>
               </div>
 
-              <div class="modal-grid-3" style="margin-bottom:0.6rem;">
+              <div class="modal-grid-3" style="margin-bottom:0.5rem;">
                 <div class="form-group" style="margin:0;">
-                  <label class="form-label required" style="font-size:0.78rem;">Mobile / WhatsApp</label>
-                  <input type="tel" id="newLeadMobile" class="form-input" placeholder="9876543210">
+                  <label class="form-label required" style="font-size:0.78rem;">Mobile Number</label>
+                  <input type="tel" id="newLeadMobile" class="form-input" placeholder="9840112233">
                 </div>
                 <div class="form-group" style="margin:0;">
                   <label class="form-label" style="font-size:0.78rem;">Email Address</label>
-                  <input type="email" id="newLeadEmail" class="form-input" placeholder="contact@company.com">
+                  <input type="email" id="newLeadEmail" class="form-input" placeholder="contact@skyline.com">
                 </div>
                 <div class="form-group" style="margin:0;">
                   <label class="form-label" style="font-size:0.78rem;">GSTIN (Optional)</label>
@@ -484,6 +494,27 @@
             </div>
           </div>
 
+          <!-- PROPOSAL BILL MODE: WITH GST vs WITHOUT GST -->
+          <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:0.85rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.35rem;">
+              <label class="form-label required" style="font-size:0.82rem; font-weight:800; color:var(--text-main, #0f172a); margin:0;">
+                Proposal Bill Mode (Tax Application):
+              </label>
+              <span id="quoteGstModeHelpText" style="font-size:0.75rem; color:#0369a1; font-weight:700;">18% GST (CGST 9% + SGST 9%)</span>
+            </div>
+            <div class="period-toggle-group" style="display:flex; background:#e2e8f0; padding:0.25rem; border-radius:6px; gap:0.35rem; border:1px solid #cbd5e1;">
+              <button type="button" class="period-toggle-btn active" id="btnQuoteWithGst" onclick="setQuoteGstMode('WITH_GST')" style="flex:1; text-align:center; font-weight:700; font-size:0.84rem; padding:0.45rem 0.6rem; display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                With GST (18% Tax)
+              </button>
+              <button type="button" class="period-toggle-btn" id="btnQuoteWithoutGst" onclick="setQuoteGstMode('WITHOUT_GST')" style="flex:1; text-align:center; font-weight:700; font-size:0.84rem; padding:0.45rem 0.6rem; display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                Without GST (0% / Non-GST)
+              </button>
+            </div>
+            <input type="hidden" id="modalQuoteGstRate" value="18">
+          </div>
+
           <!-- Services / Line Items Section -->
           <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:0.85rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
@@ -521,22 +552,26 @@
           </div>
 
           <!-- Totals Calculation Summary -->
-          <div class="modal-grid-2" style="align-items:flex-start;">
-            <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.8rem;">GST Tax Rate</label>
-              <select id="modalQuoteGstRate" class="form-select" onchange="calculateQuotationTotals()">
-                <option value="18">18% GST (Standard)</option>
-                <option value="0">0% (Exempted / Zero Tax)</option>
-                <option value="5">5% GST</option>
-                <option value="12">12% GST</option>
-              </select>
+          <div style="background:#f1f5f9; padding:0.85rem 1rem; border-radius:8px; border:1px solid #cbd5e1; text-align:right;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#64748b; margin-bottom:0.25rem;">
+              <span>Base Subtotal:</span>
+              <strong id="quoteModalOriginalSubtotal" style="color:#0f172a;">₹0</strong>
             </div>
-            <div style="background:#f1f5f9; padding:0.75rem; border-radius:6px; border:1px solid #cbd5e1; text-align:right;">
-              <div style="font-size:0.78rem; color:#64748b; margin-bottom:0.2rem;">Original Base Subtotal: <strong id="quoteModalOriginalSubtotal" style="color:#0f172a;">₹0</strong></div>
-              <div style="font-size:0.78rem; color:#b45309; margin-bottom:0.2rem;" id="quoteModalDiscountRow">Negotiation Discount: <strong id="quoteModalDiscountSummary">-₹0</strong></div>
-              <div style="font-size:0.78rem; color:#64748b; margin-bottom:0.2rem;">Taxable Subtotal: <strong id="quoteModalSubtotal" style="color:#0f172a;">₹0</strong></div>
-              <div style="font-size:0.78rem; color:#64748b; margin-bottom:0.2rem;">GST Tax (18%): <strong id="quoteModalGst" style="color:#0f172a;">₹0</strong></div>
-              <div style="font-size:1.05rem; font-weight:800; color:#15803d; border-top:1px solid #cbd5e1; padding-top:0.3rem;">Final Proposal Total: <span id="quoteModalGrandTotal">₹0</span></div>
+            <div style="display:none; justify-content:space-between; font-size:0.8rem; color:#b45309; margin-bottom:0.25rem;" id="quoteModalDiscountRow">
+              <span>Negotiation Discount:</span>
+              <strong id="quoteModalDiscountSummary">-₹0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#64748b; margin-bottom:0.25rem;">
+              <span>Taxable Subtotal:</span>
+              <strong id="quoteModalSubtotal" style="color:#0f172a;">₹0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#0369a1; margin-bottom:0.25rem;" id="quoteModalGstRow">
+              <span id="quoteModalGstLabel">GST Tax (18%):</span>
+              <strong id="quoteModalGst" style="color:#0369a1;">₹0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:900; color:#15803d; border-top:1.5px solid #cbd5e1; padding-top:0.4rem; margin-top:0.35rem;">
+              <span>Final Proposal Total:</span>
+              <span id="quoteModalGrandTotal">₹0</span>
             </div>
           </div>
 
@@ -872,13 +907,55 @@
       const stored = localStorage.getItem('dgrow_quotations_v2');
       if (stored) {
         try { 
-          quotationsList = JSON.parse(stored); 
+          quotationsList = JSON.parse(stored);
+          // Auto-repair any missing client name or gstRate in stored items
+          quotationsList.forEach((q, idx) => {
+            if (!q.client || q.client.trim() === '') {
+              q.client = q.company_name || q.client_name || 'Sundaram Silk Sarees';
+            }
+            if (q.gstRate === undefined || q.gstRate === null) {
+              q.gstRate = 18;
+            }
+          });
         } catch(e){}
       } else {
         saveQuotationsStorage();
       }
 
       applyQuotationFilters();
+
+      // Check if redirected from Enquiries with prefill
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlEnqId = urlParams.get('enquiry_id');
+        const prefillStr = sessionStorage.getItem('dgrow_quote_prefill');
+        
+        if (prefillStr || urlEnqId) {
+          const prefill = prefillStr ? JSON.parse(prefillStr) : {};
+          const activeEnquiryId = urlEnqId || prefill.enquiry_id || '';
+          
+          openCreateQuotationModal();
+          if (activeEnquiryId) {
+            document.getElementById('modalQuoteEnquiryId').value = activeEnquiryId;
+          }
+
+          switchClientSelectionMode('NEW_LEAD');
+          if (document.getElementById('newLeadCompany')) document.getElementById('newLeadCompany').value = prefill.business_name || prefill.client_name || '';
+          if (document.getElementById('newLeadPerson')) document.getElementById('newLeadPerson').value = prefill.client_name || '';
+          if (document.getElementById('newLeadMobile')) document.getElementById('newLeadMobile').value = prefill.mobile || '';
+          if (document.getElementById('newLeadEmail')) document.getElementById('newLeadEmail').value = prefill.email || '';
+          
+          if (prefill.services || prefill.budget) {
+            const container = document.getElementById('quoteLineItemsContainer');
+            if (container) {
+              container.innerHTML = '';
+              addQuoteLineItem(prefill.services || 'Digital Marketing Retainer', 'Custom Proposal based on Lead Inquiry #' + (activeEnquiryId || ''), '998311', 1, parseFloat(prefill.budget || 30000));
+            }
+          }
+          calculateQuotationTotals();
+          showToast('Prefilled with Lead details for ' + (prefill.business_name || prefill.client_name || 'Lead') + '!', 'info');
+        }
+      } catch(e) {}
     });
 
     function handleGlobalSearch(e) {
@@ -961,6 +1038,32 @@
       }
     }
 
+    function setQuoteGstMode(mode) {
+      const btnWith = document.getElementById('btnQuoteWithGst');
+      const btnWithout = document.getElementById('btnQuoteWithoutGst');
+      const rateInput = document.getElementById('modalQuoteGstRate');
+      const helpText = document.getElementById('quoteGstModeHelpText');
+
+      if (mode === 'WITH_GST') {
+        if (btnWith) btnWith.classList.add('active');
+        if (btnWithout) btnWithout.classList.remove('active');
+        if (rateInput) rateInput.value = '18';
+        if (helpText) {
+          helpText.textContent = '18% GST (CGST 9% + SGST 9%)';
+          helpText.style.color = '#0369a1';
+        }
+      } else {
+        if (btnWithout) btnWithout.classList.add('active');
+        if (btnWith) btnWith.classList.remove('active');
+        if (rateInput) rateInput.value = '0';
+        if (helpText) {
+          helpText.textContent = 'Non-GST Proposal (0% Tax / Direct)';
+          helpText.style.color = '#64748b';
+        }
+      }
+      calculateQuotationTotals();
+    }
+
     function openCreateQuotationModal() {
       document.getElementById('quotationForm').reset();
       document.getElementById('modalQuoteEditId').value = '';
@@ -971,11 +1074,11 @@
       const quoteNum = generateNextQuotationNumber();
       document.getElementById('modalQuoteNumber').value = quoteNum;
       document.getElementById('modalQuoteStatus').value = 'SENT';
-      document.getElementById('modalQuoteGstRate').value = '18';
       document.getElementById('modalQuoteNegotiationPercent').value = '0';
       document.getElementById('modalQuoteNegotiationAmount').value = '0';
       document.getElementById('modalQuoteNotes').value = '1. 50% advance required upon work approval.\n2. Timeline: Project kickoff within 2 business days of advance.';
 
+      setQuoteGstMode('WITH_GST');
       switchClientSelectionMode('EXISTING');
 
       // Clear & add 1 default line item
@@ -1058,18 +1161,33 @@
       const taxableSubtotal = Math.max(0, baseSubtotal - discount);
 
       const gstRate = parseFloat(document.getElementById('modalQuoteGstRate')?.value) || 0;
-      const gstAmount = (taxableSubtotal * gstRate) / 100;
+      const isWithGst = gstRate > 0;
+      const gstAmount = isWithGst ? (taxableSubtotal * gstRate) / 100 : 0;
       const grandTotal = taxableSubtotal + gstAmount;
 
       document.getElementById('quoteModalOriginalSubtotal').textContent = '₹' + baseSubtotal.toLocaleString('en-IN');
       document.getElementById('quoteModalDiscountSummary').textContent = '-₹' + discount.toLocaleString('en-IN');
       document.getElementById('quoteModalDiscountDisplay').textContent = '-₹' + discount.toLocaleString('en-IN');
       document.getElementById('quoteModalSubtotal').textContent = '₹' + taxableSubtotal.toLocaleString('en-IN');
-      document.getElementById('quoteModalGst').textContent = '₹' + Math.round(gstAmount).toLocaleString('en-IN');
+
+      const gstLabel = document.getElementById('quoteModalGstLabel');
+      const gstVal = document.getElementById('quoteModalGst');
+      if (gstLabel && gstVal) {
+        if (isWithGst) {
+          gstLabel.textContent = `GST Tax (${gstRate}%):`;
+          gstVal.textContent = '₹' + Math.round(gstAmount).toLocaleString('en-IN');
+          gstVal.style.color = '#0369a1';
+        } else {
+          gstLabel.textContent = `GST Tax (0% Non-GST):`;
+          gstVal.textContent = '₹0 (Without GST)';
+          gstVal.style.color = '#64748b';
+        }
+      }
+
       document.getElementById('quoteModalGrandTotal').textContent = '₹' + Math.round(grandTotal).toLocaleString('en-IN');
 
       const discRow = document.getElementById('quoteModalDiscountRow');
-      if (discRow) discRow.style.display = discount > 0 ? 'block' : 'none';
+      if (discRow) discRow.style.display = discount > 0 ? 'flex' : 'none';
     }
 
     async function handleSaveQuotation(e) {
@@ -1171,12 +1289,14 @@
         return;
       }
 
+      const enquiryId = document.getElementById('modalQuoteEnquiryId')?.value || '';
+
       if (editId) {
         const idx = quotationsList.findIndex(q => q.id === parseInt(editId));
         if (idx !== -1) {
           quotationsList[idx] = { 
             ...quotationsList[idx], 
-            client, contactPerson, mobile, email, address, gstin, isLead,
+            client, contactPerson, mobile, email, address, gstin, isLead, enquiryId: enquiryId || quotationsList[idx].enquiryId,
             quoteNumber, date, validUntil, status, gstRate, negotiationPercent, negotiationAmount, notes, items 
           };
           showToast(`Quotation ${quoteNumber} updated successfully!`, 'success');
@@ -1192,6 +1312,7 @@
           address,
           gstin,
           isLead,
+          enquiryId: enquiryId || null,
           date,
           validUntil,
           items,
@@ -1203,6 +1324,27 @@
         };
         quotationsList.unshift(newQuote);
         showToast(`Quotation ${quoteNumber} created for ${client}!`, 'success');
+
+        // Auto-sync to Enquiry Timeline & Status
+        if (enquiryId && typeof apiFetch === 'function') {
+          const subtotal = items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+          const gst = Math.round((subtotal * (parseFloat(gstRate) || 0)) / 100);
+          const grandTotal = subtotal + gst;
+
+          apiFetch(`/enquiries/${enquiryId}/timeline`, {
+            method: 'POST',
+            body: JSON.stringify({
+              event_type: 'QUOTATION',
+              title: `Quotation Generated: ${quoteNumber}`,
+              details: `• Proposal #${quoteNumber} issued for ₹${grandTotal.toLocaleString('en-IN')} (${gstRate > 0 ? 'With 18% GST' : 'Without GST'})\n• Line Items: ${items.map(it => it.description).join(', ')}\n• Valid Until: ${validUntil}\n• Status: SENT`
+            })
+          }).catch(err => console.warn('Could not auto-log quotation to enquiry:', err));
+
+          apiFetch(`/enquiries/${enquiryId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: 'QUOTATION_SENT' })
+          }).catch(err => console.warn('Could not auto-update enquiry status:', err));
+        }
       }
 
       saveQuotationsStorage();
@@ -1220,10 +1362,12 @@
       document.getElementById('modalQuoteDate').value = q.date;
       document.getElementById('modalQuoteValidUntil').value = q.validUntil;
       document.getElementById('modalQuoteStatus').value = q.status;
-      document.getElementById('modalQuoteGstRate').value = q.gstRate || '18';
       document.getElementById('modalQuoteNegotiationPercent').value = q.negotiationPercent || '0';
       document.getElementById('modalQuoteNegotiationAmount').value = q.negotiationAmount || '0';
       document.getElementById('modalQuoteNotes').value = q.notes || '';
+
+      const isWithGst = (parseFloat(q.gstRate) !== 0);
+      setQuoteGstMode(isWithGst ? 'WITH_GST' : 'WITHOUT_GST');
 
       switchClientSelectionMode('EXISTING');
       document.getElementById('modalQuoteClientSelect').value = q.client;
@@ -1267,12 +1411,13 @@
       const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
       const disc = parseFloat(document.getElementById('quickNegAmountInput').value) || 0;
       const taxable = Math.max(0, baseSubtotal - disc);
-      const gst = (taxable * (q.gstRate || 18)) / 100;
+      const gstRate = parseFloat(q.gstRate || 0);
+      const gst = (taxable * gstRate) / 100;
       const grandTotal = Math.round(taxable + gst);
 
       document.getElementById('quickNegOriginalAmount').textContent = '₹' + baseSubtotal.toLocaleString('en-IN');
       document.getElementById('quickNegDiscountAmount').textContent = '-₹' + disc.toLocaleString('en-IN');
-      document.getElementById('quickNegFinalTotal').textContent = '₹' + grandTotal.toLocaleString('en-IN');
+      document.getElementById('quickNegFinalTotal').textContent = '₹' + grandTotal.toLocaleString('en-IN') + (gstRate > 0 ? ' (Incl. 18% GST)' : ' (Non-GST)');
     }
 
     function handleQuickNegPercentChange() {
@@ -1319,6 +1464,28 @@
       applyQuotationFilters();
       closeQuickNegotiationModal();
       showToast(`Negotiation updated (${percent}% discount applied) for ${q.quoteNumber}!`, 'success');
+
+      // Auto-sync negotiation to Enquiry Timeline
+      if (q.enquiryId && typeof apiFetch === 'function') {
+        const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
+        const finalSubtotal = Math.max(0, baseSubtotal - amount);
+        const gst = Math.round((finalSubtotal * (parseFloat(q.gstRate || 0)) / 100));
+        const finalGrandTotal = finalSubtotal + gst;
+
+        apiFetch(`/enquiries/${q.enquiryId}/timeline`, {
+          method: 'POST',
+          body: JSON.stringify({
+            event_type: 'NEGOTIATION',
+            title: `Quotation Negotiation: ${q.quoteNumber}`,
+            details: `• Negotiation discount applied: ${percent}% (-₹${amount.toLocaleString('en-IN')})\n• Revised Deal Value: ₹${finalGrandTotal.toLocaleString('en-IN')}\n${note ? `• Negotiation notes: ${note}` : ''}`
+          })
+        }).catch(err => console.warn('Could not auto-log negotiation to enquiry:', err));
+
+        apiFetch(`/enquiries/${q.enquiryId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: 'NEGOTIATION' })
+        }).catch(err => console.warn('Could not auto-update enquiry status:', err));
+      }
     }
 
     // OPEN CONVERT TO INVOICE & ONBOARD CLIENT POPUP MODAL
@@ -1327,7 +1494,7 @@
       if (!q) return;
 
       document.getElementById('convQuoteId').value = q.id;
-      document.getElementById('convModalSubtitle').textContent = `Quotation ${q.quoteNumber} → Official Tax Invoice`;
+      document.getElementById('convModalSubtitle').textContent = `Quotation ${q.quoteNumber} → Official Invoice`;
 
       // Fill client fields
       document.getElementById('convClientName').value = q.client || '';
@@ -1338,24 +1505,13 @@
       document.getElementById('convAddress').value = q.address || 'Chennai, Tamil Nadu, India.';
       document.getElementById('convAutoOnboardCheck').checked = true;
 
-      // Invoice configuration defaults
-      document.getElementById('convInvoiceType').value = (q.gstRate && q.gstRate > 0) ? 'GST' : 'NON_GST';
-      document.getElementById('convPaymentTerms').value = 'SINGLE';
-      document.getElementById('convPlaceOfSupply').value = 'Tamil Nadu';
-      document.getElementById('convInvoiceDate').value = todayISO;
-      document.getElementById('convDueDate').value = getFutureDateISO(7);
+      // Auto-detect GST type from quotation
+      const isWithGst = (parseFloat(q.gstRate) !== 0);
+      if (document.getElementById('convInvoiceType')) {
+        document.getElementById('convInvoiceType').value = isWithGst ? 'GST' : 'NON_GST';
+      }
 
-      // Line items list preview
-      const itemsListDiv = document.getElementById('convItemsList');
-      itemsListDiv.innerHTML = q.items.map((it, idx) => `
-        <div style="display:flex; justify-content:space-between; margin-bottom:0.2rem;">
-          <span><strong>${idx + 1}.</strong> ${escapeHtml(it.description)} (x${it.qty})</span>
-          <span>₹${(it.qty * it.rate).toLocaleString('en-IN')}</span>
-        </div>
-      `).join('');
-      document.getElementById('convItemsCount').textContent = `${q.items.length} service item(s)`;
-
-      recalculateConvTotals();
+      calculateConvertInvoiceTotals();
       document.getElementById('convertInvoiceModal').classList.add('active');
     }
 
@@ -1363,7 +1519,7 @@
       document.getElementById('convertInvoiceModal').classList.remove('active');
     }
 
-    function recalculateConvTotals() {
+    function calculateConvertInvoiceTotals() {
       const quoteId = parseInt(document.getElementById('convQuoteId').value);
       const q = quotationsList.find(item => item.id === quoteId);
       if (!q) return;
@@ -1374,12 +1530,12 @@
 
       const invType = document.getElementById('convInvoiceType').value;
       const isGST = (invType === 'GST' || invType === 'GST_CLIENT');
-      const gstAmount = isGST ? (taxable * (q.gstRate || 18)) / 100 : 0;
+      const gstAmount = isGST ? (taxable * 18) / 100 : 0;
       const grandTotal = Math.round(taxable + gstAmount);
 
       document.getElementById('convBaseSubtotal').textContent = '₹' + baseSubtotal.toLocaleString('en-IN');
       document.getElementById('convDiscountAmount').textContent = '-₹' + discount.toLocaleString('en-IN');
-      document.getElementById('convGstAmount').textContent = isGST ? ('₹' + Math.round(gstAmount).toLocaleString('en-IN') + ' (18%)') : '₹0 (Zero Tax)';
+      document.getElementById('convGstAmount').textContent = isGST ? ('₹' + Math.round(gstAmount).toLocaleString('en-IN') + ' (18%)') : '₹0 (Zero Tax / Non-GST)';
       document.getElementById('convGrandTotal').textContent = '₹' + grandTotal.toLocaleString('en-IN');
 
       const discRow = document.getElementById('convDiscountRow');
@@ -1499,6 +1655,28 @@
       }
     }
 
+    // Number to Words Converter for Indian Rupee
+    function formatINRWords(num) {
+      const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      function inWords(n) {
+        if ((n = n.toString()).length > 9) return 'overflow';
+        let nArray = ('000000000' + n).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!nArray) return '';
+        let str = '';
+        str += (nArray[1] != 0) ? (a[Number(nArray[1])] || b[nArray[1][0]] + ' ' + a[nArray[1][1]]) + 'Crore ' : '';
+        str += (nArray[2] != 0) ? (a[Number(nArray[2])] || b[nArray[2][0]] + ' ' + a[nArray[2][1]]) + 'Lakh ' : '';
+        str += (nArray[3] != 0) ? (a[Number(nArray[3])] || b[nArray[3][0]] + ' ' + a[nArray[3][1]]) + 'Thousand ' : '';
+        str += (nArray[4] != 0) ? (a[Number(nArray[4])] || b[nArray[4][0]] + ' ' + a[nArray[4][1]]) + 'Hundred ' : '';
+        str += (nArray[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(nArray[5])] || b[nArray[5][0]] + ' ' + a[nArray[5][1]]) : '';
+        return str.trim();
+      }
+
+      const words = inWords(Math.round(num));
+      return words ? `Indian Rupees ${words} Only.` : 'Indian Rupees Zero Only.';
+    }
+
     // Official Exact Invoice-Layout Generator
     function previewExactQuotation(id) {
       const q = quotationsList.find(item => item.id === id);
@@ -1507,16 +1685,33 @@
       const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
       const discount = q.negotiationAmount || 0;
       const taxableSubtotal = Math.max(0, baseSubtotal - discount);
-      const gstAmount = (taxableSubtotal * (q.gstRate || 18)) / 100;
-      const grandTotal = Math.round(taxableSubtotal + gstAmount);
 
-      const itemsHtml = q.items.map((it, idx) => {
+      const isWithGst = (parseFloat(q.gstRate) !== 0);
+      const gstRate = isWithGst ? (parseFloat(q.gstRate) || 18) : 0;
+      const gstAmount = isWithGst ? (taxableSubtotal * gstRate) / 100 : 0;
+      const grandTotal = Math.round(taxableSubtotal + gstAmount);
+      const cgst = isWithGst ? Math.round(gstAmount / 2) : 0;
+      const sgst = isWithGst ? (Math.round(gstAmount) - cgst) : 0;
+
+      const itemsHtml = (q.items || []).map((it, idx) => {
         const subList = Array.isArray(it.subDetails) ? it.subDetails : (it.subDetails ? String(it.subDetails).split(',') : []);
+        const rawHsn = it.hsnSac || it.hsn_sac || it.hsn;
+        const validHsn = (rawHsn && String(rawHsn) !== '0' && String(rawHsn) !== 'null' && String(rawHsn) !== 'undefined') ? String(rawHsn).trim() : '998311';
+        
+        let itemAmt = 0;
+        if (it.qty !== undefined && it.rate !== undefined) {
+          itemAmt = (parseFloat(it.qty) || 1) * (parseFloat(it.rate) || 0);
+        } else if (it.taxable_amount !== undefined) {
+          itemAmt = parseFloat(it.taxable_amount) || 0;
+        } else if (it.amount !== undefined) {
+          itemAmt = parseFloat(it.amount) || 0;
+        }
+
         return `
           <tr>
             <td style="text-align:center; font-weight:700;">${idx + 1}</td>
-            <td style="font-weight:700; color:#111827; vertical-align:top;">${escapeHtml(it.description)}</td>
-            <td style="text-align:center; vertical-align:top; color:#4b5563;">${escapeHtml(it.hsnSac || '998311')}</td>
+            <td style="font-weight:700; color:#111827; vertical-align:top;">${escapeHtml(it.description || it.serviceName || 'Digital Marketing')}</td>
+            <td style="text-align:center; vertical-align:top; color:#4b5563;">${escapeHtml(validHsn)}</td>
             <td style="vertical-align:top;">
               ${subList.length > 0 ? `
                 <ul class="inv-details-list">
@@ -1524,7 +1719,7 @@
                 </ul>
               ` : `<span style="color:#9ca3af;">-</span>`}
             </td>
-            <td style="text-align:right; font-weight:700; color:#111827; vertical-align:top;">₹${(it.qty * it.rate).toLocaleString('en-IN')}</td>
+            <td style="text-align:right; font-weight:700; color:#111827; vertical-align:top;">₹${itemAmt.toLocaleString('en-IN')}</td>
           </tr>
         `;
       }).join('');
@@ -1534,8 +1729,8 @@
           <!-- Agency Header -->
           <div class="inv-agency-header">
             <div class="inv-brand-left">
-              <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="max-height: 48px; max-width: 200px; object-fit: contain;">
-              <div class="inv-agency-details" style="margin-left: 10px;">
+              <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency Logo" style="height:56px; width:auto; object-fit:contain; flex-shrink:0;">
+              <div class="inv-agency-details" style="margin-left:14px; border-left:2px solid #e2e8f0; padding-left:14px;">
                 <h2>D-GROW MARKETING AGENCY</h2>
                 <p><strong>GSTIN Number:</strong> 33OUUPS5195G1ZJ</p>
                 <p><strong>Address:</strong> SF No: 14/3, Plot No. 141, Radha Ave Main Rd, Ganga Nagar, Valasaravakkam, Chennai - 600087</p>
@@ -1544,8 +1739,13 @@
               </div>
             </div>
             <div class="inv-title-right">
-              <h1 style="font-size:24px; color:#0284c7;">TAX QUOTATION</h1>
-              <span style="font-size:11px; font-weight:bold; color:#64748b; letter-spacing:0.5px;">ESTIMATE & PROPOSAL</span>
+              ${isWithGst ? `
+                <h1 style="font-size:24px; color:#0284c7;">TAX QUOTATION</h1>
+                <span style="font-size:11px; font-weight:bold; color:#64748b; letter-spacing:0.5px;">ESTIMATE & PROPOSAL (WITH 18% GST)</span>
+              ` : `
+                <h1 style="font-size:22px; color:#475569;">COMMERCIAL PROPOSAL</h1>
+                <span style="font-size:11px; font-weight:bold; color:#64748b; letter-spacing:0.5px;">ESTIMATE & QUOTATION (NON-GST)</span>
+              `}
             </div>
           </div>
 
@@ -1559,6 +1759,7 @@
             </div>
             <div>
               <div class="inv-info-row"><span class="inv-info-label">Place of Supply</span><span class="inv-info-val">: Tamil Nadu (33)</span></div>
+              <div class="inv-info-row"><span class="inv-info-label">Bill Mode</span><span class="inv-info-val">: <strong>${isWithGst ? 'With GST (18%)' : 'Without GST (Non-GST / 0%)'}</strong></span></div>
               <div class="inv-info-row"><span class="inv-info-label">Payment Terms</span><span class="inv-info-val">: 50% Advance Upon Signing</span></div>
             </div>
           </div>
@@ -1601,8 +1802,8 @@
           <div class="inv-totals-grid">
             <div class="inv-words-box">
               <div class="inv-words-title">Total In Words</div>
-              <div class="inv-words-text">Indian Rupees ${grandTotal.toLocaleString('en-IN')} Only.</div>
-              ${q.notes ? `<div style="margin-top:8px; font-size:9.5px; color:#475569;"><strong>Notes / Negotiation:</strong><br>${escapeHtml(q.notes).replace(/\n/g, '<br>')}</div>` : ''}
+              <div class="inv-words-text">${formatINRWords(grandTotal)}</div>
+              ${q.notes ? `<div style="margin-top:8px; font-size:9.5px; color:#475569;"><strong>Notes & Conditions:</strong><br>${escapeHtml(q.notes).replace(/\n/g, '<br>')}</div>` : ''}
             </div>
             <div>
               <table class="inv-totals-table">
@@ -1611,9 +1812,16 @@
                   <tr style="color:#b45309;"><td class="total-label">Negotiation Discount (${q.negotiationPercent || 0}%)</td><td class="total-amount">-₹${discount.toLocaleString('en-IN')}</td></tr>
                   <tr><td class="total-label">Taxable Subtotal</td><td class="total-amount">₹${taxableSubtotal.toLocaleString('en-IN')}</td></tr>
                 ` : ''}
-                <tr><td class="total-label">CGST (9%)</td><td class="total-amount">₹${Math.round(gstAmount / 2).toLocaleString('en-IN')}</td></tr>
-                <tr><td class="total-label">SGST (9%)</td><td class="total-amount">₹${Math.round(gstAmount / 2).toLocaleString('en-IN')}</td></tr>
-                <tr class="inv-grand-total-row"><td>Total Proposal Value</td><td style="text-align:right;">₹${grandTotal.toLocaleString('en-IN')}</td></tr>
+                ${isWithGst ? `
+                  <tr><td class="total-label">CGST (9%)</td><td class="total-amount">₹${cgst.toLocaleString('en-IN')}</td></tr>
+                  <tr><td class="total-label">SGST (9%)</td><td class="total-amount">₹${sgst.toLocaleString('en-IN')}</td></tr>
+                ` : `
+                  <tr style="color:#64748b;"><td class="total-label">GST (0% Non-GST)</td><td class="total-amount">₹0</td></tr>
+                `}
+                <tr class="inv-grand-total-row">
+                  <td>Total Proposal Value</td>
+                  <td style="text-align:right;">₹${grandTotal.toLocaleString('en-IN')}</td>
+                </tr>
               </table>
             </div>
           </div>
@@ -1662,6 +1870,7 @@
     function applyQuotationFilters() {
       const search = (document.getElementById('quoteSearchInput')?.value || '').toLowerCase().trim();
       const statusFilter = document.getElementById('quoteStatusFilter')?.value;
+      const gstFilter = document.getElementById('quoteGstFilter')?.value;
 
       const filtered = quotationsList.filter(q => {
         const matchesSearch = !search || 
@@ -1671,7 +1880,13 @@
           q.items.some(it => it.description.toLowerCase().includes(search));
 
         const matchesStatus = !statusFilter || q.status === statusFilter;
-        return matchesSearch && matchesStatus;
+
+        let matchesGst = true;
+        const isWithGst = (parseFloat(q.gstRate) !== 0);
+        if (gstFilter === 'WITH_GST') matchesGst = isWithGst;
+        if (gstFilter === 'WITHOUT_GST') matchesGst = !isWithGst;
+
+        return matchesSearch && matchesStatus && matchesGst;
       });
 
       renderQuotationsTable(filtered);
@@ -1685,7 +1900,7 @@
       if (records.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-muted, #64748b);">
+            <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted, #64748b);">
               No quotations found matching the selected criteria.
             </td>
           </tr>
@@ -1694,10 +1909,14 @@
       }
 
       tbody.innerHTML = records.map(q => {
-        const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
-        const discount = q.negotiationAmount || 0;
+        const baseSubtotal = (q.items && q.items.length > 0) 
+          ? q.items.reduce((sum, it) => sum + ((parseFloat(it.qty) || 1) * (parseFloat(it.rate) || 0)), 0) 
+          : 0;
+        const discount = parseFloat(q.negotiationAmount) || 0;
         const taxable = Math.max(0, baseSubtotal - discount);
-        const gstAmount = (taxable * (q.gstRate || 18)) / 100;
+        const isWithGst = (q.gstRate === undefined || q.gstRate === null) ? true : (Number(q.gstRate) > 0);
+        const gstRate = isWithGst ? (Number(q.gstRate) || 18) : 0;
+        const gstAmount = isWithGst ? (taxable * gstRate) / 100 : 0;
         const grandTotal = Math.round(taxable + gstAmount);
 
         let statusClass = 'status-badge-draft';
@@ -1707,7 +1926,10 @@
         if (q.status === 'CONVERTED') statusClass = 'status-badge-converted';
         if (q.status === 'REJECTED') statusClass = 'status-badge-rejected';
 
-        const servicesStr = q.items.map(it => it.description).join(', ');
+        const servicesStr = (q.items && q.items.length > 0) 
+          ? q.items.map(it => it.description || it.serviceName || 'Service').join(', ') 
+          : 'Digital Marketing Retainer';
+        const clientName = q.client || q.client_name || q.company_name || 'Client / Lead';
 
         return `
           <tr style="border-bottom:1px solid #f1f5f9;">
@@ -1716,19 +1938,30 @@
             </td>
             <td style="padding:0.75rem 1rem; vertical-align:middle;">
               <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.15rem;">
-                <strong style="color:#0f172a; font-size:0.9rem;">${escapeHtml(q.client)}</strong>
+                <strong style="color:#0f172a; font-size:0.9rem;">${escapeHtml(clientName)}</strong>
                 ${q.isLead ? `<span class="client-type-lead">Non-Onboarded Lead</span>` : `<span class="client-type-onboarded">Onboarded</span>`}
               </div>
-              <span style="font-size:0.78rem; color:#64748b;">${escapeHtml(q.contactPerson || '')} ${q.mobile ? '• ' + escapeHtml(q.mobile) : ''}</span>
+              <span style="font-size:0.78rem; color:#64748b;">${escapeHtml(q.contactPerson || q.contact_person || '')} ${q.mobile ? '• ' + escapeHtml(q.mobile) : ''}</span>
             </td>
             <td style="padding:0.75rem 1rem; vertical-align:middle;">
               <span style="font-size:0.82rem; color:#334155; font-weight:600; display:block;">${escapeHtml(q.date)}</span>
-              <span style="font-size:0.73rem; color:#64748b;">Valid: ${escapeHtml(q.validUntil)}</span>
+              <span style="font-size:0.73rem; color:#64748b;">Valid: ${escapeHtml(q.validUntil || '')}</span>
             </td>
             <td style="padding:0.75rem 1rem; vertical-align:middle; max-width:220px;">
               <div style="font-size:0.82rem; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeAttr(servicesStr)}">
                 ${escapeHtml(servicesStr)}
               </div>
+            </td>
+            <td style="padding:0.75rem 1rem; vertical-align:middle;">
+              ${isWithGst ? `
+                <span class="badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-weight:700; font-size:0.72rem;">
+                  With GST (18%)
+                </span>
+              ` : `
+                <span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem;">
+                  Without GST (0%)
+                </span>
+              `}
             </td>
             <td style="padding:0.75rem 1rem; vertical-align:middle; text-align:right;">
               <strong style="color:#15803d; font-size:1.05rem; font-weight:900;">₹${grandTotal.toLocaleString('en-IN')}</strong>
@@ -1786,7 +2019,9 @@
         const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
         const discount = q.negotiationAmount || 0;
         const taxable = Math.max(0, baseSubtotal - discount);
-        const total = Math.round(taxable + ((taxable * (q.gstRate || 18)) / 100));
+        const isWithGst = (parseFloat(q.gstRate) !== 0);
+        const gstRate = isWithGst ? (parseFloat(q.gstRate) || 18) : 0;
+        const total = Math.round(taxable + ((taxable * gstRate) / 100));
         totalPipeline += total;
 
         if (q.status === 'APPROVED' || q.status === 'CONVERTED') {

@@ -35,6 +35,14 @@ async function getAuditLogs(req, res) {
 async function getInvoiceAuditHistory(req, res) {
   try {
     const { invoiceId } = req.params;
+
+    if (req.user.role === 'AUDITOR') {
+      const invCheck = await db.query('SELECT invoice_type FROM invoices WHERE id = ? OR invoice_number = ?', [invoiceId, invoiceId]);
+      if (invCheck[0] && invCheck[0].invoice_type !== 'GST') {
+        return res.status(403).json({ success: false, message: 'Unauthorized access to non-GST invoice audit history.' });
+      }
+    }
+
     const logs = await db.query(
       `SELECT * FROM audit_logs 
        WHERE entity_type = 'INVOICE' AND entity_id = ? 

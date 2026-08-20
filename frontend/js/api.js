@@ -106,12 +106,18 @@ async function apiFetch(endpoint, options = {}) {
     ...options.headers
   };
 
+  let body = options.body;
+  if (body && typeof body === 'object' && !(body instanceof FormData)) {
+    body = JSON.stringify(body);
+  }
+
   startTopLoader();
 
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {
       ...options,
-      headers
+      headers,
+      body
     });
 
     const contentType = res.headers.get('content-type') || '';

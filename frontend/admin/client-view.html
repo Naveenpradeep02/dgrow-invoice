@@ -1,0 +1,604 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client 360° Profile & History - D-GROW Invoice System</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="../css/invoice.css">
+  <style>
+    /* D-GROW Clean White Theme for Client 360 View */
+    .client-hero-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-top: 4px solid var(--primary, #e11d48);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    .hero-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .hero-profile-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2);
+      flex-shrink: 0;
+    }
+    .hero-meta-strip {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 0.35rem;
+    }
+    .hero-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .hero-meta-item a {
+      color: #0284c7;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .hero-meta-item a:hover {
+      text-decoration: underline;
+    }
+    .hero-actions-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    /* 6-Metric Stat Summary Grid */
+    .kpi-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 1200px) {
+      .kpi-summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 640px) {
+      .kpi-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .kpi-card.billed { border-top: 3px solid #0284c7; }
+    .kpi-card.paid { border-top: 3px solid #16a34a; background: #f0fdf4; }
+    .kpi-card.pending { border-top: 3px solid #ea580c; background: #fff7ed; }
+    .kpi-card.ads { border-top: 3px solid #9333ea; background: #faf5ff; }
+    .kpi-card.meetings { border-top: 3px solid #0891b2; }
+    .kpi-card.calls { border-top: 3px solid #64748b; }
+
+    .kpi-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 2px;
+    }
+    .kpi-value {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--text-main, #0f172a);
+    }
+
+    /* 360-Degree Tab Navigation */
+    .hub-tabs-bar {
+      display: flex;
+      gap: 0.35rem;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 1.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 0px;
+    }
+    .hub-tabs-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .hub-tab-btn {
+      border: none;
+      background: transparent;
+      padding: 0.65rem 1rem;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      border-radius: 6px 6px 0 0;
+    }
+    .hub-tab-btn:hover {
+      color: var(--primary, #e11d48);
+      background: #fff1f2;
+    }
+    .hub-tab-btn.active {
+      color: var(--primary, #e11d48);
+      border-bottom-color: var(--primary, #e11d48);
+      background: #ffffff;
+    }
+    .tab-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .hub-tab-btn.active .tab-badge {
+      background: #ffe4e6;
+      color: #e11d48;
+    }
+
+    /* Content Cards */
+    .tab-content-panel {
+      display: none;
+    }
+    .tab-content-panel.active {
+      display: block;
+    }
+
+    .hub-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: var(--radius-lg, 12px);
+      padding: 0;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .hub-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.15rem 1.35rem 0.9rem 1.35rem;
+      border-bottom: 1px solid #f1f5f9;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .hub-card-body {
+      padding: 1.25rem 1.35rem;
+    }
+    .hub-card-title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    /* Table alignments */
+    .hub-card .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0;
+    }
+    .hub-card .table th {
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    .hub-card .table td {
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.86rem;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    .hub-card .table tbody tr:hover {
+      background-color: #fafbfc;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+        <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png';" alt="DG" class="brand-mini-icon" style="display:none; width:36px; height:36px; object-fit:contain; border-radius:8px; background:none; box-shadow:none;">
+      </div>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="enquiries.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Enquiries</a></li>
+        <li class="nav-item"><a href="meetings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg> Meetings</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
+        <li class="nav-item active"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item"><a href="salary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Salary</a></li>
+        <li class="nav-item"><a href="miscellaneous.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Miscellaneous</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search..." id="globalQuickSearch">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount">1</span>
+            </button>
+          </div>
+
+          <!-- User Profile -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle"><span>AD</span></div>
+              <div class="topbar-user-text">
+                <span class="user-name">D-GROW Admin</span>
+                <span class="user-role-badge">ADMIN</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Navigation Breadcrumb & Back Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:#64748b;">
+          <a href="clients.html" style="color:var(--primary, #e11d48); font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Clients Master
+          </a>
+          <span>/</span>
+          <span>Client 360° History</span>
+          <span>/</span>
+          <span style="font-weight:700; color:var(--text-main);" id="breadcrumbClientName">Client</span>
+        </div>
+      </div>
+
+      <!-- Main Client 360 Content Container -->
+      <div id="client360Content">
+        <div style="padding: 3rem; text-align:center; color:#64748b;">
+          <div class="spinner" style="margin:0 auto 1rem auto; width:36px; height:36px; border:3px solid #e2e8f0; border-top-color:#e11d48; border-radius:50%; animation: spin 0.8s linear infinite;"></div>
+          Loading complete client profile, financial dues, ad campaigns, meetings & call logs...
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. SCHEDULE / NOTE MEETING MODAL -->
+  <div class="modal-overlay" id="meetingModal">
+    <div class="modal-box" style="max-width: 550px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.4rem;" id="meetingModalTitle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0891b2" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Schedule / Record Client Meeting
+        </h3>
+        <button type="button" class="modal-close" onclick="closeMeetingModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="meetingForm" onsubmit="submitMeetingForm(event)">
+        <input type="hidden" id="meetingId">
+        
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label class="form-label">Meeting Title / Purpose *</label>
+          <input type="text" id="meetingTitle" class="form-input" placeholder="e.g. Monthly Performance Review & Q3 Retainer Plan" required>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Meeting Mode *</label>
+            <select id="meetingMode" class="form-select" onchange="handleMeetingModeChange(this.value)" required>
+              <option value="ONLINE">🌐 Online (Google Meet / Zoom)</option>
+              <option value="OFFLINE">🏢 Offline (Client Office / D-GROW)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="meetingStatus" class="form-select">
+              <option value="SCHEDULED">Scheduled</option>
+              <option value="DONE">Completed / Done</option>
+              <option value="RESCHEDULED">Rescheduled</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Meeting Date *</label>
+            <input type="date" id="meetingDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meeting Time *</label>
+            <input type="text" id="meetingTime" class="form-input" placeholder="e.g. 11:30 AM" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label class="form-label" id="meetingLocationLabel">Location Venue / Physical Address</label>
+          <input type="text" id="meetingLocation" class="form-input" placeholder="e.g. https://meet.google.com/xyz-abc or D-GROW Office, Valasaravakkam">
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label class="form-label">Agenda & Discussion Points</label>
+          <textarea id="meetingAgenda" class="form-input" rows="2" placeholder="Topics to cover, review items, deliverables to discuss..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem;">
+          <label class="form-label">Post-Meeting Minutes / Decision Notes</label>
+          <textarea id="meetingMinutesNotes" class="form-input" rows="2" placeholder="Agreed action points, client approvals, next milestones..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeMeetingModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitMeeting" style="font-weight:700;">
+            ✓ Save Meeting
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. POST-MEETING MINUTES UPDATE MODAL -->
+  <div class="modal-overlay" id="postMinutesModal">
+    <div class="modal-box" style="max-width: 520px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.4rem;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Update Meeting Minutes & Decisions
+        </h3>
+        <button type="button" class="modal-close" onclick="closePostMinutesModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="postMinutesForm" onsubmit="submitPostMinutes(event)">
+        <input type="hidden" id="postMinutesMeetingId">
+
+        <div style="background:#f8fafc; padding:0.65rem 0.85rem; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:0.85rem;">
+          <strong id="postMinutesMeetingTitle" style="color:var(--text-main); font-size:0.9rem; display:block;">Meeting</strong>
+          <span id="postMinutesMeetingMeta" style="font-size:0.75rem; color:#64748b;">Date & Time</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.85rem;">
+          <label class="form-label">Key Decisions, Client Approvals & Next Action Items *</label>
+          <textarea id="postMinutesText" class="form-input" rows="4" placeholder="Document what was agreed during the meeting, budget sign-offs, next deadline, feedback..." required></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem;">
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; font-weight:600; color:var(--text-main); cursor:pointer;">
+            <input type="checkbox" id="postMinutesMarkDone" checked style="accent-color:var(--primary);">
+            <span>Mark meeting as Completed (Done)</span>
+          </label>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closePostMinutesModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitMinutes" style="background:linear-gradient(135deg, #16a34a, #15803d); border:none; font-weight:700;">
+            ✓ Save Meeting Minutes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. ADD / EDIT AD CAMPAIGN MODAL -->
+  <div class="modal-overlay" id="adCampaignModal">
+    <div class="modal-box" style="max-width: 520px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.4rem;" id="adModalTitle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#7e22ce" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Add Live Ad Campaign
+        </h3>
+        <button type="button" class="modal-close" onclick="closeAdCampaignModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="adCampaignForm" onsubmit="submitAdCampaignForm(event)">
+        <input type="hidden" id="adCampaignId">
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label class="form-label">Campaign Name *</label>
+          <input type="text" id="adCampaignName" class="form-input" placeholder="e.g. Festive Leads Campaign - Advantage+ Reels" required>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Ad Platform *</label>
+            <select id="adPlatform" class="form-select" required>
+              <option value="META">Meta Ads (FB & Instagram)</option>
+              <option value="GOOGLE">Google Search & Performance Max</option>
+              <option value="INSTAGRAM">Instagram Dedicated</option>
+              <option value="YOUTUBE">YouTube Video Ads</option>
+              <option value="OTHER">Other Ad Network</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Campaign Status</label>
+            <select id="adStatus" class="form-select">
+              <option value="ACTIVE">Active (Running)</option>
+              <option value="PAUSED">Paused</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="DRAFT">Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Ad Fund Budget (₹) *</label>
+            <input type="number" id="adBudget" class="form-input" placeholder="e.g. 25000" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount Spent (₹)</label>
+            <input type="number" id="adSpent" class="form-input" placeholder="e.g. 14200" min="0" value="0">
+          </div>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Leads / Inquiries Generated</label>
+            <input type="number" id="adLeads" class="form-input" placeholder="e.g. 78" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Date</label>
+            <input type="date" id="adStartDate" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem;">
+          <label class="form-label">Strategy Notes & ROAS Observations</label>
+          <textarea id="adNotes" class="form-input" rows="2" placeholder="Target demographics, key creative hooks, cost per lead metrics..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeAdCampaignModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitAd" style="background:linear-gradient(135deg, #7e22ce, #6b21a8); border:none; font-weight:700;">
+            ✓ Save Campaign
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. MANUAL CALL LOG MODAL -->
+  <div class="modal-overlay" id="clientCallModal">
+    <div class="modal-box" style="max-width: 540px; border-radius: 12px; padding: 1.25rem 1.4rem;">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.4rem;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0284c7" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Log Manual Client Call
+        </h3>
+        <button type="button" class="modal-close" onclick="closeClientCallModal()" style="font-size:1.4rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <form id="clientCallForm" onsubmit="submitClientCallForm(event)">
+        <div class="form-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Call Type / Direction *</label>
+            <select id="clientCallType" class="form-select" required>
+              <option value="Outbound Call">Outbound Call (We Called)</option>
+              <option value="Inbound Call">Inbound Call (Client Called)</option>
+              <option value="WhatsApp Call">WhatsApp Audio/Video Call</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Call Duration</label>
+            <select id="clientCallDuration" class="form-select">
+              <option value="2 mins">Quick (2 mins)</option>
+              <option value="5 mins" selected>5 mins</option>
+              <option value="10 mins">10 mins</option>
+              <option value="15 mins">15 mins</option>
+              <option value="30 mins">30 mins</option>
+              <option value="45+ mins">45+ mins (Strategic Call)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label class="form-label">Call Purpose / Outcome *</label>
+          <select id="clientCallOutcome" class="form-select" required>
+            <option value="Campaign Performance Update">Campaign Performance Update</option>
+            <option value="Invoice & Payment Follow-up">Invoice & Payment Follow-up</option>
+            <option value="Service Deliverables Review">Service Deliverables Review</option>
+            <option value="Upsell / Additional Budget Discussion">Upsell / Additional Budget Discussion</option>
+            <option value="General Check-in / Support">General Check-in / Support</option>
+          </select>
+        </div>
+
+        <div class="form-grid" style="display:grid; grid-template-columns: 1.2fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Call Summary / Title *</label>
+            <input type="text" id="clientCallTitle" class="form-input" placeholder="e.g. Reviewed weekly Google Ads ROAS and budget" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Next Follow-Up Date</label>
+            <input type="date" id="clientCallFollowUp" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.15rem;">
+          <label class="form-label">Discussion Notes & Action Items</label>
+          <textarea id="clientCallNotes" class="form-input" rows="3" placeholder="Key points discussed, client requests, next tasks..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeClientCallModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitClientCall" style="background:linear-gradient(135deg, #0284c7, #0369a1); border:none; font-weight:700;">
+            ✓ Save Call Log
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/client-view.js"></script>
+</body>
+</html>

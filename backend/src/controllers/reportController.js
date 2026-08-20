@@ -62,7 +62,7 @@ async function getDashboardKPIs(req, res) {
       params.push(req.user.client_id || -1);
     }
     if (req.user.role === 'AUDITOR') {
-      whereClause += " AND i.invoice_type IN ('GST', 'GST_CLIENT')";
+      whereClause += " AND i.invoice_type = 'GST'";
     }
 
     const now = new Date();
@@ -164,7 +164,7 @@ async function getSalesReport(req, res) {
     const params = [];
 
     if (req.user.role === 'AUDITOR') {
-      sql += " AND i.invoice_type IN ('GST', 'GST_CLIENT')";
+      sql += " AND i.invoice_type = 'GST'";
     }
 
     if (from_date) { sql += ' AND i.invoice_date >= ?'; params.push(from_date); }
@@ -239,17 +239,24 @@ async function getGstReport(req, res) {
 async function getOutstandingReport(req, res) {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const sql = `
+    let sql = `
       SELECT i.id, i.invoice_number, i.invoice_date, i.due_date, i.grand_total, i.status,
              c.company_name, c.mobile, c.email,
              (SELECT COALESCE(SUM(p.amount), 0) FROM payments p WHERE p.invoice_id = i.id) as paid_amount
       FROM invoices i
       JOIN clients c ON i.client_id = c.id
       WHERE i.status != 'CANCELLED'
-      ORDER BY i.due_date ASC
     `;
+    const params = [];
+    if (req.user.role === 'AUDITOR') {
+      sql += " AND i.invoice_type = 'GST'";
+    } else if (req.user.role === 'CLIENT') {
+      sql += " AND i.client_id = ?";
+      params.push(req.user.client_id || -1);
+    }
+    sql += ' ORDER BY i.due_date ASC';
 
-    const invoices = await db.query(sql);
+    const invoices = await db.query(sql, params);
 
     const outstanding = invoices.map(inv => {
       const paid = parseFloat(inv.paid_amount || 0);
@@ -291,7 +298,7 @@ async function getMonthlyRevenueTrend(req, res) {
       params.push(req.user.client_id || -1);
     }
     if (req.user.role === 'AUDITOR') {
-      whereClause += " AND i.invoice_type IN ('GST', 'GST_CLIENT')";
+      whereClause += " AND i.invoice_type = 'GST'";
     }
 
     // Invoices by month

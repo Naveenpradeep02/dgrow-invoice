@@ -175,7 +175,7 @@ async function getAllInvoices(req, res) {
 
     // Auditor role protection: Tax Auditors only see GST Invoices
     if (req.user.role === 'AUDITOR') {
-      sql += " AND i.invoice_type IN ('GST', 'GST_CLIENT')";
+      sql += " AND i.invoice_type = 'GST'";
     }
 
     if (search) {
@@ -258,6 +258,11 @@ async function getInvoiceById(req, res) {
     // Role check for client
     if (req.user.role === 'CLIENT' && invoice.client_id !== req.user.client_id) {
       return res.status(403).json({ success: false, message: 'Unauthorized access to invoice.' });
+    }
+
+    // Role check for auditor: Tax Auditors only see GST Invoices
+    if (req.user.role === 'AUDITOR' && invoice.invoice_type !== 'GST') {
+      return res.status(403).json({ success: false, message: 'Unauthorized access to non-GST invoice.' });
     }
 
     const items = await db.query('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY item_order ASC', [invoice.id]);

@@ -1707,64 +1707,8 @@
       return d.toISOString().split('T')[0];
     }
 
-    // Full comprehensive dataset with multi-client, multi-campaign daily, weekly & monthly records + wallet flow
-    let miscRecords = [
-      // Marks Biotech - Multi-Day Wallet Flow & Carry-Forward Demo
-      { id: 101, title: 'Ad Wallet Top-up (August Inflow)', category: 'Ad Funds', subCategory: 'Client Wallet Deposit', flowType: 'DEPOSIT', client: 'Marks Biotech', metrics: 'Wallet Inflow', mode: 'Bank Transfer', amount: 25000, receipt: 'DEP-MB-01', date: getPastDateISO(3), month: '2026-08', status: 'PAID' },
-      { id: 102, title: 'Meta Ads - High Conversions CBO Ad Set (Day 1)', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Marks Biotech', metrics: '6 Campaigns | 140 Leads', mode: 'Corporate Card', amount: 12000, receipt: 'FB-MB-01', date: getPastDateISO(3), month: '2026-08', status: 'PAID' },
-      { id: 103, title: 'Google Ads - Search & Performance Max (Day 2)', category: 'Ad Funds', subCategory: 'Google Ads Only', flowType: 'SPEND', client: 'Marks Biotech', metrics: '3 Campaigns | 920 Clicks', mode: 'Corporate Card', amount: 8000, receipt: 'G-MB-02', date: getPastDateISO(2), month: '2026-08', status: 'PAID' },
-      { id: 104, title: 'Meta Ads - Retargeting & Brand Awareness (Day 3)', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Marks Biotech', metrics: '4 Campaigns | 210 Purchases', mode: 'Corporate Card', amount: 7500, receipt: 'FB-MB-03', date: getPastDateISO(1), month: '2026-08', status: 'PAID' },
-      { id: 105, title: 'Top-up Deposit & Overdraft Clearance (Today)', category: 'Ad Funds', subCategory: 'Client Wallet Deposit', flowType: 'DEPOSIT', client: 'Marks Biotech', metrics: 'Wallet Top-up', mode: 'UPI / GPay', amount: 15000, receipt: 'DEP-MB-02', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 106, title: 'Target Running Budget Allocation (Today)', category: 'Ad Funds', subCategory: 'Client Ad Fund', flowType: 'BUDGET', client: 'Marks Biotech', metrics: 'Daily Active Budget', mode: 'Corporate Card', amount: 10000, receipt: 'BUD-MB-01', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 107, title: 'Meta Ads - Scaling Campaign Today', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Marks Biotech', metrics: '5 Campaigns | 85 Leads', mode: 'Corporate Card', amount: 6500, receipt: 'FB-MB-04', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 120, title: 'Refund Unspent Balance to Client (Marks Biotech)', category: 'Ad Funds', subCategory: 'Refund / Balance Return', flowType: 'REFUND', client: 'Marks Biotech', metrics: 'Unspent Balance Refunded', mode: 'Bank Transfer / IMPS', amount: 3000, receipt: 'REFUND-MB-8801', date: getPastDateISO(1), month: '2026-08', status: 'PAID' },
-
-      // Acme Corporation - Today (Daily Ad Campaigns & Deposit)
-      { id: 108, title: 'Client Monthly Ad Budget Deposit', category: 'Ad Funds', subCategory: 'Client Wallet Deposit', flowType: 'DEPOSIT', client: 'Acme Corporation', metrics: 'Monthly Inflow', mode: 'Bank Transfer', amount: 50000, receipt: 'DEP-ACM-01', date: getPastDateISO(1), month: '2026-08', status: 'PAID' },
-      { id: 1, title: 'Meta Ads - Summer Retargeting CBO #01', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Acme Corporation', metrics: '124 Leads | ₹11.20 CPL | 5.2x ROAS', mode: 'Corporate Card', amount: 4500, receipt: 'FB-ACM-01', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 2, title: 'Meta Ads - Broad Lookalike 1% Scale Ad Set', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Acme Corporation', metrics: '88 Leads | ₹14.50 CPL', mode: 'Corporate Card', amount: 3500, receipt: 'FB-ACM-02', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 3, title: 'Google Search Ads - High Intent Brand Keywords', category: 'Ad Funds', subCategory: 'Google Ads Only', flowType: 'SPEND', client: 'Acme Corporation', metrics: '920 Clicks | ₹2.80 CPC | 6.1x ROAS', mode: 'Corporate Card', amount: 3800, receipt: 'G-ACM-03', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 4, title: 'Google Performance Max - Dynamic Product Catalog', category: 'Ad Funds', subCategory: 'Google Ads Only', flowType: 'SPEND', client: 'Acme Corporation', metrics: '45 Purchases | 4.8x ROAS', mode: 'Corporate Card', amount: 4200, receipt: 'G-ACM-04', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 5, title: 'Instagram Reels - Video Creative Hook Test #03', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Acme Corporation', metrics: '150K Impressions | 1,420 Clicks', mode: 'Corporate Card', amount: 2500, receipt: 'FB-ACM-05', date: todayISO, month: '2026-08', status: 'PAID' },
-
-      // TechNova Global - Today (Daily Ad Campaigns & Deposit)
-      { id: 109, title: 'B2B Q3 Media Spend Deposit', category: 'Ad Funds', subCategory: 'Client Wallet Deposit', flowType: 'DEPOSIT', client: 'TechNova Global', metrics: 'B2B Top-up', mode: 'Bank Transfer', amount: 40000, receipt: 'DEP-TN-01', date: getPastDateISO(2), month: '2026-08', status: 'PAID' },
-      { id: 6, title: 'Meta Ads - SaaS B2B Decision Maker Lead Gen', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'TechNova Global', metrics: '32 Qualified Leads | ₹85 CPL', mode: 'Corporate Card', amount: 6000, receipt: 'FB-TN-01', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 7, title: 'Google Search - Cloud Migration Solutions', category: 'Ad Funds', subCategory: 'Google Ads Only', flowType: 'SPEND', client: 'TechNova Global', metrics: '650 Clicks | ₹7.20 CPC', mode: 'Corporate Card', amount: 4800, receipt: 'G-TN-02', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 8, title: 'YouTube Pre-Roll Ads - 30s Brand Video', category: 'Ad Funds', subCategory: 'Google Ads Only', flowType: 'SPEND', client: 'TechNova Global', metrics: '75K Views | ₹0.40 CPV', mode: 'Corporate Card', amount: 3000, receipt: 'YT-TN-03', date: todayISO, month: '2026-08', status: 'PAID' },
-
-      // Apex Retail & Fashion - Today & Weekly Ad Campaigns
-      { id: 110, title: 'E-commerce Festive Campaign Deposit', category: 'Ad Funds', subCategory: 'Client Wallet Deposit', flowType: 'DEPOSIT', client: 'Apex Retail & Fashion', metrics: 'Campaign Fund', mode: 'Bank Transfer', amount: 30000, receipt: 'DEP-APX-01', date: getPastDateISO(3), month: '2026-08', status: 'PAID' },
-      { id: 9, title: 'Meta Ads - Festive Collection Catalog Carousel', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Apex Retail & Fashion', metrics: '1,850 Clicks | 110 Orders | 4.9x ROAS', mode: 'Corporate Card', amount: 8500, receipt: 'FB-APX-01', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 10, title: 'Meta Ads - Influencer User-Generated Content Test', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Apex Retail & Fashion', metrics: '84 Orders | 4.2x ROAS', mode: 'Corporate Card', amount: 5000, receipt: 'FB-APX-02', date: getPastDateISO(1), month: '2026-08', status: 'PAID' },
-      { id: 11, title: 'Google Search - Designer Apparel Store Near Me', category: 'Ad Funds', subCategory: 'Google Ads Only', flowType: 'SPEND', client: 'Apex Retail & Fashion', metrics: '980 Clicks | ₹3.10 CPC', mode: 'Corporate Card', amount: 4200, receipt: 'G-APX-03', date: getPastDateISO(2), month: '2026-08', status: 'PAID' },
-      { id: 12, title: 'Meta Ads - Abandoned Cart Dynamic Retargeting', category: 'Ad Funds', subCategory: 'Meta Ads Only', flowType: 'SPEND', client: 'Apex Retail & Fashion', metrics: '72 Recovered Carts | 8.5x ROAS', mode: 'Corporate Card', amount: 3500, receipt: 'FB-APX-04', date: getPastDateISO(3), month: '2026-08', status: 'PAID' },
-
-      // Operational, Food, Tech & General Expenses
-      { id: 13, title: 'Pantry Snacks, Fresh Juice & Morning Coffee', category: 'Food Expenses', subCategory: 'Tea / Coffee', client: '', metrics: '', mode: 'Cash / Petty Cash', amount: 450, receipt: 'Voucher #112', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 14, title: 'Fuel for Client On-Site Presentation Travel', category: 'Travel & Transport', subCategory: 'Petrol / Fuel', client: 'Apex Retail & Fashion', metrics: '', mode: 'UPI / GPay', amount: 800, receipt: 'HPCL #991', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 15, title: 'ChatGPT Team API & Image Rendering Usage', category: 'Software & Technology', subCategory: 'AI Tools', client: '', metrics: '', mode: 'Corporate Card', amount: 1200, receipt: 'OpenAI #891', date: todayISO, month: '2026-08', status: 'PAID' },
-      { id: 16, title: 'Adobe Creative Cloud & Figma Org Licenses', category: 'Software & Technology', subCategory: 'Software Subscription', client: '', metrics: '', mode: 'Corporate Card', amount: 9200, receipt: 'Attached', date: getPastDateISO(3), month: '2026-08', status: 'PAID' },
-      { id: 17, title: 'Sony FX3 & GM Master Cinema Lens Rental', category: 'Software & Technology', subCategory: 'Shooting Equipment Rent', client: 'Apex Retail & Fashion', metrics: '', mode: 'Bank Transfer', amount: 12000, receipt: 'RentVoucher #88', date: getPastDateISO(4), month: '2026-08', status: 'PAID' },
-      { id: 18, title: 'High-Speed Airtel Fiber Broadband', category: 'Office Expenses', subCategory: 'Internet', client: '', metrics: '', mode: 'UPI / GPay', amount: 2450, receipt: 'Airtel #1029', date: getPastDateISO(4), month: '2026-08', status: 'PAID' },
-      { id: 19, title: 'Office Electricity Bill (TNEB Commercial)', category: 'General Business', subCategory: 'EB Bill', client: '', metrics: '', mode: 'UPI / GPay', amount: 5600, receipt: 'EB-REC-9912', date: getPastDateISO(5), month: '2026-08', status: 'PAID' },
-      { id: 20, title: 'Strategic Growth & Campaign Strategy Lunch', category: 'Client-Related Expenses', subCategory: 'Client Food', client: 'TechNova Global', metrics: '', mode: 'Corporate Card', amount: 3600, receipt: 'Attached', date: getPastDateISO(5), month: '2026-08', status: 'PAID' },
-      { id: 21, title: 'Rapido Express Delivery for Project Hard Disks', category: 'Travel & Transport', subCategory: 'Rapido', client: '', metrics: '', mode: 'UPI / GPay', amount: 140, receipt: 'Rapido #9102', date: getPastDateISO(6), month: '2026-08', status: 'PAID' },
-      { id: 22, title: 'Chartered Accountant Quarterly GST & Audit Fee', category: 'General Business', subCategory: 'Auditor Bill', client: '', metrics: '', mode: 'Bank Transfer', amount: 8500, receipt: 'CA-INV-401', date: getPastDateISO(15), month: '2026-08', status: 'PAID' },
-      { id: 23, title: 'Q2 Top Campaign Lead Performance Incentive', category: 'Employee', subCategory: 'Incentive', client: '', metrics: '', mode: 'Bank Transfer', amount: 15000, receipt: 'Voucher #106', date: getPastDateISO(18), month: '2026-08', status: 'PAID' },
-      { id: 24, title: 'Monthly Commercial Office Space Rent', category: 'General Business', subCategory: 'Office Rent', client: '', metrics: '', mode: 'Bank Transfer', amount: 35000, receipt: 'RentReceipt #08', date: getPastDateISO(20), month: '2026-08', status: 'PAID' },
-      { id: 25, title: 'Executive Savings Transfer to Personal Account', category: 'Personal Expenses', subCategory: 'Personal Transfer', client: '', metrics: '', mode: 'Bank Transfer', amount: 25000, receipt: 'TRF-50100', date: getPastDateISO(22), month: '2026-08', status: 'PAID' },
-
-      // August 2026 - EMI & Loans (2 Completed / Paid, 5 Pending)
-      { id: 30, title: 'Bajaj - AC + Office Workstation (2nd)', category: 'EMI & Loans', subCategory: 'Bajaj', client: '', metrics: 'Due Date: 2nd of every month', mode: 'Bank Transfer / Auto-Debit', amount: 11160, receipt: 'BAJAJ-11160', date: '2026-08-02', month: '2026-08', status: 'PAID' },
-      { id: 28, title: 'Sri Ram Finance - Bike Monthly Due (5th)', category: 'EMI & Loans', subCategory: 'Sri Ram Finance', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / NACH', amount: 4879, receipt: 'SRF-4879', date: '2026-08-05', month: '2026-08', status: 'PAID' },
-      
-      { id: 26, title: 'Kissht - Mobile EMI (14th)', category: 'EMI & Loans', subCategory: 'Kissht', client: '', metrics: 'Due Date: 14th of every month', mode: 'Bank Transfer / Auto-Debit', amount: 6406, receipt: 'KISSHT-6406', date: '2026-08-14', month: '2026-08', status: 'PENDING' },
-      { id: 27, title: 'Money Overview - Amma Monthly Support (5th)', category: 'EMI & Loans', subCategory: 'Money Overview', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / UPI', amount: 5918, receipt: 'MO-5918', date: '2026-08-05', month: '2026-08', status: 'PENDING' },
-      { id: 29, title: 'Navi - Camera Upgrade EMI (5th)', category: 'EMI & Loans', subCategory: 'Navi', client: '', metrics: 'Due Date: 5th of every month', mode: 'Bank Transfer / Auto-Debit', amount: 5200, receipt: 'NAVI-5200', date: '2026-08-05', month: '2026-08', status: 'PENDING' },
-      { id: 31, title: 'IDFC Bank - Bike Monthly Due (5th)', category: 'EMI & Loans', subCategory: 'IDFC Bank', client: '', metrics: 'Bike Loan Monthly Installment', mode: 'Bank Transfer / Auto-Debit', amount: 3500, receipt: 'IDFC-3500', date: '2026-08-05', month: '2026-08', status: 'PENDING' },
-      { id: 32, title: 'Credit Card Bill - Office Upgradation (10th)', category: 'EMI & Loans', subCategory: 'Credit Card Bill', client: '', metrics: 'Office Setup & Studio Upgrades', mode: 'Corporate Card', amount: 18500, receipt: 'CC-18500', date: '2026-08-10', month: '2026-08', status: 'PENDING' }
-    ];
+    // Full dataset with multi-client, multi-campaign records
+    let miscRecords = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       loadCategoryHierarchy();
@@ -2160,15 +2104,7 @@
     // ==========================================
     // --- AD CAMPAIGNS DATA ENGINE & MODAL ---
     // ==========================================
-    let defaultAdCampaigns = [
-      { id: 1, client: 'Marks Biotech', name: 'Meta Ads - High Conversions CBO Ad Set', platform: 'Meta Ads Only', dailyBudget: 3500, status: 'ACTIVE', createdAt: todayISO },
-      { id: 2, client: 'Marks Biotech', name: 'Google Ads - Search & Performance Max', platform: 'Google Ads Only', dailyBudget: 2500, status: 'ACTIVE', createdAt: todayISO },
-      { id: 3, client: 'Marks Biotech', name: 'Meta Ads - Retargeting & Brand Awareness', platform: 'Meta Ads Only', dailyBudget: 2000, status: 'ACTIVE', createdAt: todayISO },
-      { id: 4, client: 'Acme Corporation', name: 'Meta Ads - Summer Retargeting CBO #01', platform: 'Meta Ads Only', dailyBudget: 4500, status: 'ACTIVE', createdAt: todayISO },
-      { id: 5, client: 'Acme Corporation', name: 'Google Performance Max - Dynamic Product Catalog', platform: 'Google Ads Only', dailyBudget: 4000, status: 'ACTIVE', createdAt: todayISO },
-      { id: 6, client: 'TechNova Global', name: 'Meta Ads - SaaS B2B Decision Maker Lead Gen', platform: 'Meta Ads Only', dailyBudget: 6000, status: 'ACTIVE', createdAt: todayISO },
-      { id: 7, client: 'Apex Retail & Fashion', name: 'Meta Ads - Festive Collection Catalog Carousel', platform: 'Meta Ads Only', dailyBudget: 8500, status: 'ACTIVE', createdAt: todayISO }
-    ];
+    let defaultAdCampaigns = [];
 
     let adCampaigns = [];
 
@@ -2178,10 +2114,10 @@
         try {
           adCampaigns = JSON.parse(stored);
         } catch(e) {
-          adCampaigns = [...defaultAdCampaigns];
+          adCampaigns = [];
         }
       } else {
-        adCampaigns = [...defaultAdCampaigns];
+        adCampaigns = [];
         saveAdCampaignsStorage();
       }
     }
@@ -5050,51 +4986,7 @@
       showToast('Generating ' + (reportMode === 'DAILY' ? 'Daily' : 'Monthly') + ' Ad Bill for ' + clientName + '...', 'success');
     }
 
-    // ==============================================================
-    // --- CUSTOM CLIENT AD BILL ENGINE (MATCHING 2ND IMAGE UI) ---
-    // ==============================================================
-    const defaultClientAdProfiles = {
-      'Marks Biotech': {
-        company: 'Marks Biotech',
-        person: 'Dr. Ramesh Kumar',
-        mobile: '9444109822',
-        email: 'info@marksbiotech.com',
-        address: 'Plot 88, Guindy Industrial Estate, Chennai - 600032',
-        gstin: '33OUUPS5195G1ZJ'
-      },
-      'Acme Corporation': {
-        company: 'Acme Corporation',
-        person: 'John Doe',
-        mobile: '9840192800',
-        email: 'billing@acme.com',
-        address: '12 MG Road, Chennai - 600001',
-        gstin: '33AAACM1234F1Z5'
-      },
-      'TechNova Global': {
-        company: 'TechNova Global',
-        person: 'Priya Sundar',
-        mobile: '9790123800',
-        email: 'accounts@technova.com',
-        address: '45 IT Highway, Chennai - 600113',
-        gstin: '33AABCT9988G1Z1'
-      },
-      'Sundaram Silk Sarees': {
-        company: 'Sundaram Silk Sarees',
-        person: 'K. Sundaram',
-        mobile: '9884099887',
-        email: 'contact@sundaramsilks.in',
-        address: '24 Usman Road, T. Nagar, Chennai - 600017',
-        gstin: '33AAAFS4567J1Z8'
-      },
-      'Apex Tech Labs': {
-        company: 'Apex Tech Labs',
-        person: 'Karthik Raja',
-        mobile: '9840192834',
-        email: 'karthik@apexlabs.com',
-        address: 'No 45, Tech Park Phase 2, OMR, Chennai - 600096',
-        gstin: '33AAACT9921B1Z2'
-      }
-    };
+    const defaultClientAdProfiles = {};
 
     let customBillItems = [];
 

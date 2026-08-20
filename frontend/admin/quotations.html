@@ -835,72 +835,7 @@
     let allAvailableClients = [];
 
     // Master Quotations List
-    let quotationsList = [
-      {
-        id: 1,
-        quoteNumber: 'QUO001',
-        client: 'Apex Tech Labs',
-        contactPerson: 'Karthik Raja',
-        mobile: '9840192834',
-        email: 'karthik@apexlabs.com',
-        address: 'No 45, Tech Park Phase 2, OMR, Chennai - 600096',
-        gstin: '33AAACT9921B1Z2',
-        isLead: true, // Non-onboarded prospect
-        date: todayISO,
-        validUntil: getFutureDateISO(15),
-        items: [
-          { description: 'Full-Funnel Performance Marketing Strategy', subDetails: ['Meta Ads Campaign Setup', 'Audience Research & Pixel Setup'], hsnSac: '998311', qty: 1, rate: 35000 },
-          { description: 'Content & High-ROAS Video Creative Production', subDetails: ['4 UGC Ad Creatives', 'Scriptwriting & Hook Editing'], hsnSac: '998312', qty: 1, rate: 25000 }
-        ],
-        negotiationPercent: 8,
-        negotiationAmount: 4800,
-        gstRate: 18,
-        notes: 'Includes 8% negotiation discount on 3-month growth retainer.',
-        status: 'NEGOTIATING'
-      },
-      {
-        id: 2,
-        quoteNumber: 'QUO002',
-        client: 'Zenith Retail Brands',
-        contactPerson: 'Meera Nambiar',
-        mobile: '9790123991',
-        email: 'growth@zenithbrands.in',
-        address: '12/4 Anna Salai, Mount Road, Chennai - 600002',
-        gstin: '33AABCF8812E1Z8',
-        isLead: true,
-        date: todayISO,
-        validUntil: getFutureDateISO(20),
-        items: [
-          { description: 'E-commerce Search Engine Optimization (SEO)', subDetails: ['Technical SEO Audit', 'Keyword Strategy', 'Product Schema Setup'], hsnSac: '998314', qty: 1, rate: 40000 }
-        ],
-        negotiationPercent: 0,
-        negotiationAmount: 0,
-        gstRate: 18,
-        notes: 'Valid for 20 days. 50% advance upon contract signing.',
-        status: 'SENT'
-      },
-      {
-        id: 3,
-        quoteNumber: 'QUO003',
-        client: 'Marks Biotech',
-        contactPerson: 'Dr. Ramesh Kumar',
-        mobile: '9444109822',
-        email: 'info@marksbiotech.com',
-        address: 'Plot 88, Guindy Industrial Estate, Chennai - 600032',
-        gstin: '33OUUPS5195G1ZJ',
-        isLead: false, // Already active client
-        date: '2026-08-05',
-        validUntil: '2026-08-20',
-        items: [
-          { description: 'Quarterly Lead Gen & Brand Awareness Campaign', subDetails: ['Google Search Ads', 'LinkedIn B2B Outreach'], hsnSac: '998311', qty: 1, rate: 50000 }
-        ],
-        negotiationPercent: 5,
-        negotiationAmount: 2500,
-        gstRate: 18,
-        notes: 'Converted to Official Tax Invoice #DG-INV-2026-091.',
-        status: 'CONVERTED'
-      }
-    ];
+    let quotationsList = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       await loadClientsDirectory();

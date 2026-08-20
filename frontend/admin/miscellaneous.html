@@ -683,6 +683,15 @@
             <input type="text" id="modalMiscTitle" class="form-input" placeholder="e.g. Petrol for client shoot / Meta Ads for TechNova" required>
           </div>
 
+          <!-- EMI & Loan Due Date Box (Shown for EMI & Loans) -->
+          <div class="form-group" id="modalMiscDueDateGroup" style="display:none; margin:0; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:0.65rem 0.75rem;">
+            <label class="form-label" style="font-size:0.78rem; font-weight:700; color:#15803d; display:flex; align-items:center; gap:0.35rem; margin-bottom:0.35rem;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              EMI Due Date / Recurring Monthly Day
+            </label>
+            <input type="text" id="modalMiscDueDate" class="form-input" placeholder="e.g. 14th of every month / Due Date: 20 Aug 2026" style="font-size:0.84rem; border-color:#86efac; background:#ffffff;">
+          </div>
+
           <!-- Special Client Picker (Visible for Client-Related Expenses or Ad Funds) -->
           <div id="modalClientSection" style="display:none; background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:0.75rem;">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.65rem;">
@@ -3337,6 +3346,12 @@
       } else {
         metricsGrp.style.display = 'none';
       }
+
+      // Check EMI due date group
+      const dueGrp = document.getElementById('modalMiscDueDateGroup');
+      if (dueGrp) {
+        dueGrp.style.display = (category === 'EMI & Loans' || category === 'EMI & Monthly Dues') ? 'block' : 'none';
+      }
     }
 
     // Custom Category & Sub-category Toggles & Handlers
@@ -3750,6 +3765,13 @@
       document.getElementById('modalMiscCategory').value = catToSet;
       populateSubCategories(catToSet);
 
+      const dueGrp = document.getElementById('modalMiscDueDateGroup');
+      if (dueGrp) {
+        dueGrp.style.display = (catToSet === 'EMI & Loans' || catToSet === 'EMI & Monthly Dues') ? 'block' : 'none';
+      }
+      const dueInput = document.getElementById('modalMiscDueDate');
+      if (dueInput) dueInput.value = '';
+
       const statusSelect = document.getElementById('modalMiscStatus');
       if (statusSelect) {
         statusSelect.value = (catToSet === 'EMI & Loans') ? 'PENDING' : 'PAID';
@@ -3781,6 +3803,15 @@
       document.getElementById('modalMiscCategory').value = record.category;
       populateSubCategories(record.category, record.subCategory);
 
+      const dueGrp = document.getElementById('modalMiscDueDateGroup');
+      if (dueGrp) {
+        dueGrp.style.display = (record.category === 'EMI & Loans' || record.category === 'EMI & Monthly Dues') ? 'block' : 'none';
+      }
+      const dueInput = document.getElementById('modalMiscDueDate');
+      if (dueInput) {
+        dueInput.value = record.dueDate || (record.metrics && record.metrics.includes('Due Date:') ? record.metrics.replace('Due Date: ', '') : '');
+      }
+
       document.getElementById('modalMiscTitle').value = record.title;
       document.getElementById('modalMiscAmount').value = record.amount;
       document.getElementById('modalMiscPaymentMode').value = record.mode;
@@ -3809,8 +3840,13 @@
       const date = document.getElementById('modalMiscDate').value;
       const receipt = document.getElementById('modalMiscReceipt').value.trim() || 'Attached';
       const client = document.getElementById('modalMiscClient').value;
-      const metrics = document.getElementById('modalMiscMetrics').value.trim();
+      let metrics = document.getElementById('modalMiscMetrics').value.trim();
+      const dueDate = document.getElementById('modalMiscDueDate')?.value.trim() || '';
       const status = document.getElementById('modalMiscStatus')?.value || ((category === 'EMI & Loans') ? 'PENDING' : 'PAID');
+
+      if ((category === 'EMI & Loans' || category === 'EMI & Monthly Dues') && dueDate) {
+        metrics = dueDate.startsWith('Due Date:') ? dueDate : `Due Date: ${dueDate}`;
+      }
 
       const monthCode = (date && date.length >= 7) ? date.substring(0, 7) : activeBillingMonth;
 
@@ -3824,6 +3860,7 @@
             subCategory,
             client,
             metrics,
+            dueDate,
             amount,
             mode,
             date,
@@ -3841,6 +3878,7 @@
           subCategory,
           client,
           metrics,
+          dueDate,
           amount,
           mode,
           date,
@@ -4653,7 +4691,14 @@
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; width:28%; min-width:240px;">' +
                   '<div style="font-weight:700; color:' + (isClosed ? '#64748b' : 'var(--text-main)') + '; font-size:0.88rem; line-height:1.35;">' + escapeHtml(r.title) + '</div>' +
-                  (r.metrics ? '<div class="metrics-snippet" style="white-space:nowrap; display:inline-flex; align-items:center; gap:0.25rem; font-size:0.74rem; margin-top:0.3rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> ' + escapeHtml(r.metrics) + '</div>' : '') +
+                  (isEmi ? (
+                    '<div class="metrics-snippet" style="white-space:nowrap; display:inline-flex; align-items:center; gap:0.3rem; font-size:0.74rem; margin-top:0.35rem; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700;">' +
+                      '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ' +
+                      escapeHtml(r.metrics && r.metrics.includes('Due Date:') ? r.metrics : (r.dueDate ? ('Due Date: ' + r.dueDate) : ('Due Date: ' + (dayNum ? (dayNum.replace('Day ', '').trim() + 'th of every month') : formatDate(r.date))))) +
+                    '</div>'
+                  ) : (
+                    r.metrics ? '<div class="metrics-snippet" style="white-space:nowrap; display:inline-flex; align-items:center; gap:0.25rem; font-size:0.74rem; margin-top:0.3rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> ' + escapeHtml(r.metrics) + '</div>' : ''
+                  )) +
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; text-align:center; white-space:nowrap; width:10%;">' +
                   (isEmi ? (

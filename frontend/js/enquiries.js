@@ -103,35 +103,116 @@ function renderSourceMetrics(sources = []) {
   if (!container) return;
 
   if (sources.length === 0) {
-    container.innerHTML = '<p class="text-muted" style="font-size:0.8rem;">No source activity recorded for this period.</p>';
+    container.innerHTML = '<p class="text-muted" style="font-size:0.8rem; padding:0.5rem 0;">No source activity recorded for this period.</p>';
     return;
   }
 
-  const sourceIconMap = {
-    WEBSITE: '🌐',
-    CALL: '📞',
-    GMB: '📍',
-    ADS: '📢',
-    MARKETING_PERSON: '👤',
-    OTHER: '⚡'
+  const channelConfig = {
+    WEBSITE: {
+      name: 'Websites',
+      icon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+      color: '#0284c7',
+      bg: '#f0f9ff',
+      border: '#bae6fd'
+    },
+    CALL: {
+      name: 'Phone Call',
+      icon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+      color: '#16a34a',
+      bg: '#f0fdf4',
+      border: '#bbf7d0'
+    },
+    GMB: {
+      name: 'Google My Business',
+      icon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+      color: '#d97706',
+      bg: '#fffbeb',
+      border: '#fde68a'
+    },
+    ADS: {
+      name: 'Paid Ads',
+      icon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`,
+      color: '#db2777',
+      bg: '#fdf2f8',
+      border: '#fbcfe8'
+    },
+    MARKETING_PERSON: {
+      name: 'Marketing Person',
+      icon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      color: '#7c3aed',
+      bg: '#faf5ff',
+      border: '#e9d5ff'
+    },
+    REFERRAL: {
+      name: 'Referral',
+      icon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"/><path d="M10 12l2 2 4-4"/></svg>`,
+      color: '#d97706',
+      bg: '#fffbeb',
+      border: '#fde68a'
+    },
+    OTHER: {
+      name: 'Other Sources',
+      icon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+      color: '#ea580c',
+      bg: '#fff7ed',
+      border: '#fed7aa'
+    }
   };
 
+  const arcLength = 113.1; // pi * R (R = 36)
+
   container.innerHTML = sources.map(s => {
-    const icon = sourceIconMap[s.source_key] || '🔹';
+    const cfg = channelConfig[s.source_key] || channelConfig.OTHER;
+    const convRate = parseFloat(s.conversion_rate) || 0;
+    const leadsCount = parseInt(s.total) || 0;
+    const wonCount = parseInt(s.onboarded) || 0;
+    
+    // Calculate SVG semi-circle dashoffset (from 113.1 at 0% to 0 at 100%)
+    const offset = arcLength - (arcLength * Math.min(100, Math.max(0, convRate)) / 100);
+    const gaugeColor = convRate > 0 ? (convRate >= 50 ? '#15803d' : cfg.color) : '#cbd5e1';
+
     return `
-      <div class="source-metric-item">
-        <div class="source-header">
-          <div class="source-title">
-            <span class="source-icon">${icon}</span>
-            <strong>${escapeAttr(s.label)}</strong>
+      <div class="source-gauge-card" style="border-top: 3.5px solid ${cfg.color};">
+        <div class="source-card-top">
+          <div class="source-icon-badge" style="background:${cfg.bg}; color:${cfg.color}; border:1px solid ${cfg.border};">
+            ${cfg.icon}
           </div>
-          <div class="source-stats">
-            <span class="source-count">${s.total} Leads</span>
-            <span class="source-converted text-success">(${s.onboarded} Won &bull; ${s.conversion_rate}%)</span>
-          </div>
+          <span class="source-card-title" title="${escapeAttr(s.label || cfg.name)}">${escapeAttr(s.label || cfg.name)}</span>
         </div>
-        <div class="source-progress-track">
-          <div class="source-progress-bar" style="width: ${Math.min(100, Math.max(8, s.share_of_total))}%"></div>
+
+        <!-- Semi-Circular Arch Gauge Speedometer -->
+        <div class="source-gauge-container" title="Conversion Rate: ${convRate}% (${wonCount}/${leadsCount} Won)">
+          <svg width="100" height="54" viewBox="0 0 100 54" style="display:block; overflow:visible;">
+            <defs>
+              <pattern id="gaugeHatch_${s.source_key}" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <line x1="0" y1="0" x2="0" y2="4" stroke="#cbd5e1" stroke-width="1.2" />
+              </pattern>
+            </defs>
+
+            <!-- Background Track with Hatch / Diagonal Pattern -->
+            <path d="M 14 46 A 36 36 0 0 1 86 46" fill="none" stroke="#f1f5f9" stroke-width="9" stroke-linecap="round" />
+            <path d="M 14 46 A 36 36 0 0 1 86 46" fill="none" stroke="url(#gaugeHatch_${s.source_key})" stroke-width="8" stroke-linecap="round" opacity="0.65" />
+
+            <!-- Active Colored Gauge Arc -->
+            <path d="M 14 46 A 36 36 0 0 1 86 46" fill="none" stroke="${gaugeColor}" stroke-width="9" stroke-linecap="round"
+              stroke-dasharray="${arcLength}"
+              stroke-dashoffset="${offset}"
+              style="transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);" />
+
+            <!-- Percentage Value Inside Arch -->
+            <text x="50" y="36" text-anchor="middle" font-size="14" font-weight="900" fill="#0f172a" font-family="system-ui, -apple-system, sans-serif">${Math.round(convRate)}%</text>
+
+            <!-- Subtitle Label -->
+            <text x="50" y="47" text-anchor="middle" font-size="6.5" font-weight="700" fill="#64748b" font-family="system-ui, -apple-system, sans-serif">Won Rate</text>
+          </svg>
+        </div>
+
+        <!-- Footer Stats Bar -->
+        <div class="source-card-footer">
+          <span class="source-footer-lead">${leadsCount} <small>${leadsCount === 1 ? 'Lead' : 'Leads'}</small></span>
+          <span class="source-footer-won" style="color: ${wonCount > 0 ? '#15803d' : '#64748b'};">
+            ${wonCount > 0 ? `<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:middle; margin-right:1px;"><polyline points="20 6 9 17 4 12"/></svg>` : ''}${wonCount} Won
+          </span>
         </div>
       </div>
     `;
@@ -215,7 +296,7 @@ async function loadEnquiries() {
                 View
               </a>
               <button type="button" class="btn btn-secondary btn-sm" onclick="openEditEnquiryModal(${enq.id})" title="Edit Enquiry" style="padding:0.3rem 0.45rem;">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
               <button type="button" class="btn btn-secondary btn-sm" onclick="handleCreateQuotationFromEnquiry(${enq.id})" title="Create Quotation" style="padding:0.3rem 0.45rem; color:#0284c7; border-color:#bae6fd;">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg>
@@ -228,6 +309,9 @@ async function loadEnquiries() {
               ` : `
                 <span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.7rem; padding:0.25rem 0.5rem; font-weight:700;">Won</span>
               `}
+              <button type="button" class="btn btn-secondary btn-sm" onclick="handleDeleteEnquiry(${enq.id}, '${escapeAttr(enq.name)}')" title="Remove / Delete Enquiry" style="padding:0.3rem 0.45rem; color:#dc2626; border-color:#fecaca; background:#fffbfb;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fffbfb'">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
             </div>
           </td>
         </tr>
@@ -270,6 +354,8 @@ function getEnquirySourceBadge(source, marketingPerson = '') {
       return `<span class="badge" style="background:#fdf2f8; color:#be185d; font-weight:700;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:3px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Paid Ads</span>`;
     case 'MARKETING_PERSON':
       return `<span class="badge" style="background:#faf5ff; color:#7e22ce; font-weight:700;" title="${escapeAttr(marketingPerson)}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:3px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Rep: ${escapeAttr(marketingPerson || 'Field Rep')}</span>`;
+    case 'REFERRAL':
+      return `<span class="badge" style="background:#fefce8; color:#a16207; font-weight:700; border:1px solid #fef08a;" title="${escapeAttr(marketingPerson)}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:3px;"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"/><path d="M10 12l2 2 4-4"/></svg>Ref: ${escapeAttr(marketingPerson || 'Referral')}</span>`;
     default:
       return `<span class="badge" style="background:#f1f5f9; color:#475569;">${source || 'Direct'}</span>`;
   }
@@ -294,8 +380,27 @@ function toggleMarketingPersonField(sourceSelectId, repContainerId) {
   const container = document.getElementById(repContainerId);
   if (!select || !container) return;
 
+  const labelEl = container.querySelector('label') || container.querySelector('.form-label');
+  const inputEl = container.querySelector('input');
+
   if (select.value === 'MARKETING_PERSON') {
     container.style.display = 'block';
+    container.style.background = '#faf5ff';
+    container.style.borderColor = '#e9d5ff';
+    if (labelEl) {
+      labelEl.textContent = 'Marketing Person / Executive Name *';
+      labelEl.style.color = '#6b21a8';
+    }
+    if (inputEl) inputEl.placeholder = 'e.g. Vimal (Field Executive) or Rahul';
+  } else if (select.value === 'REFERRAL') {
+    container.style.display = 'block';
+    container.style.background = '#fefce8';
+    container.style.borderColor = '#fef08a';
+    if (labelEl) {
+      labelEl.textContent = 'Referral Person / Referred By Name *';
+      labelEl.style.color = '#a16207';
+    }
+    if (inputEl) inputEl.placeholder = 'e.g. Anand Kumar, Dr. Rajesh, Client XYZ';
   } else {
     container.style.display = 'none';
   }
@@ -565,3 +670,28 @@ function truncateStr(str, max = 30) {
   if (!str) return '';
   return str.length > max ? str.substring(0, max) + '...' : str;
 }
+
+// --- DELETE / REMOVE ENQUIRY ---
+async function handleDeleteEnquiry(id, name) {
+  const displayName = name || `Enquiry #${id}`;
+  if (!confirm(`Are you sure you want to remove / delete enquiry for "${displayName}"? This action cannot be undone.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/enquiries/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (res && res.success) {
+      showToast(`✓ Enquiry for "${displayName}" removed successfully!`, 'success');
+    } else {
+      showToast(res?.message || 'Enquiry removed.', 'success');
+    }
+    loadEnquiryMetrics();
+    loadEnquiries();
+  } catch (err) {
+    showToast('Failed to delete enquiry: ' + err.message, 'error');
+  }
+}
+window.handleDeleteEnquiry = handleDeleteEnquiry;

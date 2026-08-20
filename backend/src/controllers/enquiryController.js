@@ -444,6 +444,7 @@ async function getEnquiryMetrics(req, res) {
       GMB: { total: 0, onboarded: 0, label: 'Google My Business' },
       ADS: { total: 0, onboarded: 0, label: 'Paid Ads' },
       MARKETING_PERSON: { total: 0, onboarded: 0, label: 'Marketing Person' },
+      REFERRAL: { total: 0, onboarded: 0, label: 'Referral' },
       OTHER: { total: 0, onboarded: 0, label: 'Other Sources' }
     };
 

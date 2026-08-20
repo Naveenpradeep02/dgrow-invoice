@@ -395,33 +395,46 @@
       <!-- Filter Bar with Search, Category, Client Filter, Billing Month Selector & Report Generator -->
       <div class="card" style="padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
         
-        <!-- Status Tabs for EMI & Loans: All, Completed (Paid), Pending -->
+        <!-- Status Tabs for EMI & Loans: All, Completed (Paid), Pending, Closed -->
         <div id="emiStatusFilterGroup" style="display:none; margin-bottom:0.85rem; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
-          <div class="period-toggle-group" style="display:inline-flex; background:#f1f5f9; padding:0.25rem; border-radius:var(--radius-md); gap:0.25rem; border:1px solid #cbd5e1;">
+          <div class="period-toggle-group" style="display:inline-flex; background:#f1f5f9; padding:0.25rem; border-radius:var(--radius-md); gap:0.25rem; border:1px solid #cbd5e1; flex-wrap:wrap;">
             <button type="button" class="period-toggle-btn active" id="tabEmiStatusAll" onclick="setEmiStatusFilter('')" style="font-weight:700; font-size:0.82rem; display:inline-flex; align-items:center; gap:0.3rem;">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               All EMI Records (<span id="badgeEmiCountAll">0</span>)
-            </button>
-            <button type="button" class="period-toggle-btn" id="tabEmiStatusPaid" onclick="setEmiStatusFilter('PAID')" style="font-weight:700; font-size:0.82rem; color:#15803d; display:inline-flex; align-items:center; gap:0.3rem;">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Completed / Paid (<span id="badgeEmiCountPaid">0</span>)
             </button>
             <button type="button" class="period-toggle-btn" id="tabEmiStatusPending" onclick="setEmiStatusFilter('PENDING')" style="font-weight:700; font-size:0.82rem; color:#d97706; display:inline-flex; align-items:center; gap:0.3rem;">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               Pending Payments (<span id="badgeEmiCountPending">0</span>)
             </button>
+            <button type="button" class="period-toggle-btn" id="tabEmiStatusPaid" onclick="setEmiStatusFilter('PAID')" style="font-weight:700; font-size:0.82rem; color:#15803d; display:inline-flex; align-items:center; gap:0.3rem;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Completed / Paid (<span id="badgeEmiCountPaid">0</span>)
+            </button>
+            <button type="button" class="period-toggle-btn" id="tabEmiStatusClosed" onclick="setEmiStatusFilter('CLOSED')" style="font-weight:700; font-size:0.82rem; color:#64748b; display:inline-flex; align-items:center; gap:0.3rem;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Closed Loans (<span id="badgeEmiCountClosed">0</span>)
+            </button>
           </div>
 
-          <button type="button" class="btn btn-secondary btn-sm" onclick="triggerMonthlyEmiRosterSync()" style="font-size:0.78rem; display:inline-flex; align-items:center; gap:0.35rem;" title="Ensure all recurring EMIs are listed in Pending for selected month">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            Refresh Monthly EMI Roster
-          </button>
+          <div style="display:flex; gap:0.45rem; align-items:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" onclick="openMiscModal('EMI & Loans')" style="font-size:0.78rem; font-weight:700; background:#be185d; border-color:#be185d; display:inline-flex; align-items:center; gap:0.35rem;" title="Record an EMI Installment">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              + Add EMI / Loan
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="openManageLoansModal()" style="font-size:0.78rem; font-weight:700; color:#7e22ce; border-color:#d8b4fe; background:#faf5ff; display:inline-flex; align-items:center; gap:0.35rem;" title="Manage Loan Master Accounts & Active/Closed Status">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              🎯 Manage Loan Accounts
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="triggerMonthlyEmiRosterSync()" style="font-size:0.78rem; display:inline-flex; align-items:center; gap:0.35rem;" title="Ensure active recurring EMIs are listed in Pending for selected month">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Refresh Monthly EMI Roster
+            </button>
+          </div>
         </div>
 
-        <!-- Ad Funds Wallet & Flow Control Group: Deposits, Running Spends, Daily Budgets -->
         <!-- Ad Funds Wallet & Flow Control Group: Deposits, Running Spends, Daily Budgets, Refunds -->
-        <div id="adFundsFlowGroup" style="display:none; margin-bottom:0.85rem; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:0.75rem;">
-          <div class="period-toggle-group" style="display:none; background:#f1f5f9; padding:0.25rem; border-radius:var(--radius-md); gap:0.25rem; border:1px solid #cbd5e1; flex-wrap:wrap;">
+        <div id="adFundsFlowGroup" style="display:none; margin-bottom:0.85rem; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+          <div class="period-toggle-group" style="display:inline-flex; background:#f1f5f9; padding:0.25rem; border-radius:var(--radius-md); gap:0.25rem; border:1px solid #cbd5e1; flex-wrap:wrap;">
             <button type="button" class="period-toggle-btn active" id="tabAdFundsAll" onclick="setAdFundsFilter('')" style="font-weight:700; font-size:0.82rem; display:inline-flex; align-items:center; gap:0.3rem;">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               All Activity (<span id="badgeAdCountAll">0</span>)
@@ -433,6 +446,10 @@
             <button type="button" class="period-toggle-btn" id="tabAdFundsSpends" onclick="setAdFundsFilter('SPEND')" style="font-weight:700; font-size:0.82rem; color:#0369a1; display:inline-flex; align-items:center; gap:0.3rem;">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
               Spends (<span id="badgeAdCountSpends">0</span>)
+            </button>
+            <button type="button" class="period-toggle-btn" id="tabAdFundsBudgets" onclick="setAdFundsFilter('BUDGET')" style="font-weight:700; font-size:0.82rem; color:#7c3aed; display:inline-flex; align-items:center; gap:0.3rem;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              Daily Budgets (<span id="badgeAdCountBudgets">0</span>)
             </button>
             <button type="button" class="period-toggle-btn" id="tabAdFundsRefunds" onclick="setAdFundsFilter('REFUND')" style="font-weight:700; font-size:0.82rem; color:#dc2626; display:inline-flex; align-items:center; gap:0.3rem;">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
@@ -715,9 +732,18 @@
               </span>
             </div>
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.8rem;">Receipt / Voucher Ref</label>
-              <input type="text" id="modalMiscReceipt" class="form-input" placeholder="e.g. Attached / Inv #204 / Voucher #12">
+              <label class="form-label required" style="font-size:0.8rem;">Payment Status</label>
+              <select id="modalMiscStatus" class="form-select" required>
+                <option value="PENDING">Pending (Will manually pay later)</option>
+                <option value="PAID">Paid / Cleared</option>
+                <option value="CLOSED">Closed / Completed</option>
+              </select>
             </div>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.8rem;">Receipt / Voucher Ref</label>
+            <input type="text" id="modalMiscReceipt" class="form-input" placeholder="e.g. Attached / Inv #204 / Voucher #12">
           </div>
 
         </div>
@@ -727,6 +753,121 @@
           <button type="submit" class="btn btn-primary">Save Expense</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- POPUP: Manage Loan Accounts & Master EMI Presets Modal -->
+  <div class="modal-overlay" id="manageLoansModal" style="z-index: 1250;">
+    <div class="modal-box" style="max-width: 850px; width:95%; max-height:92vh; display:flex; flex-direction:column; padding:1.5rem;">
+      <div class="modal-header" style="margin-bottom:1rem; padding-bottom:0.65rem; display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div style="width:36px; height:36px; border-radius:6px; background:#fdf2f8; color:#be185d; display:flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-main);">Manage Loan Accounts & EMI Master</h3>
+            <p style="margin:0.15rem 0 0 0; font-size:0.75rem; color:var(--text-muted);">Configure ongoing loan installments, set due dates, and mark loans as Closed so they never carry over to future months</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick="closeManageLoansModal()" title="Close" style="display:inline-flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-muted); cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <!-- Loan Account Registration / Edit Form -->
+      <form id="loanAccountForm" onsubmit="handleSaveLoanAccount(event)" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:1rem; margin-bottom:1rem;">
+        <input type="hidden" id="loanAccountEditId" value="">
+        <div style="font-size:0.8rem; font-weight:800; color:#0f172a; margin-bottom:0.6rem; display:flex; justify-content:space-between; align-items:center;">
+          <span id="loanAccountFormHeading">+ Register New Loan / EMI Account</span>
+          <span style="font-size:0.72rem; color:#be185d; font-weight:700;">Automatic monthly pending roster sync</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1.2fr 1.8fr 1fr; gap:0.65rem; margin-bottom:0.65rem;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.75rem;">Financier / Provider</label>
+            <input type="text" id="loanProviderInput" class="form-input" placeholder="e.g. Kissht / Bajaj / Navi / HDFC" required>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.75rem;">Loan Title / Description</label>
+            <input type="text" id="loanTitleInput" class="form-input" placeholder="e.g. Mobile EMI / Studio Equipment Loan" required>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.75rem;">Monthly Amount (₹)</label>
+            <input type="number" id="loanAmountInput" class="form-input" min="1" placeholder="6400" required style="font-weight:800; color:#be185d;">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1.2fr 1.2fr 1fr auto; gap:0.65rem; align-items:flex-end;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.75rem;">Due Day of Month</label>
+            <select id="loanDueDaySelect" class="form-select" style="font-weight:700;">
+              <option value="1">1st of every month</option>
+              <option value="2">2nd of every month</option>
+              <option value="5" selected>5th of every month</option>
+              <option value="7">7th of every month</option>
+              <option value="10">10th of every month</option>
+              <option value="12">12th of every month</option>
+              <option value="14">14th of every month</option>
+              <option value="15">15th of every month</option>
+              <option value="20">20th of every month</option>
+              <option value="25">25th of every month</option>
+              <option value="28">28th of every month</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.75rem;">Payment Mode</label>
+            <select id="loanModeSelect" class="form-select">
+              <option value="Bank Transfer / Auto-Debit">Bank Transfer / Auto-Debit</option>
+              <option value="Bank Transfer / NACH">Bank Transfer / NACH Mandate</option>
+              <option value="Bank Transfer / UPI">Bank Transfer / UPI</option>
+              <option value="Corporate Card">Corporate Card</option>
+              <option value="UPI / GPay">UPI / GPay</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label required" style="font-size:0.75rem;">Loan Status</label>
+            <select id="loanStatusSelect" class="form-select" style="font-weight:700;">
+              <option value="ACTIVE">Active (Ongoing)</option>
+              <option value="CLOSED">Closed (Completed)</option>
+            </select>
+          </div>
+
+          <div style="display:flex; gap:0.4rem;">
+            <button type="button" id="loanCancelEditBtn" class="btn btn-secondary" onclick="resetLoanAccountForm()" style="display:none; font-size:0.78rem; padding:0.45rem 0.75rem;">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="loanSaveBtn" style="background:#be185d; border-color:#be185d; font-size:0.78rem; font-weight:700; padding:0.45rem 0.9rem; display:inline-flex; align-items:center; gap:0.35rem;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              + Save Loan Account
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Loan Accounts Table -->
+      <div style="font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase; margin-bottom:0.4rem; display:flex; justify-content:space-between; align-items:center;">
+        <span>Registered Loan Accounts (<span id="loanAccountsCountBadge">0</span>)</span>
+        <span style="font-size:0.72rem; color:#166534; font-weight:700; background:#f0fdf4; border:1px solid #86efac; padding:0.15rem 0.5rem; border-radius:4px;">
+          ✓ Closed loans never auto-sync next month
+        </span>
+      </div>
+
+      <div style="flex:1; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px; max-height:36vh; background:#ffffff;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.8rem; min-width:680px;">
+          <thead>
+            <tr style="background:#f8fafc; color:#475569; font-size:0.72rem; text-transform:uppercase; font-weight:700; position:sticky; top:0; z-index:2; border-bottom:1.5px solid #e2e8f0;">
+              <th style="padding:0.6rem 0.75rem; text-align:left; width:18%;">Provider</th>
+              <th style="padding:0.6rem 0.75rem; text-align:left; width:30%;">Loan Title / Item</th>
+              <th style="padding:0.6rem 0.75rem; text-align:left; width:18%;">Schedule / Due Day</th>
+              <th style="padding:0.6rem 0.75rem; text-align:right; width:16%;">Monthly EMI (₹)</th>
+              <th style="padding:0.6rem 0.75rem; text-align:center; width:18%;">Status & Actions</th>
+            </tr>
+          </thead>
+          <tbody id="loanAccountsTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1679,6 +1820,38 @@
       setTimeout(() => toast.remove(), 3500);
     }
 
+    // Topbar & Global Navigation Fallbacks
+    function toggleNotificationDropdown(e) {
+      if (e) e.stopPropagation();
+      const dd = document.getElementById('notifDropdownMenu');
+      if (dd) dd.classList.toggle('active');
+    }
+    window.toggleNotificationDropdown = toggleNotificationDropdown;
+
+    function clearAllNotifications() {
+      const list = document.getElementById('topbarNotifList');
+      if (list) list.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--text-muted); font-size:0.8rem;">No unread notifications</div>';
+      const badge = document.getElementById('notifBadgeCount');
+      if (badge) badge.style.display = 'none';
+      showToast('Notifications cleared', 'info');
+    }
+    window.clearAllNotifications = clearAllNotifications;
+
+    function toggleUserProfileDropdown(e) {
+      if (e) e.stopPropagation();
+      const dd = document.getElementById('profileDropdownMenu');
+      if (dd) dd.classList.toggle('active');
+    }
+    window.toggleUserProfileDropdown = toggleUserProfileDropdown;
+
+    function handleLogout() {
+      if (confirm('Are you sure you want to log out?')) {
+        localStorage.removeItem('dgrow_token');
+        window.location.href = '../index.html';
+      }
+    }
+    window.handleLogout = handleLogout;
+
     // Active Subview & Filter States
     let currentMiscSubView = 'ALL'; // 'ALL', 'AD_FUNDS', 'EMI_LOANS', 'OTHER_EXPENSES'
     let currentMiscStatusFilter = ''; // '' (All), 'PAID', 'PENDING'
@@ -1688,8 +1861,8 @@
     let miscCustomToDate = '';
     let currentEditingEmiRecordId = null;
 
-    // EMI & Loan Preset Accounts
-    let emiPresets = [
+    // EMI & Loan Preset Accounts Master Data
+    const defaultEmiPresets = [
       { id: 'emi_1', title: 'Kissht - Mobile EMI (14th)', provider: 'Kissht', dueDay: '14th of every month', defaultDateDay: 14, mode: 'Bank Transfer / Auto-Debit', amount: 6406, status: 'ACTIVE', notes: 'Mobile EMI Auto-Debit' },
       { id: 'emi_2', title: 'Money Overview - Amma Monthly Support (5th)', provider: 'Money Overview', dueDay: '5th of every month', defaultDateDay: 5, mode: 'Bank Transfer / UPI', amount: 5918, status: 'ACTIVE', notes: 'Monthly Support Due' },
       { id: 'emi_3', title: 'Sri Ram Finance - Bike Monthly Due (5th)', provider: 'Sri Ram Finance', dueDay: '5th of every month', defaultDateDay: 5, mode: 'Bank Transfer / NACH', amount: 4879, status: 'ACTIVE', notes: 'Bike NACH Mandate' },
@@ -1698,6 +1871,26 @@
       { id: 'emi_6', title: 'IDFC Bank - Bike Monthly Due (5th)', provider: 'IDFC Bank', dueDay: '5th of every month', defaultDateDay: 5, mode: 'Bank Transfer / Auto-Debit', amount: 3500, status: 'ACTIVE', notes: 'Vehicle Loan Installment' },
       { id: 'emi_7', title: 'Credit Card Bill - Office Upgradation (10th)', provider: 'Credit Card Bill', dueDay: '10th of every month', defaultDateDay: 10, mode: 'Corporate Card', amount: 18500, status: 'ACTIVE', notes: 'Studio & Tech Card Bill' }
     ];
+
+    let emiPresets = [];
+
+    function loadEmiPresets() {
+      const stored = localStorage.getItem('dgrow_emi_presets_v2');
+      if (stored) {
+        try {
+          emiPresets = JSON.parse(stored);
+        } catch(e) {
+          emiPresets = [...defaultEmiPresets];
+        }
+      } else {
+        emiPresets = [...defaultEmiPresets];
+        saveEmiPresetsStorage();
+      }
+    }
+
+    function saveEmiPresetsStorage() {
+      localStorage.setItem('dgrow_emi_presets_v2', JSON.stringify(emiPresets));
+    }
 
     // Today's date string helper
     const todayISO = new Date().toISOString().split('T')[0];
@@ -1714,6 +1907,7 @@
       loadCategoryHierarchy();
       loadBillingMonths();
       initAdCampaigns();
+      loadEmiPresets();
       const stored = localStorage.getItem('dgrow_misc_records_v8');
       if (stored) {
         try { 
@@ -1765,18 +1959,21 @@
       localStorage.setItem('dgrow_misc_records_v8', JSON.stringify(miscRecords));
     }
 
-    // Auto-sync active EMI presets into the current month cycle
+    // Auto-sync active EMI presets into the current month cycle (Strictly skip CLOSED or INACTIVE loans!)
     function syncMonthlyEmiRoster(targetYearMonth) {
       const monthKey = targetYearMonth || activeBillingMonth || '2026-08';
       let addedCount = 0;
 
+      loadEmiPresets();
+
       emiPresets.forEach(ep => {
-        if (ep.status === 'INACTIVE') return;
+        // If loan is CLOSED or INACTIVE, DO NOT SYNC OR GENERATE ANY RECORDS FOR THIS OR NEXT MONTHS!
+        if (ep.status === 'CLOSED' || ep.status === 'INACTIVE') return;
 
         // Check if record already exists for this provider in this month
         const existing = miscRecords.find(r => 
           (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
-          r.subCategory === ep.provider &&
+          (r.subCategory === ep.provider || (r.title && r.title.includes(ep.provider)) || r.loanPresetId === ep.id) &&
           (r.date && r.date.startsWith(monthKey))
         );
 
@@ -1784,7 +1981,7 @@
           const dayPad = String(ep.defaultDateDay || 5).padStart(2, '0');
           const dateStr = `${monthKey}-${dayPad}`;
           const newRec = {
-            id: Date.now() + Math.floor(Math.random() * 1000),
+            id: Date.now() + Math.floor(Math.random() * 10000),
             title: ep.title,
             category: 'EMI & Loans',
             subCategory: ep.provider,
@@ -1795,8 +1992,9 @@
             receipt: `${ep.provider.toUpperCase().replace(/\s+/g, '')}-${ep.amount}`,
             date: dateStr,
             month: monthKey,
-            status: 'PENDING',
-            flowType: 'SPEND'
+            status: 'PENDING', // Default to PENDING as requested
+            flowType: 'SPEND',
+            loanPresetId: ep.id
           };
           miscRecords.push(newRec);
           addedCount++;
@@ -1806,6 +2004,199 @@
       if (addedCount > 0) {
         saveMiscStorage();
       }
+    }
+
+    function triggerMonthlyEmiRosterSync() {
+      const selectedMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
+      syncMonthlyEmiRoster(selectedMonth);
+      applyAllMiscFilters();
+      showToast(`Monthly active EMI roster synchronized for ${selectedMonth}!`, 'success');
+    }
+
+    // ==========================================
+    // --- LOAN ACCOUNTS MASTER MANAGER ---
+    // ==========================================
+    function openManageLoansModal() {
+      loadEmiPresets();
+      resetLoanAccountForm();
+      renderLoanAccountsList();
+      document.getElementById('manageLoansModal').classList.add('active');
+    }
+
+    function closeManageLoansModal() {
+      document.getElementById('manageLoansModal').classList.remove('active');
+    }
+
+    function resetLoanAccountForm() {
+      document.getElementById('loanAccountForm').reset();
+      document.getElementById('loanAccountEditId').value = '';
+      document.getElementById('loanAccountFormHeading').textContent = '+ Register New Loan / EMI Account';
+      document.getElementById('loanSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> + Save Loan Account';
+      document.getElementById('loanCancelEditBtn').style.display = 'none';
+    }
+
+    function handleSaveLoanAccount(e) {
+      e.preventDefault();
+      const editId = document.getElementById('loanAccountEditId').value;
+      const provider = document.getElementById('loanProviderInput').value.trim();
+      const title = document.getElementById('loanTitleInput').value.trim();
+      const amount = parseFloat(document.getElementById('loanAmountInput').value) || 0;
+      const dueDayNum = parseInt(document.getElementById('loanDueDaySelect').value) || 5;
+      const mode = document.getElementById('loanModeSelect').value;
+      const status = document.getElementById('loanStatusSelect').value || 'ACTIVE';
+
+      if (!provider || !title || amount <= 0) {
+        showToast('Please enter provider, loan title, and valid monthly amount!', 'error');
+        return;
+      }
+
+      // Add to categoryHierarchy under 'EMI & Loans' if missing
+      if (categoryHierarchy['EMI & Loans'] && !categoryHierarchy['EMI & Loans'].includes(provider)) {
+        categoryHierarchy['EMI & Loans'].push(provider);
+        saveCategoryHierarchy();
+        renderCategoryDropdowns();
+      }
+
+      if (editId) {
+        const idx = emiPresets.findIndex(p => p.id === editId);
+        if (idx !== -1) {
+          emiPresets[idx] = {
+            ...emiPresets[idx],
+            provider,
+            title,
+            amount,
+            defaultDateDay: dueDayNum,
+            dueDay: `${dueDayNum}th of every month`,
+            mode,
+            status
+          };
+          showToast(`Loan account "${title}" updated!`, 'success');
+        }
+      } else {
+        const newPreset = {
+          id: `emi_custom_${Date.now()}`,
+          provider,
+          title,
+          amount,
+          defaultDateDay: dueDayNum,
+          dueDay: `${dueDayNum}th of every month`,
+          mode,
+          status,
+          notes: 'Registered Loan Account'
+        };
+        emiPresets.push(newPreset);
+        showToast(`Loan account "${title}" registered successfully!`, 'success');
+      }
+
+      saveEmiPresetsStorage();
+      resetLoanAccountForm();
+      renderLoanAccountsList();
+
+      // If active, sync into current month
+      if (status === 'ACTIVE') {
+        syncMonthlyEmiRoster(activeBillingMonth);
+      }
+      applyAllMiscFilters();
+    }
+
+    function editLoanAccount(id) {
+      const preset = emiPresets.find(p => p.id === id);
+      if (!preset) return;
+
+      document.getElementById('loanAccountEditId').value = preset.id;
+      document.getElementById('loanProviderInput').value = preset.provider || '';
+      document.getElementById('loanTitleInput').value = preset.title || '';
+      document.getElementById('loanAmountInput').value = preset.amount || 0;
+      document.getElementById('loanDueDaySelect').value = preset.defaultDateDay || 5;
+      document.getElementById('loanModeSelect').value = preset.mode || 'Bank Transfer / Auto-Debit';
+      document.getElementById('loanStatusSelect').value = preset.status || 'ACTIVE';
+
+      document.getElementById('loanAccountFormHeading').textContent = `Edit Loan Account: ${preset.title}`;
+      document.getElementById('loanSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Update Loan Account';
+      document.getElementById('loanCancelEditBtn').style.display = 'inline-block';
+    }
+
+    function toggleLoanAccountStatus(id) {
+      const preset = emiPresets.find(p => p.id === id);
+      if (!preset) return;
+
+      preset.status = (preset.status === 'ACTIVE') ? 'CLOSED' : 'ACTIVE';
+      saveEmiPresetsStorage();
+
+      if (preset.status === 'CLOSED') {
+        showToast(`Loan "${preset.title}" marked as CLOSED. It will not auto-sync dues into future months!`, 'info');
+      } else {
+        showToast(`Loan "${preset.title}" re-opened as ACTIVE.`, 'success');
+        syncMonthlyEmiRoster(activeBillingMonth);
+      }
+
+      renderLoanAccountsList();
+      applyAllMiscFilters();
+    }
+
+    function deleteLoanAccount(id) {
+      if (!confirm('Are you sure you want to delete this master loan account preset?')) return;
+      emiPresets = emiPresets.filter(p => p.id !== id);
+      saveEmiPresetsStorage();
+      renderLoanAccountsList();
+      applyAllMiscFilters();
+      showToast('Loan account preset deleted.', 'info');
+    }
+
+    function renderLoanAccountsList() {
+      const tbody = document.getElementById('loanAccountsTableBody');
+      const badge = document.getElementById('loanAccountsCountBadge');
+      if (!tbody) return;
+
+      if (badge) badge.textContent = emiPresets.length;
+
+      if (emiPresets.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-muted);">
+              No loan accounts registered. Use the form above to add a loan or EMI account.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = emiPresets.map(p => {
+        const isClosed = (p.status === 'CLOSED');
+        return `
+          <tr style="border-bottom:1px solid #f1f5f9; background:${isClosed ? '#f8fafc' : '#ffffff'};">
+            <td style="padding:0.6rem 0.75rem; vertical-align:middle;">
+              <span style="font-weight:700; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; padding:0.15rem 0.45rem; border-radius:4px; font-size:0.75rem;">
+                ${escapeHtml(p.provider)}
+              </span>
+            </td>
+            <td style="padding:0.6rem 0.75rem; vertical-align:middle;">
+              <strong style="color:${isClosed ? '#64748b' : '#0f172a'}; font-size:0.84rem; display:block;">${escapeHtml(p.title)}</strong>
+              <span style="font-size:0.7rem; color:#64748b;">${escapeHtml(p.mode || 'Bank Transfer')}</span>
+            </td>
+            <td style="padding:0.6rem 0.75rem; vertical-align:middle; font-size:0.78rem; color:#475569; font-weight:600;">
+              ${escapeHtml(p.dueDay || '5th of every month')}
+            </td>
+            <td style="padding:0.6rem 0.75rem; vertical-align:middle; text-align:right;">
+              <strong style="color:${isClosed ? '#64748b' : '#be185d'}; font-size:0.92rem;">₹${Number(p.amount || 0).toLocaleString('en-IN')}</strong>
+              <div style="font-size:0.65rem; color:#64748b;">Monthly Installment</div>
+            </td>
+            <td style="padding:0.6rem 0.75rem; vertical-align:middle; text-align:center;">
+              <div style="display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;">
+                <button type="button" class="btn btn-sm" onclick="toggleLoanAccountStatus('${p.id}')" style="font-size:0.7rem; font-weight:800; padding:0.2rem 0.5rem; border-radius:4px; ${isClosed ? 'background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;' : 'background:#dcfce7; color:#15803d; border:1px solid #86efac;'}" title="Click to toggle Active / Closed status">
+                  ${isClosed ? '🔒 CLOSED' : '✓ ACTIVE'}
+                </button>
+                <button type="button" class="icon-action-btn" onclick="editLoanAccount('${p.id}')" title="Edit Loan Account">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button type="button" class="icon-action-btn" onclick="deleteLoanAccount('${p.id}')" style="color:#dc2626;" title="Delete Master Preset">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function triggerMonthlyEmiRosterSync() {
@@ -1907,6 +2298,7 @@
       document.getElementById('tabEmiStatusAll')?.classList.toggle('active', status === '');
       document.getElementById('tabEmiStatusPaid')?.classList.toggle('active', status === 'PAID');
       document.getElementById('tabEmiStatusPending')?.classList.toggle('active', status === 'PENDING');
+      document.getElementById('tabEmiStatusClosed')?.classList.toggle('active', status === 'CLOSED');
       applyAllMiscFilters();
     }
 
@@ -3272,13 +3664,16 @@
       const emiPeriodRecords = periodRecords.filter(r => (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues'));
       const emiPaidCount = emiPeriodRecords.filter(r => (r.status || 'PAID') === 'PAID').length;
       const emiPendingCount = emiPeriodRecords.filter(r => r.status === 'PENDING').length;
+      const emiClosedCount = emiPeriodRecords.filter(r => r.status === 'CLOSED').length;
 
       const badgeAll = document.getElementById('badgeEmiCountAll');
       const badgePaid = document.getElementById('badgeEmiCountPaid');
       const badgePending = document.getElementById('badgeEmiCountPending');
+      const badgeClosed = document.getElementById('badgeEmiCountClosed');
       if (badgeAll) badgeAll.textContent = emiPeriodRecords.length;
       if (badgePaid) badgePaid.textContent = emiPaidCount;
       if (badgePending) badgePending.textContent = emiPendingCount;
+      if (badgeClosed) badgeClosed.textContent = emiClosedCount;
 
       // Filter Ad Funds Records for Ad Flow tab badges & live calculations
       const adPeriodRecords = periodRecords.filter(r => r.category === 'Ad Funds');
@@ -3347,13 +3742,18 @@
 
       document.getElementById('miscForm').reset();
       document.getElementById('modalMiscEditId').value = '';
-      document.getElementById('miscModalTitle').textContent = 'Add Expense Entry';
+      document.getElementById('miscModalTitle').textContent = (prefillCategory === 'EMI & Loans') ? 'Add EMI / Loan Entry' : 'Add Expense Entry';
       document.getElementById('modalMiscDate').value = todayISO;
       updateModalDateHint(todayISO);
 
       const catToSet = prefillCategory || 'Travel & Transport';
       document.getElementById('modalMiscCategory').value = catToSet;
       populateSubCategories(catToSet);
+
+      const statusSelect = document.getElementById('modalMiscStatus');
+      if (statusSelect) {
+        statusSelect.value = (catToSet === 'EMI & Loans') ? 'PENDING' : 'PAID';
+      }
 
       if (prefillClient) {
         document.getElementById('modalMiscClient').value = prefillClient;
@@ -3377,7 +3777,7 @@
       }
 
       document.getElementById('modalMiscEditId').value = record.id;
-      document.getElementById('miscModalTitle').textContent = 'Edit Expense Entry';
+      document.getElementById('miscModalTitle').textContent = (record.category === 'EMI & Loans') ? 'Edit EMI / Loan Entry' : 'Edit Expense Entry';
       document.getElementById('modalMiscCategory').value = record.category;
       populateSubCategories(record.category, record.subCategory);
 
@@ -3389,6 +3789,11 @@
       document.getElementById('modalMiscReceipt').value = record.receipt || '';
       document.getElementById('modalMiscClient').value = record.client || '';
       document.getElementById('modalMiscMetrics').value = record.metrics || '';
+
+      const statusSelect = document.getElementById('modalMiscStatus');
+      if (statusSelect) {
+        statusSelect.value = record.status || ((record.category === 'EMI & Loans') ? 'PENDING' : 'PAID');
+      }
 
       document.getElementById('miscModal').classList.add('active');
     }
@@ -3405,6 +3810,7 @@
       const receipt = document.getElementById('modalMiscReceipt').value.trim() || 'Attached';
       const client = document.getElementById('modalMiscClient').value;
       const metrics = document.getElementById('modalMiscMetrics').value.trim();
+      const status = document.getElementById('modalMiscStatus')?.value || ((category === 'EMI & Loans') ? 'PENDING' : 'PAID');
 
       const monthCode = (date && date.length >= 7) ? date.substring(0, 7) : activeBillingMonth;
 
@@ -3423,7 +3829,7 @@
             date,
             receipt,
             month: monthCode,
-            status: miscRecords[index].status || 'PAID'
+            status: status
           };
           showToast('Expense entry updated', 'success');
         }
@@ -3440,10 +3846,10 @@
           date,
           receipt,
           month: monthCode,
-          status: 'PAID'
+          status: status
         };
         miscRecords.unshift(newRecord);
-        showToast('Expense entry saved to Monthly Bill', 'success');
+        showToast(`Expense entry saved as ${status}!`, 'success');
       }
 
       saveMiscStorage();
@@ -3524,11 +3930,58 @@
       showToast(`Marked ${record.title} as PAID!`, 'success');
     }
 
+    function markEmiRecordClosed(recordId) {
+      const record = miscRecords.find(r => r.id === recordId);
+      if (!record) return;
+
+      record.status = 'CLOSED';
+      saveMiscStorage();
+
+      // Check if matching preset exists and ask to close preset as well
+      loadEmiPresets();
+      const matchedPreset = emiPresets.find(p => p.provider === record.subCategory || p.title === record.title || p.id === record.loanPresetId);
+      if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+        if (confirm(`Do you also want to mark the master loan "${matchedPreset.title}" as CLOSED so it will NOT auto-create dues next month?`)) {
+          matchedPreset.status = 'CLOSED';
+          saveEmiPresetsStorage();
+          showToast(`Master loan "${matchedPreset.title}" is now CLOSED and will not generate next month.`, 'info');
+        }
+      }
+
+      applyAllMiscFilters();
+      showToast(`Marked ${record.title} as CLOSED / FINISHED!`, 'info');
+    }
+
+    function reopenEmiRecord(recordId) {
+      const record = miscRecords.find(r => r.id === recordId);
+      if (!record) return;
+
+      record.status = 'PENDING';
+      saveMiscStorage();
+
+      loadEmiPresets();
+      const matchedPreset = emiPresets.find(p => p.provider === record.subCategory || p.title === record.title || p.id === record.loanPresetId);
+      if (matchedPreset && matchedPreset.status === 'CLOSED') {
+        matchedPreset.status = 'ACTIVE';
+        saveEmiPresetsStorage();
+      }
+
+      applyAllMiscFilters();
+      showToast(`Re-opened ${record.title} as PENDING!`, 'info');
+    }
+
     function toggleEmiStatus(recordId) {
       const record = miscRecords.find(r => r.id === recordId);
       if (!record) return;
 
-      record.status = (record.status === 'PAID') ? 'PENDING' : 'PAID';
+      if (record.status === 'PENDING') {
+        record.status = 'PAID';
+      } else if (record.status === 'PAID') {
+        record.status = 'CLOSED';
+      } else {
+        record.status = 'PENDING';
+      }
+
       saveMiscStorage();
       applyAllMiscFilters();
       showToast(`EMI status toggled to ${record.status}!`, 'info');
@@ -4164,6 +4617,7 @@
 
             const isEmi = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues');
             const isPending = (r.status === 'PENDING');
+            const isClosed = (r.status === 'CLOSED');
             const isRefund = (r.flowType === 'REFUND' || r.subCategory === 'Refund / Balance Return' || r.category === 'Refund / Balance Return' || r.category === 'Refund');
             const isDeposit = (r.flowType === 'DEPOSIT' || r.subCategory === 'Client Wallet Deposit');
             const catBadgeClass = isRefund ? 'cat-refund' : getCategoryBadgeClass(r.category);
@@ -4172,10 +4626,10 @@
             const monthStr = isNaN(d.getTime()) ? 'August 2026' : d.toLocaleString('default', { month: 'long', year: 'numeric' });
 
             renderedRows.push(
-              '<tr style="border-bottom:1px solid #f1f5f9; ' + (isPending ? 'background:#fffbf5;' : (isRefund ? 'background:#fffbfb;' : '')) + '">' +
+              '<tr style="border-bottom:1px solid #f1f5f9; ' + (isClosed ? 'background:#f8fafc; opacity:0.85;' : (isPending ? 'background:#fffbf5;' : (isRefund ? 'background:#fffbfb;' : ''))) + '">' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; white-space:nowrap; width:15%;">' +
                   (isEmi ? (
-                    '<span style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:700; font-size:0.84rem; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; padding:0.2rem 0.55rem; border-radius:4px;">' +
+                    '<span style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:700; font-size:0.84rem; ' + (isClosed ? 'color:#64748b; background:#f1f5f9; border:1px solid #cbd5e1;' : 'color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8;') + ' padding:0.2rem 0.55rem; border-radius:4px;">' +
                       '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> ' +
                       escapeHtml(r.subCategory || 'EMI Account') +
                     '</span>'
@@ -4191,20 +4645,25 @@
                   (dayNum ? '<span style="font-size:0.7rem; color:#16a34a; font-weight:800; margin-left:0.2rem;">(' + dayNum + ')</span>' : '') +
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; white-space:nowrap; width:11%;">' +
-                  '<strong style="color:' + (isPending ? '#d97706' : (isRefund ? '#dc2626' : (isDeposit ? '#16a34a' : '#0f172a'))) + '; font-size:1.05rem; font-weight:800;">' +
+                  '<strong style="color:' + (isClosed ? '#64748b' : (isPending ? '#d97706' : (isRefund ? '#dc2626' : (isDeposit ? '#16a34a' : '#0f172a')))) + '; font-size:1.05rem; font-weight:800;">' +
                     (isRefund ? '-₹' : (isDeposit ? '+₹' : '₹')) + amt.toLocaleString('en-IN') +
                   '</strong>' +
                   (isRefund ? '<span style="font-size:0.7rem; color:#dc2626; font-weight:700; display:block;">Refund</span>' : '') +
+                  (isClosed ? '<span style="font-size:0.7rem; color:#64748b; font-weight:700; display:block;">Closed Loan</span>' : '') +
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; width:28%; min-width:240px;">' +
-                  '<div style="font-weight:700; color:var(--text-main); font-size:0.88rem; line-height:1.35;">' + escapeHtml(r.title) + '</div>' +
+                  '<div style="font-weight:700; color:' + (isClosed ? '#64748b' : 'var(--text-main)') + '; font-size:0.88rem; line-height:1.35;">' + escapeHtml(r.title) + '</div>' +
                   (r.metrics ? '<div class="metrics-snippet" style="white-space:nowrap; display:inline-flex; align-items:center; gap:0.25rem; font-size:0.74rem; margin-top:0.3rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> ' + escapeHtml(r.metrics) + '</div>' : '') +
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; text-align:center; white-space:nowrap; width:10%;">' +
                   (isEmi ? (
-                    '<span class="badge ' + (isPending ? 'badge-pending' : 'badge-paid') + '" style="cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to toggle Paid/Pending status">' +
-                      (isPending ? '⏱ PENDING' : '✓ PAID') +
-                    '</span>'
+                    isPending ? (
+                      '<span class="badge badge-pending" style="cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to cycle status (Pending -> Paid -> Closed)">⏱ PENDING</span>'
+                    ) : (isClosed ? (
+                      '<span class="badge" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to cycle status (Closed -> Pending)">🔒 CLOSED</span>'
+                    ) : (
+                      '<span class="badge badge-paid" style="cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to cycle status (Paid -> Closed)">✓ PAID</span>'
+                    ))
                   ) : (
                     '<span class="cat-badge ' + catBadgeClass + '">' + (isRefund ? '↩️ REFUND' : escapeHtml(r.category)) + '</span>'
                   )) +
@@ -4225,10 +4684,24 @@
                       '</button>' +
                       '<button type="button" class="icon-action-btn" onclick="quickMarkEmiPaid(' + r.id + ')" style="color:#16a34a;" title="Quick 1-Click Mark as Paid">' +
                         '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' +
+                      '</button>' +
+                      '<button type="button" class="icon-action-btn" onclick="markEmiRecordClosed(' + r.id + ')" style="color:#64748b;" title="Mark Loan as Closed / Completed">' +
+                        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
                       '</button>'
                     ) : '') +
-                    (isEmi && !isPending ? (
+                    (isEmi && !isPending && !isClosed ? (
                       '<button type="button" class="icon-action-btn" onclick="downloadEmiReceipt(' + r.id + ')" style="color:#16a34a;" title="Download Official EMI Payment Voucher">' +
+                        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
+                      '</button>' +
+                      '<button type="button" class="icon-action-btn" onclick="markEmiRecordClosed(' + r.id + ')" style="color:#64748b;" title="Mark Loan as Closed / Completed">' +
+                        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+                      '</button>'
+                    ) : '') +
+                    (isEmi && isClosed ? (
+                      '<button type="button" class="btn btn-secondary btn-sm" onclick="reopenEmiRecord(' + r.id + ')" style="padding:0.2rem 0.5rem; font-size:0.75rem; color:#475569;" title="Re-open Loan as Pending">' +
+                        'Re-open' +
+                      '</button>' +
+                      '<button type="button" class="icon-action-btn" onclick="downloadEmiReceipt(' + r.id + ')" style="color:#16a34a;" title="Download Voucher">' +
                         '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
                       '</button>'
                     ) : '') +
@@ -4314,18 +4787,21 @@
         }
       } else if (currentMiscSubView === 'EMI_LOANS') {
         const emiPeriodRecords = allPeriodRecords.filter(r => (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues'));
-        const totalEmiObligation = emiPeriodRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+        const activeNonClosedEmi = emiPeriodRecords.filter(r => r.status !== 'CLOSED');
+        const totalEmiObligation = activeNonClosedEmi.reduce((sum, r) => sum + Number(r.amount || 0), 0);
         const paidEmiRecords = emiPeriodRecords.filter(r => (r.status || 'PAID') === 'PAID');
         const pendingEmiRecords = emiPeriodRecords.filter(r => r.status === 'PENDING');
+        const closedEmiRecords = emiPeriodRecords.filter(r => r.status === 'CLOSED');
         
         const paidEmiAmount = paidEmiRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
         const pendingEmiAmount = pendingEmiRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
-        const activeEmiAccounts = emiPresets.filter(p => p.status !== 'INACTIVE').length;
+        const activeEmiAccounts = emiPresets.filter(p => p.status === 'ACTIVE').length;
+        const closedEmiAccounts = emiPresets.filter(p => p.status === 'CLOSED').length;
 
         document.getElementById('statTotalMisc').textContent = '₹' + totalEmiObligation.toLocaleString('en-IN');
         document.getElementById('statTotalMisc').style.color = 'var(--text-main)';
         const card1Sub = document.getElementById('statMiscCycleLabel');
-        if (card1Sub) card1Sub.textContent = `${emiPeriodRecords.length} EMI Records for Period`;
+        if (card1Sub) card1Sub.textContent = `${activeNonClosedEmi.length} Active EMIs (${closedEmiRecords.length} Closed)`;
 
         document.getElementById('statAdFundsMisc').textContent = '₹' + paidEmiAmount.toLocaleString('en-IN');
         document.getElementById('statAdFundsMisc').style.color = '#16a34a';
@@ -4345,12 +4821,12 @@
           card3Subtext.style.color = '#d97706';
         }
 
-        document.getElementById('statPettyMisc').textContent = activeEmiAccounts + ' Accounts';
+        document.getElementById('statPettyMisc').textContent = activeEmiAccounts + ' Active';
         document.getElementById('statPettyMisc').style.color = '#9d174d';
         const card4Subtext = document.getElementById('kpiCard4Subtext');
         if (card4Subtext) {
-          card4Subtext.textContent = 'Kissht, Bajaj, Navi, etc.';
-          card4Subtext.style.color = '#9d174d';
+          card4Subtext.textContent = `${closedEmiAccounts} Closed Loan Accounts`;
+          card4Subtext.style.color = '#64748b';
         }
       } else if (currentMiscSubView === 'OTHER_EXPENSES') {
         const opsPeriodRecords = allPeriodRecords.filter(r => r.category !== 'Ad Funds' && r.category !== 'EMI & Loans' && r.category !== 'EMI & Monthly Dues');
@@ -5448,5 +5924,8 @@
       }, 300);
     }
   </script>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" style="position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none;"></div>
 </body>
 </html>

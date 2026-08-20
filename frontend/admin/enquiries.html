@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -85,56 +85,109 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
-    /* Source Metrics Bars */
+    /* Modern Semi-Circular Arch Gauge Metric Cards (7-Column Single Line) */
     .source-metrics-card {
       background: #ffffff;
       border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: var(--radius-md, 8px);
-      padding: 1rem 1.25rem;
+      border-radius: var(--radius-lg, 10px);
+      padding: 1rem 1.15rem;
       margin-bottom: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     .source-metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 0.85rem;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.55rem;
       margin-top: 0.75rem;
+      width: 100%;
     }
-    .source-metric-item {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 0.65rem 0.85rem;
+    @media (max-width: 1380px) {
+      .source-metrics-grid {
+        grid-template-columns: repeat(7, minmax(130px, 1fr));
+        overflow-x: auto;
+        padding-bottom: 0.35rem;
+      }
     }
-    .source-header {
+    .source-gauge-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.55rem 0.5rem 0.45rem 0.5rem;
       display: flex;
+      flex-direction: column;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.35rem;
+      transition: all 0.2s ease;
+      position: relative;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      min-width: 0;
     }
-    .source-title {
-      font-size: 0.82rem;
-      color: #1e293b;
+    .source-gauge-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border-color: #cbd5e1;
+    }
+    .source-card-top {
+      width: 100%;
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       gap: 0.35rem;
+      margin-bottom: 0.2rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid #f1f5f9;
+      min-width: 0;
     }
-    .source-stats {
-      font-size: 0.75rem;
+    .source-icon-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .source-card-title {
+      font-size: 0.74rem;
       font-weight: 700;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .source-gauge-container {
+      width: 100%;
+      max-width: 105px;
+      margin: 0.1rem auto 0.2rem auto;
+      display: flex;
+      justify-content: center;
+    }
+    .source-card-footer {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 0.25rem 0.4rem;
+      border-radius: 5px;
+      border: 1px solid #f1f5f9;
+    }
+    .source-footer-lead {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+    .source-footer-lead small {
+      font-size: 0.62rem;
+      font-weight: 600;
       color: #64748b;
     }
-    .source-progress-track {
-      width: 100%;
-      height: 6px;
-      background: #e2e8f0;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .source-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #e11d48, #f43f5e);
-      border-radius: 3px;
-      transition: width 0.3s ease;
+    .source-footer-won {
+      font-size: 0.68rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     /* Timeline Styling */
@@ -339,8 +392,9 @@
       <!-- Lead Source Breakdown Progress Card -->
       <div class="source-metrics-card">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h4 style="margin:0; font-size:0.92rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.4rem;">
-            <span>📊</span> Lead Source Channels & Conversion Performance
+          <h4 style="margin:0; font-size:0.92rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:0.45rem;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="12" rx="1"/><rect x="17" y="4" width="4" height="16" rx="1"/></svg>
+            Lead Source Channels & Conversion Performance
           </h4>
           <span style="font-size:0.75rem; color:#64748b;">Source performance breakdown for selected timeframe</span>
         </div>
@@ -359,12 +413,13 @@
             <!-- Source Filter -->
             <select id="filterEnquirySource" class="form-select" onchange="loadEnquiries()" style="font-size:0.82rem; font-weight:600;">
               <option value="ALL">All Sources</option>
-              <option value="WEBSITE">🌐 Websites</option>
-              <option value="CALL">📞 Phone Call</option>
-              <option value="GMB">📍 Google My Business</option>
-              <option value="ADS">📢 Paid Ads</option>
-              <option value="MARKETING_PERSON">👤 Marketing Person</option>
-              <option value="OTHER">⚡ Other</option>
+              <option value="WEBSITE">Websites</option>
+              <option value="CALL">Phone Call</option>
+              <option value="GMB">Google My Business</option>
+              <option value="ADS">Paid Ads</option>
+              <option value="MARKETING_PERSON">Marketing Person</option>
+              <option value="REFERRAL">Referral</option>
+              <option value="OTHER">Other Sources</option>
             </select>
 
             <!-- Status Filter -->
@@ -453,7 +508,8 @@
               <option value="GMB">Google My Business (GMB)</option>
               <option value="ADS">Paid Ads (Meta / Google)</option>
               <option value="MARKETING_PERSON">By Marketing Person / Field Rep</option>
-              <option value="OTHER">Other Direct Referral</option>
+              <option value="REFERRAL">By Referral (Client / Partner Referral)</option>
+              <option value="OTHER">Other Direct Lead</option>
             </select>
           </div>
           <div class="form-group">
@@ -469,7 +525,7 @@
           </div>
         </div>
 
-        <!-- Marketing Person Field (Shown if source is Marketing Person) -->
+        <!-- Marketing Person / Referral Person Field (Shown if source is Marketing Person or Referral) -->
         <div class="form-group" id="newEnqRepContainer" style="display:none; margin-bottom:0.75rem; background:#faf5ff; padding:0.6rem 0.8rem; border-radius:6px; border:1px solid #e9d5ff;">
           <label class="form-label" style="color:#6b21a8; font-weight:700;">Marketing Person / Executive Name *</label>
           <input type="text" id="newEnqMarketingPerson" class="form-input" placeholder="e.g. Vimal (Field Executive) or Rahul">
@@ -541,7 +597,8 @@
               <option value="GMB">Google My Business (GMB)</option>
               <option value="ADS">Paid Ads (Meta / Google)</option>
               <option value="MARKETING_PERSON">By Marketing Person</option>
-              <option value="OTHER">Other Direct Referral</option>
+              <option value="REFERRAL">By Referral</option>
+              <option value="OTHER">Other Direct Lead</option>
             </select>
           </div>
           <div class="form-group">

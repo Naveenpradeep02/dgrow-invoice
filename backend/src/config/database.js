@@ -91,7 +91,7 @@ async function initDatabase() {
           email VARCHAR(150),
           mobile VARCHAR(30) NOT NULL,
           business_name VARCHAR(255) NOT NULL,
-          source ENUM('WEBSITE', 'CALL', 'GMB', 'ADS', 'MARKETING_PERSON', 'OTHER') NOT NULL DEFAULT 'WEBSITE',
+          source VARCHAR(50) NOT NULL DEFAULT 'WEBSITE',
           marketing_person VARCHAR(150) NULL,
           services_interested TEXT NULL,
           estimated_budget DECIMAL(12,2) DEFAULT 0.00,
@@ -107,6 +107,10 @@ async function initDatabase() {
           INDEX idx_enq_date (created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
+
+      try {
+        await connection.query("ALTER TABLE enquiries MODIFY COLUMN source VARCHAR(50) NOT NULL DEFAULT 'WEBSITE'");
+      } catch (e) {}
 
       await connection.query(`
         CREATE TABLE IF NOT EXISTS enquiry_timeline (

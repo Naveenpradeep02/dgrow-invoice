@@ -190,6 +190,11 @@ function renderEnquiryHero(enq, timeline = []) {
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Edit
           </button>
+
+          <button type="button" class="btn btn-secondary btn-sm" onclick="handleDeleteEnquiryFromNested()" style="display:inline-flex; align-items:center; gap:0.35rem; color:#dc2626; border-color:#fecaca; background:#fffbfb;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fffbfb'">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            Remove
+          </button>
         </div>
       </div>
     </div>
@@ -864,6 +869,8 @@ function getEnquirySourceBadge(source, marketingPerson = '') {
       return `<span class="badge" style="background:#fdf2f8; color:#be185d; font-weight:700;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:3px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Paid Ads</span>`;
     case 'MARKETING_PERSON':
       return `<span class="badge" style="background:#faf5ff; color:#7e22ce; font-weight:700;" title="${escapeAttr(marketingPerson)}">${SVG_ICONS.USER} Rep: ${escapeAttr(marketingPerson || 'Field Rep')}</span>`;
+    case 'REFERRAL':
+      return `<span class="badge" style="background:#fefce8; color:#a16207; font-weight:700; border:1px solid #fef08a;" title="${escapeAttr(marketingPerson)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:3px;"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"/><path d="M10 12l2 2 4-4"/></svg> Ref: ${escapeAttr(marketingPerson || 'Referral')}</span>`;
     default:
       return `<span class="badge" style="background:#f1f5f9; color:#475569;">${source || 'Direct'}</span>`;
   }
@@ -875,3 +882,31 @@ function getInitials(name) {
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
+
+// --- DELETE / REMOVE ENQUIRY FROM NESTED VIEW ---
+async function handleDeleteEnquiryFromNested() {
+  if (!currentEnquiry) return;
+  const name = currentEnquiry.business_name || currentEnquiry.name || `#${currentEnquiry.id}`;
+  if (!confirm(`Are you sure you want to delete enquiry "${name}"? All timeline history notes will also be removed. This cannot be undone.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/enquiries/${currentEnquiry.id}`, {
+      method: 'DELETE'
+    });
+
+    if (res && res.success) {
+      showToast(`✓ Enquiry "${name}" deleted successfully!`, 'success');
+    } else {
+      showToast(res?.message || 'Enquiry deleted.', 'success');
+    }
+
+    setTimeout(() => {
+      window.location.href = 'enquiries.html';
+    }, 500);
+  } catch (err) {
+    showToast('Failed to delete enquiry: ' + err.message, 'error');
+  }
+}
+window.handleDeleteEnquiryFromNested = handleDeleteEnquiryFromNested;

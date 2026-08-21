@@ -487,12 +487,6 @@
 
             <select id="miscFilterClient" class="form-select" style="flex:1.2; min-width:160px;" onchange="applyAllMiscFilters()">
               <option value="">All Clients (Agency-Wide)</option>
-              <option value="Marks Biotech">Marks Biotech</option>
-              <option value="Acme Corporation">Acme Corporation</option>
-              <option value="TechNova Global">TechNova Global</option>
-              <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
-              <option value="Zenith Health Labs">Zenith Health Labs</option>
-              <option value="D-GROW In-House">D-GROW In-House</option>
             </select>
 
             <!-- Billing Month Selector for Day 1 to 30 Monthly Bills -->
@@ -699,11 +693,6 @@
                 <label class="form-label" style="font-size:0.78rem; font-weight:700; color:#0369a1;">Assign to Client</label>
                 <select id="modalMiscClient" class="form-select" style="font-size:0.85rem;">
                   <option value="">-- Agency In-House / General --</option>
-                  <option value="Acme Corporation">Acme Corporation</option>
-                  <option value="TechNova Global">TechNova Global</option>
-                  <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
-                  <option value="Zenith Health Labs">Zenith Health Labs</option>
-                  <option value="D-GROW In-House">D-GROW In-House</option>
                 </select>
               </div>
 
@@ -972,12 +961,6 @@
           <div class="form-group" style="margin:0;">
             <label class="form-label required" style="font-size:0.75rem;">Select Client</label>
             <select id="adCampaignClientSelect" class="form-select" required style="font-weight:700;" onchange="updateAdCampaignModalWalletStatus()">
-              <option value="Marks Biotech">Marks Biotech</option>
-              <option value="Acme Corporation">Acme Corporation</option>
-              <option value="TechNova Global">TechNova Global</option>
-              <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
-              <option value="Zenith Health Labs">Zenith Health Labs</option>
-              <option value="D-GROW In-House">D-GROW In-House</option>
             </select>
           </div>
 
@@ -1027,11 +1010,6 @@
         <span>Registered Client Ads (<span id="adCampaignsCountBadge">0</span>)</span>
         <select id="adCampaignsFilterClient" class="form-select" style="font-size:0.75rem; padding:0.2rem 0.5rem; max-width:200px;" onchange="renderAdCampaignsList()">
           <option value="">All Clients</option>
-          <option value="Marks Biotech">Marks Biotech</option>
-          <option value="Acme Corporation">Acme Corporation</option>
-          <option value="TechNova Global">TechNova Global</option>
-          <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
-          <option value="Zenith Health Labs">Zenith Health Labs</option>
         </select>
       </div>
 
@@ -1075,12 +1053,6 @@
         <div class="form-group" style="margin:0;">
           <label class="form-label required" style="font-size:0.75rem;">Select Client Company</label>
           <select id="adModalClient" class="form-select" required style="font-weight:700;" onchange="onAdModalClientOrDateChange()">
-            <option value="Marks Biotech">Marks Biotech</option>
-            <option value="Acme Corporation">Acme Corporation</option>
-            <option value="TechNova Global">TechNova Global</option>
-            <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
-            <option value="Zenith Health Labs">Zenith Health Labs</option>
-            <option value="D-GROW In-House">D-GROW In-House</option>
           </select>
         </div>
 
@@ -1177,11 +1149,6 @@
           <div class="form-group" style="margin:0;">
             <label class="form-label required" style="font-size:0.8rem;">Select Client</label>
             <select id="adRefundClient" class="form-select" required onchange="updateRefundModalBalance(this.value)">
-              <option value="Marks Biotech">Marks Biotech</option>
-              <option value="Acme Corporation">Acme Corporation</option>
-              <option value="TechNova Global">TechNova Global</option>
-              <option value="Apex Retail & Fashion">Apex Retail & Fashion</option>
-              <option value="Zenith Health Labs">Zenith Health Labs</option>
             </select>
           </div>
 
@@ -1960,7 +1927,7 @@
       document.getElementById('modalMiscDate').value = todayISO;
       updateModalDateHint(todayISO);
       renderCategoryDropdowns('Ad Funds');
-      loadClientsIntoModal();
+      loadDynamicClients();
       switchMiscPeriod('MONTHLY');
 
       // Click outside / backdrop dismissal for all modals
@@ -2568,9 +2535,11 @@
 
     function openAdCampaignsModal(prefillClient = null) {
       initAdCampaigns();
+      populateAllClientDropdowns();
       const clientSelect = document.getElementById('adCampaignClientSelect');
       const filterSelect = document.getElementById('adCampaignsFilterClient');
-      const targetClient = prefillClient || document.getElementById('miscFilterClient')?.value || 'Marks Biotech';
+      const defaultClient = (dynamicActiveClients && dynamicActiveClients.length > 0) ? dynamicActiveClients[0] : 'Marks Biotech';
+      const targetClient = prefillClient || document.getElementById('miscFilterClient')?.value || defaultClient;
       
       if (clientSelect) clientSelect.value = targetClient;
       if (filterSelect) filterSelect.value = prefillClient || '';
@@ -2586,7 +2555,8 @@
     }
 
     function updateAdCampaignModalWalletStatus() {
-      const client = document.getElementById('adCampaignClientSelect')?.value || 'Marks Biotech';
+      const defaultClient = (dynamicActiveClients && dynamicActiveClients.length > 0) ? dynamicActiveClients[0] : 'Marks Biotech';
+      const client = document.getElementById('adCampaignClientSelect')?.value || defaultClient;
       const flow = calculateAdFundsFlow(client, todayISO);
       const notice = document.getElementById('adCampaignClientWalletNotice');
       if (notice) {
@@ -2759,7 +2729,9 @@
 
     function openAdDepositModal(defaultType = 'DEPOSIT', prefillClient = null, editId = null) {
       initAdCampaigns();
-      const targetClient = prefillClient || document.getElementById('miscFilterClient')?.value || 'Marks Biotech';
+      populateAllClientDropdowns();
+      const defaultClient = (dynamicActiveClients && dynamicActiveClients.length > 0) ? dynamicActiveClients[0] : 'Marks Biotech';
+      const targetClient = prefillClient || document.getElementById('miscFilterClient')?.value || defaultClient;
       const clientSelect = document.getElementById('adModalClient');
       if (clientSelect) clientSelect.value = targetClient;
 
@@ -2809,7 +2781,8 @@
     }
 
     function onAdModalClientOrDateChange() {
-      const client = document.getElementById('adModalClient')?.value || 'Marks Biotech';
+      const defaultClient = (dynamicActiveClients && dynamicActiveClients.length > 0) ? dynamicActiveClients[0] : 'Marks Biotech';
+      const client = document.getElementById('adModalClient')?.value || defaultClient;
       const targetDate = document.getElementById('adModalDate')?.value || todayISO;
       const flow = calculateAdFundsFlow(client, targetDate);
 
@@ -2846,7 +2819,8 @@
     }
 
     function addMultiEntryRow(type = 'DEPOSIT', shouldRender = true) {
-      const client = document.getElementById('adModalClient')?.value || 'Marks Biotech';
+      const defaultClient = (dynamicActiveClients && dynamicActiveClients.length > 0) ? dynamicActiveClients[0] : 'Marks Biotech';
+      const client = document.getElementById('adModalClient')?.value || defaultClient;
       const clientAds = getClientAdCampaigns(client, true);
       
       let defaultTitle = '';
@@ -3153,12 +3127,14 @@
 
     // --- REFUND MODAL HANDLERS ---
     function openAdRefundModal(prefillClient = null) {
+      populateAllClientDropdowns();
       const clientSelect = document.getElementById('adRefundClient');
       const filterClientVal = prefillClient || document.getElementById('miscFilterClient')?.value;
       if (filterClientVal && clientSelect) {
         clientSelect.value = filterClientVal;
       }
-      const selectedClient = clientSelect?.value || 'Marks Biotech';
+      const defaultClient = (dynamicActiveClients && dynamicActiveClients.length > 0) ? dynamicActiveClients[0] : 'Marks Biotech';
+      const selectedClient = clientSelect?.value || defaultClient;
       updateRefundModalBalance(selectedClient);
       document.getElementById('adRefundDate').value = todayISO;
       document.getElementById('adFundRefundModal').classList.add('active');
@@ -3268,38 +3244,142 @@
       }
     }
 
-    async function loadClientsIntoModal() {
-      const clientSelect = document.getElementById('modalMiscClient');
-      const filterClientSelect = document.getElementById('miscFilterClient');
-      if (!clientSelect) return;
+    // Dynamic Client Master Cache
+    let dynamicActiveClients = [];
+    let dynamicAllClientsData = [];
 
+    async function loadDynamicClients() {
       let apiClients = [];
       try {
         if (typeof apiFetch === 'function') {
           const res = await apiFetch('/clients');
-          if (res && res.clients && res.clients.length > 0) {
-            apiClients = res.clients.map(c => c.company_name);
+          if (res && res.clients && Array.isArray(res.clients)) {
+            dynamicAllClientsData = res.clients;
+            // Include all registered clients from Client Master
+            apiClients = res.clients.map(c => (c.company_name || '').trim()).filter(Boolean);
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('loadDynamicClients API error:', e);
+      }
 
-      // Distinct client names from API + miscRecords
+      // Distinct client names from actual transaction records and saved campaigns
       const recordClients = miscRecords.filter(r => r.client && r.client.trim()).map(r => r.client.trim());
+      const campaignClients = (adCampaigns || []).filter(c => c.client && c.client.trim()).map(c => c.client.trim());
       const defaultClients = ['Marks Biotech', 'Acme Corporation', 'TechNova Global', 'Apex Retail & Fashion', 'Zenith Health Labs', 'Sundaram Silk Sarees', 'D-GROW In-House'];
-      const allClients = [...new Set([...apiClients, ...recordClients, ...defaultClients])].filter(Boolean);
 
-      const modalClientOptions = `<option value="">-- Agency In-House / General --` + 
-        allClients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}`).join('');
-      clientSelect.innerHTML = modalClientOptions;
+      const combined = (apiClients.length > 0)
+        ? [...new Set([...apiClients, ...recordClients, ...campaignClients])].filter(Boolean)
+        : [...new Set([...recordClients, ...campaignClients, ...defaultClients])].filter(Boolean);
 
+      // Sort alphabetically
+      dynamicActiveClients = combined.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+      populateAllClientDropdowns();
+      return dynamicActiveClients;
+    }
+
+    function populateAllClientDropdowns() {
+      const clients = dynamicActiveClients && dynamicActiveClients.length > 0 
+        ? dynamicActiveClients 
+        : ['Marks Biotech', 'Acme Corporation', 'TechNova Global', 'Apex Retail & Fashion', 'Zenith Health Labs'];
+
+      // 1. Page Main Filter Select (#miscFilterClient)
+      const filterClientSelect = document.getElementById('miscFilterClient');
       if (filterClientSelect) {
         const currVal = filterClientSelect.value;
-        let filterOptions = `<option value="">All Clients (Agency-Wide)`;
-        filterOptions += allClients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}`).join('');
+        let filterOptions = `<option value="">All Clients (Agency-Wide)</option>`;
+        filterOptions += clients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
         filterClientSelect.innerHTML = filterOptions;
-        if (allClients.includes(currVal)) filterClientSelect.value = currVal;
+        if (currVal && clients.includes(currVal)) filterClientSelect.value = currVal;
       }
+
+      // 2. Add Expense Entry Modal Client Picker (#modalMiscClient)
+      const modalClientSelect = document.getElementById('modalMiscClient');
+      if (modalClientSelect) {
+        const currVal = modalClientSelect.value;
+        let modalClientOptions = `<option value="">-- Agency In-House / General --</option>`;
+        modalClientOptions += clients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        modalClientSelect.innerHTML = modalClientOptions;
+        if (currVal && clients.includes(currVal)) modalClientSelect.value = currVal;
+      }
+
+      // 3. Daily Ad Funds Modal (#adModalClient)
+      const adModalClientSelect = document.getElementById('adModalClient');
+      if (adModalClientSelect) {
+        const currVal = adModalClientSelect.value;
+        const optionsHtml = clients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        adModalClientSelect.innerHTML = optionsHtml;
+        if (currVal && clients.includes(currVal)) {
+          adModalClientSelect.value = currVal;
+        } else if (clients.length > 0) {
+          adModalClientSelect.value = clients[0];
+        }
+      }
+
+      // 4. Create Ad Campaign Form (#adCampaignClientSelect)
+      const adCampaignClientSelect = document.getElementById('adCampaignClientSelect');
+      if (adCampaignClientSelect) {
+        const currVal = adCampaignClientSelect.value;
+        const optionsHtml = clients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        adCampaignClientSelect.innerHTML = optionsHtml;
+        if (currVal && clients.includes(currVal)) {
+          adCampaignClientSelect.value = currVal;
+        } else if (clients.length > 0) {
+          adCampaignClientSelect.value = clients[0];
+        }
+      }
+
+      // 5. Registered Ads List Filter (#adCampaignsFilterClient)
+      const adCampaignsFilterClient = document.getElementById('adCampaignsFilterClient');
+      if (adCampaignsFilterClient) {
+        const currVal = adCampaignsFilterClient.value;
+        let optionsHtml = `<option value="">All Clients</option>`;
+        optionsHtml += clients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        adCampaignsFilterClient.innerHTML = optionsHtml;
+        if (currVal && clients.includes(currVal)) adCampaignsFilterClient.value = currVal;
+      }
+
+      // 6. Ad Refund Modal (#adRefundClient)
+      const adRefundClientSelect = document.getElementById('adRefundClient');
+      if (adRefundClientSelect) {
+        const currVal = adRefundClientSelect.value;
+        const optionsHtml = clients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        adRefundClientSelect.innerHTML = optionsHtml;
+        if (currVal && clients.includes(currVal)) {
+          adRefundClientSelect.value = currVal;
+        } else if (clients.length > 0) {
+          adRefundClientSelect.value = clients[0];
+        }
+      }
+
+      // 7. Daily / Custom Ad Spend Bill Modal (#dailyBillClient)
+      const dailyBillClientSelect = document.getElementById('dailyBillClient');
+      if (dailyBillClientSelect) {
+        const currVal = dailyBillClientSelect.value;
+        const optionsHtml = clients.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+        dailyBillClientSelect.innerHTML = optionsHtml;
+        if (currVal && clients.includes(currVal)) {
+          dailyBillClientSelect.value = currVal;
+        } else if (clients.length > 0) {
+          dailyBillClientSelect.value = clients[0];
+        }
+      }
+
+      // 8. Custom Ad Bill Generator: Datalist for #customBillClientName
+      let dataList = document.getElementById('customBillClientList');
+      if (!dataList) {
+        dataList = document.createElement('datalist');
+        dataList.id = 'customBillClientList';
+        document.body.appendChild(dataList);
+        const customBillInput = document.getElementById('customBillClientName');
+        if (customBillInput) customBillInput.setAttribute('list', 'customBillClientList');
+      }
+      dataList.innerHTML = clients.map(c => `<option value="${escapeAttr(c)}"></option>`).join('');
     }
+
+    // Alias for backwards compatibility
+    const loadClientsIntoModal = loadDynamicClients;
 
     // Load custom category additions from localStorage
     function loadCategoryHierarchy() {
@@ -5130,19 +5210,17 @@
 
     // --- CUSTOM DATE AD BILL MODAL HANDLERS (SINGLE DATE & MULTIPLE DATES RANGE) ---
     function openDailyBillModal(prefillClient = null, prefillDate = null) {
+      populateAllClientDropdowns();
       const clientSelect = document.getElementById('dailyBillClient');
       const dateInput = document.getElementById('dailyBillDate');
       const fromInput = document.getElementById('dailyBillFromDate');
       const toInput = document.getElementById('dailyBillToDate');
       
-      const recordClients = miscRecords.filter(r => r.category === 'Ad Funds' && r.client && r.client.trim()).map(r => r.client.trim());
-      const allClients = [...new Set([...recordClients, 'Marks Biotech', 'Acme Corporation', 'TechNova Global', 'Apex Retail & Fashion', 'Zenith Health Labs'])].filter(Boolean);
-      
-      clientSelect.innerHTML = allClients.map(c => '<option value="' + escapeAttr(c) + '">' + escapeHtml(c) + '<\/option>').join('');
-      
       const filterClientVal = prefillClient || document.getElementById('miscFilterClient')?.value;
-      if (filterClientVal && allClients.includes(filterClientVal)) {
+      if (filterClientVal && dynamicActiveClients.includes(filterClientVal)) {
         clientSelect.value = filterClientVal;
+      } else if (dynamicActiveClients.length > 0) {
+        clientSelect.value = dynamicActiveClients[0];
       }
       
       const targetD = prefillDate || todayISO;
@@ -5545,16 +5623,27 @@
 
     let customBillItems = [];
 
-    function openCustomAdBillModal(clientName = 'Marks Biotech', month = '2026-08') {
-      const targetClient = clientName || 'Marks Biotech';
-      const prof = defaultClientAdProfiles[targetClient] || {
+    function openCustomAdBillModal(clientName = null, month = '2026-08') {
+      populateAllClientDropdowns();
+      const defaultClient = (dynamicActiveClients && dynamicActiveClients.length > 0) ? dynamicActiveClients[0] : 'Marks Biotech';
+      const targetClient = clientName || document.getElementById('miscFilterClient')?.value || defaultClient;
+      
+      const dbClient = (dynamicAllClientsData || []).find(c => (c.company_name || '').trim().toLowerCase() === targetClient.toLowerCase());
+      const prof = dbClient ? {
+        company: dbClient.company_name,
+        person: dbClient.contact_person || 'Dr. Ramesh',
+        mobile: dbClient.mobile || '9444109822',
+        email: dbClient.email || 'info@client.com',
+        address: dbClient.address || (dbClient.city ? `${dbClient.city}, ${dbClient.state || 'Tamil Nadu'}` : 'Chennai, Tamil Nadu'),
+        gstin: dbClient.gstin || '33OUUPS5195G1ZJ'
+      } : (defaultClientAdProfiles[targetClient] || {
         company: targetClient,
         person: 'Contact Person',
         mobile: '9790123456',
         email: 'accounts@client.in',
         address: 'Chennai, Tamil Nadu',
         gstin: '33OUUPS5195G1ZJ'
-      };
+      });
 
       // Populate Company Info
       if (document.getElementById('customBillCompName')) document.getElementById('customBillCompName').value = 'D-GROW MARKETING AGENCY';
@@ -5614,7 +5703,14 @@
 
     function onCustomBillClientInput() {
       const val = document.getElementById('customBillClientName')?.value?.trim();
-      if (val && defaultClientAdProfiles[val]) {
+      if (!val) return;
+      const dbClient = (dynamicAllClientsData || []).find(c => (c.company_name || '').trim().toLowerCase() === val.toLowerCase());
+      if (dbClient) {
+        if (document.getElementById('customBillClientPerson')) document.getElementById('customBillClientPerson').value = dbClient.contact_person || '';
+        if (document.getElementById('customBillClientMobile')) document.getElementById('customBillClientMobile').value = dbClient.mobile || '';
+        if (document.getElementById('customBillClientGstin')) document.getElementById('customBillClientGstin').value = dbClient.gstin || '';
+        if (document.getElementById('customBillClientAddress')) document.getElementById('customBillClientAddress').value = dbClient.address || (dbClient.city ? `${dbClient.city}, ${dbClient.state || 'Tamil Nadu'}` : '');
+      } else if (defaultClientAdProfiles[val]) {
         const prof = defaultClientAdProfiles[val];
         if (document.getElementById('customBillClientPerson')) document.getElementById('customBillClientPerson').value = prof.person || '';
         if (document.getElementById('customBillClientMobile')) document.getElementById('customBillClientMobile').value = prof.mobile || '';

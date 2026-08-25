@@ -79,6 +79,16 @@ function forceLogoutDeactivatedAccount(reason) {
   window.location.href = `${prefix}/login.html`;
 }
 
+function handleLogout() {
+  clearAuthSession();
+  const prefix = getAppPathPrefix();
+  window.location.href = `${prefix}/login.html`;
+}
+
+// Global aliases for logout
+window.handleLogout = handleLogout;
+window.logout = handleLogout;
+
 function getAppPathPrefix() {
   const path = window.location.pathname;
   const match = path.match(/^(.*?)(\/(?:admin|client|auditor|login\.html|index\.html|$))/i);

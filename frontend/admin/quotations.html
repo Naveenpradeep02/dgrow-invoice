@@ -1655,7 +1655,7 @@
               ` : `<span style="color:#9ca3af;">-</span>`}
             </td>
             ${idx === 0 ? `
-              <td rowspan="${items.length}" style="text-align:center; vertical-align:middle; font-weight:700; font-size:1.05rem; color:#111827; background:#ffffff; border-left:1px solid #d1d5db;">
+              <td rowspan="${(q.items || []).length}" style="text-align:center; vertical-align:middle; font-weight:700; font-size:1.05rem; color:#111827; background:#ffffff; border-left:1px solid #d1d5db;">
                 ₹${baseSubtotal.toLocaleString('en-IN')}
               </td>
             ` : ''}

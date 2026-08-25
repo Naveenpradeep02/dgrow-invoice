@@ -85,15 +85,21 @@ function getAppPathPrefix() {
   return '';
 }
 
+function isMarketingRole(role) {
+  const norm = String(role || '').toUpperCase().trim();
+  return norm === 'MARKETING' || norm === 'SALES_EXECUTIVE';
+}
+
 function redirectUserByRole(role) {
   const prefix = getAppPathPrefix();
-  if (role === 'ADMIN') {
+  const normRole = String(role || '').toUpperCase().trim();
+  if (normRole === 'ADMIN') {
     window.location.href = `${prefix}/admin/dashboard.html`;
-  } else if (role === 'MARKETING') {
+  } else if (isMarketingRole(normRole)) {
     window.location.href = `${prefix}/admin/enquiries.html`;
-  } else if (role === 'CLIENT') {
+  } else if (normRole === 'CLIENT') {
     window.location.href = `${prefix}/client/dashboard.html`;
-  } else if (role === 'AUDITOR') {
+  } else if (normRole === 'AUDITOR') {
     window.location.href = `${prefix}/auditor/dashboard.html`;
   } else {
     window.location.href = `${prefix}/login.html`;
@@ -135,27 +141,33 @@ function checkAuthGuard() {
     return;
   }
 
+  const normRole = String(user.role || '').toUpperCase().trim();
+  const isMarketing = isMarketingRole(normRole);
+  const isAdmin = (normRole === 'ADMIN');
+  const isClient = (normRole === 'CLIENT');
+  const isAuditor = (normRole === 'AUDITOR');
+
   // Role path protection
   if (path.includes('/admin/')) {
-    if (user.role === 'MARKETING') {
+    if (isMarketing) {
       const currentPage = path.split('/').pop().split('?')[0];
       if (!MARKETING_ALLOWED_PAGES.includes(currentPage)) {
         showToast('Marketing role: Access restricted to sales and client management modules.', 'warning');
         window.location.href = `${prefix}/admin/enquiries.html`;
         return;
       }
-    } else if (user.role !== 'ADMIN') {
+    } else if (!isAdmin) {
       showToast('Unauthorized role access.', 'error');
-      redirectUserByRole(user.role);
+      redirectUserByRole(normRole);
       return;
     }
-  } else if (path.includes('/client/') && user.role !== 'CLIENT') {
+  } else if (path.includes('/client/') && !isClient) {
     showToast('Unauthorized role access.', 'error');
-    redirectUserByRole(user.role);
+    redirectUserByRole(normRole);
     return;
-  } else if (path.includes('/auditor/') && user.role !== 'AUDITOR' && user.role !== 'ADMIN') {
+  } else if (path.includes('/auditor/') && !isAuditor && !isAdmin) {
     showToast('Unauthorized role access.', 'error');
-    redirectUserByRole(user.role);
+    redirectUserByRole(normRole);
     return;
   }
 
@@ -171,15 +183,16 @@ function checkAuthGuard() {
   // Update Top Navbar Profile Info
   populateTopNavbarUser(user);
 
-  // Load Real Dynamic Notifications (Invoice Ready based on onboard date + Payment Pending)
-  if (user.role === 'ADMIN' || user.role === 'AUDITOR') {
+  // Load Real Dynamic Notifications
+  if (isAdmin || isAuditor) {
     loadTopbarRealNotifications();
   }
 }
 
 function applyRolePermissionsUI(user) {
   if (!user) return;
-  if (user.role === 'MARKETING') {
+  const isMarketing = isMarketingRole(user.role);
+  if (isMarketing) {
     document.body.classList.add('role-marketing');
 
     // Hide sidebar links not in MARKETING_ALLOWED_PAGES

@@ -126,8 +126,8 @@ function renderMarketersTable(list) {
   tbody.innerHTML = filtered.map((m, idx) => {
     const initials = m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'MK';
     const statusBadge = m.status === 'ACTIVE'
-      ? `<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700; font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:12px;">ACTIVE</span>`
-      : `<span class="badge" style="background:#fee2e2; color:#dc2626; font-weight:700; font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:12px;">INACTIVE</span>`;
+      ? `<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700; font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:10px;">ACTIVE</span>`
+      : `<span class="badge" style="background:#fee2e2; color:#dc2626; font-weight:700; font-size:0.72rem; padding:0.2rem 0.5rem; border-radius:10px;">INACTIVE</span>`;
 
     // Progress bar for conversion
     const convRate = m.conversion_rate_percent || 0;
@@ -135,60 +135,59 @@ function renderMarketersTable(list) {
 
     return `
       <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.15s ease;">
-        <td style="text-align:center; font-weight:700; color:#94a3b8; font-size:0.85rem; vertical-align:middle; padding:0.85rem 0.5rem;">${idx + 1}</td>
-        <td style="vertical-align:middle; padding:0.85rem 1rem;">
-          <div style="display:flex; align-items:center; gap:0.75rem;">
-            <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, #e11d48, #be123c); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; flex-shrink:0; box-shadow:0 2px 4px rgba(225,29,72,0.2);">
+        <td style="text-align:center; font-weight:700; color:#94a3b8; font-size:0.8rem; vertical-align:middle; padding:0.65rem 0.35rem;">${idx + 1}</td>
+        <td style="vertical-align:middle; padding:0.65rem 0.65rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, #e11d48, #be123c); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem; flex-shrink:0;">
               ${initials}
             </div>
-            <div>
-              <div style="font-weight:700; color:var(--text-main); font-size:0.92rem;">${escapeHtml(m.name)}</div>
-              <div style="font-size:0.78rem; color:#64748b; margin-top:1px;">${escapeHtml(m.email)}</div>
+            <div style="overflow:hidden;">
+              <div style="font-weight:700; color:var(--text-main); font-size:0.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(m.name)}</div>
+              <div style="font-size:0.75rem; color:#64748b; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(m.email)}</div>
             </div>
           </div>
         </td>
-        <td style="text-align:center; vertical-align:middle; padding:0.85rem 0.75rem;">
-          <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">${m.enquiries_count}</div>
-          <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">${m.enquiries_in_discussion} in discussion</div>
+        <td style="text-align:center; vertical-align:middle; padding:0.65rem 0.4rem;">
+          <div style="font-size:1rem; font-weight:800; color:#0f172a;">${m.enquiries_count}</div>
+          <div style="font-size:0.68rem; color:#64748b;">${m.enquiries_in_discussion} active</div>
         </td>
-        <td style="text-align:center; vertical-align:middle; padding:0.85rem 0.75rem;">
-          <div style="font-size:1.1rem; font-weight:800; color:#0284c7;">${m.meetings_total}</div>
-          <div style="font-size:0.72rem; color:#16a34a; margin-top:2px;">${m.meetings_completed} completed</div>
+        <td style="text-align:center; vertical-align:middle; padding:0.65rem 0.4rem;">
+          <div style="font-size:1rem; font-weight:800; color:#0284c7;">${m.meetings_total}</div>
+          <div style="font-size:0.68rem; color:#16a34a;">${m.meetings_completed} done</div>
         </td>
-        <td style="text-align:center; vertical-align:middle; padding:0.85rem 0.75rem;">
-          <div style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:800; font-size:1.05rem; color:#15803d;">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <td style="text-align:center; vertical-align:middle; padding:0.65rem 0.4rem;">
+          <div style="display:inline-flex; align-items:center; gap:0.25rem; font-weight:800; font-size:0.95rem; color:#15803d;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             ${m.converted_clients_count} Clients
           </div>
-          <div style="width:80px; height:5px; background:#e2e8f0; border-radius:3px; margin:4px auto 0 auto; overflow:hidden;">
+          <div style="width:70px; height:4px; background:#e2e8f0; border-radius:3px; margin:3px auto 0 auto; overflow:hidden;">
             <div style="width:${Math.min(100, convRate)}%; height:100%; background:${progressColor}; border-radius:3px;"></div>
           </div>
         </td>
-        <td style="text-align:center; vertical-align:middle; padding:0.85rem 0.75rem;">
-          <span class="badge" style="background:#f1f5f9; color:${progressColor}; font-weight:800; font-size:0.82rem; padding:0.25rem 0.6rem; border-radius:6px;">
+        <td style="text-align:center; vertical-align:middle; padding:0.65rem 0.4rem;">
+          <span class="badge" style="background:#f1f5f9; color:${progressColor}; font-weight:800; font-size:0.78rem; padding:0.2rem 0.45rem; border-radius:5px;">
             ${convRate}%
           </span>
         </td>
-        <td style="text-align:right; vertical-align:middle; padding:0.85rem 1rem;">
-          <div style="font-weight:800; font-size:1rem; color:#0f172a;">₹${(m.converted_revenue || 0).toLocaleString('en-IN')}</div>
-          ${m.pipeline_value > 0 ? `<div style="font-size:0.72rem; color:#b45309; margin-top:2px;">₹${(m.pipeline_value).toLocaleString('en-IN')} pipeline</div>` : ''}
+        <td style="text-align:right; vertical-align:middle; padding:0.65rem 0.65rem;">
+          <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">₹${(m.converted_revenue || 0).toLocaleString('en-IN')}</div>
+          ${m.pipeline_value > 0 ? `<div style="font-size:0.68rem; color:#b45309;">₹${(m.pipeline_value).toLocaleString('en-IN')} pipe</div>` : ''}
         </td>
-        <td style="text-align:center; vertical-align:middle; padding:0.85rem 0.75rem;">
+        <td style="text-align:center; vertical-align:middle; padding:0.65rem 0.4rem;">
           ${statusBadge}
         </td>
-        <td style="text-align:right; vertical-align:middle; padding:0.85rem 1rem;">
-          <div style="display:inline-flex; gap:0.4rem; align-items:center; justify-content:flex-end;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="viewMarketerActivity(${m.id})" title="View Detailed Activity & Client Pipeline" style="font-weight:700; padding:0.32rem 0.65rem; font-size:0.78rem; display:inline-flex; align-items:center; gap:0.3rem;">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <td style="text-align:right; vertical-align:middle; padding:0.65rem 0.65rem; white-space:nowrap;">
+          <div style="display:inline-flex; gap:0.3rem; align-items:center; justify-content:flex-end;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="viewMarketerActivity(${m.id})" title="View Activity" style="font-weight:700; padding:0.25rem 0.5rem; font-size:0.75rem;">
               Activity
             </button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMarketerModal(${m.id})" style="padding:0.32rem 0.6rem; font-size:0.78rem;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openEditMarketerModal(${m.id})" title="Edit" style="padding:0.25rem 0.45rem; font-size:0.75rem;">
               Edit
             </button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMarketerStatus(${m.id}, '${m.status}')" style="padding:0.32rem 0.6rem; font-size:0.78rem; color:${m.status === 'ACTIVE' ? '#b91c1c' : '#15803d'};">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMarketerStatus(${m.id}, '${m.status}')" style="padding:0.25rem 0.45rem; font-size:0.75rem; color:${m.status === 'ACTIVE' ? '#b91c1c' : '#15803d'};">
               ${m.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
             </button>
-            <button type="button" class="btn btn-danger btn-sm" onclick="deleteMarketerAccount(${m.id}, '${escapeHtml(m.name)}')" style="padding:0.32rem 0.6rem; font-size:0.78rem;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteMarketerAccount(${m.id}, '${escapeHtml(m.name)}')" title="Delete" style="padding:0.25rem 0.45rem; font-size:0.75rem;">
               Delete
             </button>
           </div>

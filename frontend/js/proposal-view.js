@@ -6,10 +6,6 @@ function getApiBaseUrl() {
   if (isLocalhost) {
     return window.location.port === '5000' ? '/api' : 'http://localhost:5000/api';
   }
-  const path = window.location.pathname;
-  if (path.includes('/payment-management')) {
-    return '/payment-management/api';
-  }
   return '/api';
 }
 

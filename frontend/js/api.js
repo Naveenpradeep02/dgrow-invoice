@@ -1,6 +1,6 @@
 // D-GROW API Helper & Utilities
 
-// API Base URL detection for local development and live deployments (crm-tools.dgrowmarketing.com / subpaths)
+// API Base URL detection for local development (port 5000/5500) and production (/api)
 function getApiBaseUrl() {
   const host = window.location.hostname;
   const isLocalhost = host === 'localhost' || host === '127.0.0.1';
@@ -8,11 +8,7 @@ function getApiBaseUrl() {
     return window.location.port === '5000' ? '/api' : 'http://localhost:5000/api';
   }
 
-  // Custom domains & live subpaths (e.g. /payment-management)
-  const path = window.location.pathname;
-  if (path.includes('/payment-management')) {
-    return '/payment-management/api';
-  }
+  // Production backend API is mounted at /api
   return '/api';
 }
 

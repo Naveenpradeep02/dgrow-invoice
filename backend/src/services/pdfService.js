@@ -214,29 +214,36 @@ function generateInvoicePDF(res, invoiceData) {
 
   // --- SERVICE TABLE ---
   y += 35;
-  doc.rect(30, y, 535, 20).fill('#2d2d2d');
+  const tableHeaderY = y;
+  doc.rect(30, tableHeaderY, 535, 20).fill('#2d2d2d');
   doc.fillColor('#FFFFFF').fontSize(8.5).font('Helvetica-Bold');
-  doc.text('No', 32, y + 6, { width: 30, align: 'center' });
-  doc.text('Service', 68, y + 6, { width: 135 });
-  doc.text('HSN/SAC', 208, y + 6, { width: 65, align: 'center' });
-  doc.text('Details', 278, y + 6, { width: 175 });
-  doc.text('Amount', 458, y + 6, { width: 102, align: 'right' });
+  doc.text('No', 32, tableHeaderY + 6, { width: 30, align: 'center' });
+  doc.text('Service', 68, tableHeaderY + 6, { width: 135 });
+  doc.text('HSN/SAC', 208, tableHeaderY + 6, { width: 65, align: 'center' });
+  doc.text('Details', 278, tableHeaderY + 6, { width: 175 });
+  doc.text('Amount', 458, tableHeaderY + 6, { width: 104, align: 'center' });
 
   y += 20;
+  const tableBodyStartY = y;
+
+  const rowHeights = items.map(item => {
+    const parsed = parseItemDetails(item);
+    const detailLinesCount = Math.max(1, parsed.subDetails.length);
+    return Math.max(28, 14 + detailLinesCount * 13);
+  });
+  const totalTableHeight = rowHeights.reduce((a, b) => a + b, 0);
 
   items.forEach((item, index) => {
     const parsed = parseItemDetails(item);
-    const detailLinesCount = Math.max(1, parsed.subDetails.length);
-    const rowHeight = Math.max(28, 14 + detailLinesCount * 13);
+    const rowHeight = rowHeights[index];
 
-    // Row Outer Border
-    doc.strokeColor('#d1d5db').lineWidth(0.5).rect(30, y, 535, rowHeight).stroke();
+    // Row Outer Border for left columns (columns 1 to 4: 30 to 455)
+    doc.strokeColor('#d1d5db').lineWidth(0.5).rect(30, y, 425, rowHeight).stroke();
 
-    // Vertical Column Divider Lines matching user screenshot table design
+    // Vertical Column Divider Lines
     doc.moveTo(64, y).lineTo(64, y + rowHeight).stroke();
     doc.moveTo(205, y).lineTo(205, y + rowHeight).stroke();
     doc.moveTo(275, y).lineTo(275, y + rowHeight).stroke();
-    doc.moveTo(455, y).lineTo(455, y + rowHeight).stroke();
 
     // No Column
     doc.fillColor('#111827').fontSize(8.5).font('Helvetica-Bold').text(String(index + 1), 32, y + 8, { width: 30, align: 'center' });
@@ -258,11 +265,15 @@ function generateInvoicePDF(res, invoiceData) {
       doc.font('Helvetica').fontSize(8).fillColor('#9ca3af').text('-', 278, y + 8);
     }
 
-    // Amount Column
-    doc.font('Helvetica-Bold').fontSize(9).fillColor('#111827').text(`Rs. ${formatMoney(parsed.amount)}`, 458, y + 8, { width: 102, align: 'right' });
-
     y += rowHeight;
   });
+
+  // Amount Column (Single merged block spanning total table height)
+  doc.strokeColor('#d1d5db').lineWidth(0.5).rect(455, tableBodyStartY, 110, totalTableHeight).stroke();
+
+  // Center overall amount vertically and horizontally in Amount column
+  const amountCenterY = tableBodyStartY + (totalTableHeight / 2) - 6;
+  doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#111827').text(`Rs. ${formatMoney(invoice.subtotal)}`, 458, amountCenterY, { width: 104, align: 'center' });
 
   // --- TOTALS & AMOUNT IN WORDS SECTION ---
   y += 10;

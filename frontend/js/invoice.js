@@ -1,4 +1,4 @@
-﻿// Invoice Builder, Tax Calculation, and View Controller
+// Invoice Builder, Tax Calculation, and View Controller
 
 let currentItems = [];
 let availableClients = [];
@@ -1340,7 +1340,7 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
             <th style="width:160px;">Service</th>
             <th style="width:85px; text-align:center;">HSN/SAC</th>
             <th>Details</th>
-            <th style="width:120px; text-align:right;">Amount</th>
+            <th style="width:120px; text-align:center;">Amount</th>
           </tr>
         </thead>
         <tbody>
@@ -1358,7 +1358,11 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
                     </ul>
                   ` : `<span style="color:#9ca3af;">-</span>`}
                 </td>
-                <td style="text-align:right; font-weight:700; color:#111827; vertical-align:top;">${formatINR(parsed.amount)}</td>
+                ${idx === 0 ? `
+                  <td rowspan="${items.length}" style="text-align:center; vertical-align:middle; font-weight:700; font-size:1.05rem; color:#111827; background:#ffffff; border-left:1px solid #d1d5db;">
+                    ${formatINR(invoice.subtotal)}
+                  </td>
+                ` : ''}
               </tr>
             `;
           }).join('')}

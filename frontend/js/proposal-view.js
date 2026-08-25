@@ -1,9 +1,19 @@
 // Public Client 3-Tier Proposal View Controller
 
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE = isLocalhost
-  ? (window.location.port === '5000' ? '/api' : 'http://localhost:5000/api')
-  : 'https://dgrow-invoice.onrender.com/api';
+function getApiBaseUrl() {
+  const host = window.location.hostname;
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+  if (isLocalhost) {
+    return window.location.port === '5000' ? '/api' : 'http://localhost:5000/api';
+  }
+  const path = window.location.pathname;
+  if (path.includes('/payment-management')) {
+    return '/payment-management/api';
+  }
+  return '/api';
+}
+
+const API_BASE = getApiBaseUrl();
 
 let currentProposal = null;
 let currentToken = '';

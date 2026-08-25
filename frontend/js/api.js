@@ -1,10 +1,22 @@
 // D-GROW API Helper & Utilities
 
-// API Base URL detection for local development (Live Server port 5500 / Express port 5000) and production (Render)
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE = isLocalhost
-  ? (window.location.port === '5000' ? '/api' : 'http://localhost:5000/api')
-  : 'https://dgrow-invoice.onrender.com/api';
+// API Base URL detection for local development and live deployments (crm-tools.dgrowmarketing.com / subpaths)
+function getApiBaseUrl() {
+  const host = window.location.hostname;
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+  if (isLocalhost) {
+    return window.location.port === '5000' ? '/api' : 'http://localhost:5000/api';
+  }
+
+  // Custom domains & live subpaths (e.g. /payment-management)
+  const path = window.location.pathname;
+  if (path.includes('/payment-management')) {
+    return '/payment-management/api';
+  }
+  return '/api';
+}
+
+const API_BASE = getApiBaseUrl();
 
 
 function getToken() {

@@ -31,9 +31,10 @@ async function authenticateToken(req, res, next) {
     try {
       // Check live active status from DB
       const users = await db.query(
-        `SELECT u.id, u.name, u.email, u.status, u.client_id, r.name as role 
+        `SELECT u.id, u.name, u.email, u.client_id, u.role_id, COALESCE(u.status, 'ACTIVE') as status, 
+                COALESCE(r.name, CASE WHEN u.role_id = 4 THEN 'MARKETING' WHEN u.role_id = 1 THEN 'ADMIN' WHEN u.role_id = 3 THEN 'AUDITOR' ELSE 'CLIENT' END) as role 
          FROM users u 
-         JOIN roles r ON u.role_id = r.id 
+         LEFT JOIN roles r ON u.role_id = r.id 
          WHERE u.id = ? LIMIT 1`,
         [decodedUser.id]
       );
@@ -55,11 +56,16 @@ async function authenticateToken(req, res, next) {
         });
       }
 
+      const effectiveRole = String(dbUser.role || '').toUpperCase().trim();
+      const finalRole = (effectiveRole === 'SALES_EXECUTIVE' || effectiveRole === 'MARKETING' || dbUser.role_id === 4)
+        ? 'MARKETING'
+        : effectiveRole;
+
       req.user = {
         id: dbUser.id,
         name: dbUser.name,
         email: dbUser.email,
-        role: dbUser.role,
+        role: finalRole,
         client_id: dbUser.client_id,
         status: dbUser.status
       };

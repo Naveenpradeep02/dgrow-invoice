@@ -68,28 +68,39 @@ async function login(req, res) {
     const normalizedEmail = inputEmail.replace(/^info\.dgrowmarketing\.com$/, 'info@dgrowmarketing.com');
 
     const users = await db.query(
-      `SELECT u.id, u.name, u.email, u.password_hash, u.client_id, u.status, r.name as role 
+      `SELECT u.id, u.name, u.email, u.password_hash, u.client_id, u.role_id, COALESCE(u.status, 'ACTIVE') as status, 
+              COALESCE(r.name, CASE WHEN u.role_id = 4 THEN 'MARKETING' WHEN u.role_id = 1 THEN 'ADMIN' WHEN u.role_id = 3 THEN 'AUDITOR' ELSE 'CLIENT' END) as role 
        FROM users u 
-       JOIN roles r ON u.role_id = r.id 
-       WHERE u.email = ? OR u.email = ?`,
+       LEFT JOIN roles r ON u.role_id = r.id 
+       WHERE LOWER(TRIM(u.email)) = ? OR LOWER(TRIM(u.email)) = ?`,
       [inputEmail, normalizedEmail]
     );
 
     const user = users[0];
-    if (!user || user.status !== 'ACTIVE') {
-      return res.status(401).json({ success: false, message: 'Invalid credentials or inactive account.' });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials. User not found.' });
+    }
+
+    if (user.status !== 'ACTIVE') {
+      return res.status(401).json({ success: false, message: 'Your account is inactive. Please contact administrator.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials.' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials. Incorrect password.' });
     }
+
+    // Normalize role name
+    const effectiveRole = String(user.role || '').toUpperCase().trim();
+    const finalRole = (effectiveRole === 'SALES_EXECUTIVE' || effectiveRole === 'MARKETING' || user.role_id === 4)
+      ? 'MARKETING'
+      : effectiveRole;
 
     const payload = {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      role: finalRole,
       client_id: user.client_id
     };
 
@@ -112,7 +123,7 @@ async function login(req, res) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: finalRole,
         client_id: user.client_id
       }
     });
@@ -133,9 +144,11 @@ async function getMe(req, res) {
 async function getAllStaffUsers(req, res) {
   try {
     const users = await db.query(
-      `SELECT u.id, u.name, u.email, u.status, u.created_at, r.name as role, r.id as role_id 
+      `SELECT u.id, u.name, u.email, COALESCE(u.status, 'ACTIVE') as status, u.created_at, 
+              COALESCE(r.name, CASE WHEN u.role_id = 4 THEN 'MARKETING' WHEN u.role_id = 1 THEN 'ADMIN' WHEN u.role_id = 3 THEN 'AUDITOR' ELSE 'CLIENT' END) as role, 
+              u.role_id 
        FROM users u 
-       JOIN roles r ON u.role_id = r.id 
+       LEFT JOIN roles r ON u.role_id = r.id 
        ORDER BY u.id ASC`
     );
     res.json({ success: true, users });

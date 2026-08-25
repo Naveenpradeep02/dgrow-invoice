@@ -19,6 +19,7 @@ const reportRoutes = require('./src/routes/reportRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const enquiryRoutes = require('./src/routes/enquiryRoutes');
 const meetingRoutes = require('./src/routes/meetingRoutes');
+const marketerRoutes = require('./src/routes/marketerRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,6 +49,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/enquiries', enquiryRoutes);
 app.use('/api/meetings', meetingRoutes);
+app.use('/api/marketers', marketerRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

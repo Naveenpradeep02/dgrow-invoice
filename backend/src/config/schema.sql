@@ -208,7 +208,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- =========================================================
 
 -- Seed Roles
-INSERT IGNORE INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CLIENT'), (3, 'AUDITOR');
+INSERT IGNORE INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CLIENT'), (3, 'AUDITOR'), (4, 'MARKETING');
 
 -- Seed Tax Rates
 INSERT IGNORE INTO tax_rates (id, rate_percentage, description, is_active) VALUES

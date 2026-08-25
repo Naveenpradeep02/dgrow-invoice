@@ -130,14 +130,21 @@ async function apiFetch(endpoint, options = {}) {
     }
 
     if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         if (!window.location.pathname.includes('/login.html')) {
+          if (data.errorCode === 'ACCOUNT_DEACTIVATED') {
+            sessionStorage.setItem('deactivated_logout_reason', data.message || 'Your account has been deactivated by administrator. You have been logged out.');
+            clearAuthSession();
+            const prefix = window.location.pathname.includes('/frontend/') ? '/frontend' : '';
+            window.location.href = `${prefix}/login.html`;
+            return;
+          }
           showToast(data.message || 'Session expired. Please login again.', 'error');
           setTimeout(() => {
             clearAuthSession();
             const prefix = window.location.pathname.includes('/frontend/') ? '/frontend' : '';
             window.location.href = `${prefix}/login.html`;
-          }, 1200);
+          }, 1000);
         }
       }
       throw new Error(data.message || `Request failed (${res.status})`);

@@ -15,6 +15,7 @@ const pages = [
   '/admin/reports.html',
   '/admin/services.html',
   '/admin/settings.html',
+  '/admin/marketers.html',
   '/admin/audit.html',
   '/auditor/dashboard.html',
   '/auditor/audit-log.html',
@@ -32,6 +33,7 @@ const pages = [
   '/js/reports.js',
   '/js/services.js',
   '/js/settings.js',
+  '/js/marketers.js',
   '/js/audit.js',
   '/css/styles.css'
 ];

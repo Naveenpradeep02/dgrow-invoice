@@ -87,6 +87,12 @@ async function initDatabase() {
       await connection.query("ALTER TABLE company_settings ADD COLUMN upi_id VARCHAR(100) NULL DEFAULT '7373509585@okbizaxis'");
     } catch (e) {}
 
+    // Ensure MARKETING role exists
+    try {
+      await connection.query("INSERT IGNORE INTO roles (id, name) VALUES (4, 'MARKETING')");
+      await connection.query("UPDATE roles SET name = 'MARKETING' WHERE id = 4 OR name = 'SALES_EXECUTIVE'");
+    } catch (e) {}
+
     // Ensure enquiries and enquiry_timeline tables exist
     try {
       await connection.query(`

@@ -4,8 +4,8 @@ const serviceController = require('../controllers/serviceController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
 
-router.get('/', authenticateToken, authorizeRoles('ADMIN', 'AUDITOR'), serviceController.getAllServices);
-router.post('/', authenticateToken, authorizeRoles('ADMIN'), serviceController.createService);
-router.put('/:id', authenticateToken, authorizeRoles('ADMIN'), serviceController.updateService);
+router.get('/', authenticateToken, authorizeRoles('ADMIN', 'AUDITOR', 'MARKETING'), serviceController.getAllServices);
+router.post('/', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), serviceController.createService);
+router.put('/:id', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), serviceController.updateService);
 
 module.exports = router;

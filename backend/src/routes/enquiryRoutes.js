@@ -8,16 +8,16 @@ const { authorizeRoles } = require('../middleware/roleMiddleware');
 router.get('/metrics', authenticateToken, enquiryController.getEnquiryMetrics);
 
 // Enquiries CRUD
-router.get('/', authenticateToken, enquiryController.getAllEnquiries);
-router.get('/:id', authenticateToken, enquiryController.getEnquiryById);
-router.post('/', authenticateToken, authorizeRoles('ADMIN'), enquiryController.createEnquiry);
-router.put('/:id', authenticateToken, authorizeRoles('ADMIN'), enquiryController.updateEnquiry);
+router.get('/', authenticateToken, authorizeRoles('ADMIN', 'MARKETING', 'AUDITOR'), enquiryController.getAllEnquiries);
+router.get('/:id', authenticateToken, authorizeRoles('ADMIN', 'MARKETING', 'AUDITOR'), enquiryController.getEnquiryById);
+router.post('/', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), enquiryController.createEnquiry);
+router.put('/:id', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), enquiryController.updateEnquiry);
 router.delete('/:id', authenticateToken, authorizeRoles('ADMIN'), enquiryController.deleteEnquiry);
 
 // Timeline event endpoint
-router.post('/:id/timeline', authenticateToken, authorizeRoles('ADMIN'), enquiryController.addTimelineEvent);
+router.post('/:id/timeline', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), enquiryController.addTimelineEvent);
 
 // Convert to onboarded client
-router.post('/:id/convert', authenticateToken, authorizeRoles('ADMIN'), enquiryController.convertToClient);
+router.post('/:id/convert', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), enquiryController.convertToClient);
 
 module.exports = router;

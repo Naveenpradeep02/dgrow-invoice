@@ -3,6 +3,15 @@
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
 
+  // Check if user was forced to logout due to deactivation
+  const deactReason = sessionStorage.getItem('deactivated_logout_reason');
+  if (deactReason && window.location.pathname.includes('/login.html')) {
+    sessionStorage.removeItem('deactivated_logout_reason');
+    setTimeout(() => {
+      showToast(deactReason, 'error');
+    }, 300);
+  }
+
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -36,7 +45,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkAuthGuard();
   initSidebarCollapse();
+
+  // Periodic active status heartbeat (forces logout immediately when admin deactivates account)
+  if (!window.location.pathname.includes('/login.html') && getUser()) {
+    verifyLiveSessionStatus();
+    setInterval(verifyLiveSessionStatus, 15000);
+  }
 });
+
+async function verifyLiveSessionStatus() {
+  const user = getUser();
+  if (!user || window.location.pathname.includes('/login.html')) return;
+
+  try {
+    const res = await apiFetch('/auth/me');
+    if (!res || !res.success || !res.user || res.user.status !== 'ACTIVE') {
+      forceLogoutDeactivatedAccount('Your account has been deactivated by administrator. You have been logged out.');
+    }
+  } catch (err) {
+    if (err.message && (err.message.toLowerCase().includes('deactivated') || err.message.toLowerCase().includes('inactive'))) {
+      forceLogoutDeactivatedAccount(err.message);
+    }
+  }
+}
+
+function forceLogoutDeactivatedAccount(reason) {
+  sessionStorage.setItem('deactivated_logout_reason', reason || 'Your account has been deactivated by administrator. You have been logged out.');
+  clearAuthSession();
+  const prefix = getAppPathPrefix();
+  window.location.href = `${prefix}/login.html`;
+}
 
 function getAppPathPrefix() {
   const path = window.location.pathname;
@@ -51,6 +89,8 @@ function redirectUserByRole(role) {
   const prefix = getAppPathPrefix();
   if (role === 'ADMIN') {
     window.location.href = `${prefix}/admin/dashboard.html`;
+  } else if (role === 'MARKETING') {
+    window.location.href = `${prefix}/admin/enquiries.html`;
   } else if (role === 'CLIENT') {
     window.location.href = `${prefix}/client/dashboard.html`;
   } else if (role === 'AUDITOR') {
@@ -59,6 +99,17 @@ function redirectUserByRole(role) {
     window.location.href = `${prefix}/login.html`;
   }
 }
+
+const MARKETING_ALLOWED_PAGES = [
+  'enquiries.html',
+  'enquiry-view.html',
+  'meetings.html',
+  'quotations.html',
+  'clients.html',
+  'client-edit.html',
+  'client-view.html',
+  'services.html'
+];
 
 function checkAuthGuard() {
   const user = getUser();
@@ -85,16 +136,31 @@ function checkAuthGuard() {
   }
 
   // Role path protection
-  if (path.includes('/admin/') && user.role !== 'ADMIN') {
-    showToast('Unauthorized role access.', 'error');
-    redirectUserByRole(user.role);
+  if (path.includes('/admin/')) {
+    if (user.role === 'MARKETING') {
+      const currentPage = path.split('/').pop().split('?')[0];
+      if (!MARKETING_ALLOWED_PAGES.includes(currentPage)) {
+        showToast('Marketing role: Access restricted to sales and client management modules.', 'warning');
+        window.location.href = `${prefix}/admin/enquiries.html`;
+        return;
+      }
+    } else if (user.role !== 'ADMIN') {
+      showToast('Unauthorized role access.', 'error');
+      redirectUserByRole(user.role);
+      return;
+    }
   } else if (path.includes('/client/') && user.role !== 'CLIENT') {
     showToast('Unauthorized role access.', 'error');
     redirectUserByRole(user.role);
+    return;
   } else if (path.includes('/auditor/') && user.role !== 'AUDITOR' && user.role !== 'ADMIN') {
     showToast('Unauthorized role access.', 'error');
     redirectUserByRole(user.role);
+    return;
   }
+
+  // Apply UI role adjustments (hide delete buttons and filter sidebar)
+  applyRolePermissionsUI(user);
 
   // Update user name in sidebar if present
   const userNameEl = document.getElementById('sidebarUserName');
@@ -106,7 +172,54 @@ function checkAuthGuard() {
   populateTopNavbarUser(user);
 
   // Load Real Dynamic Notifications (Invoice Ready based on onboard date + Payment Pending)
-  loadTopbarRealNotifications();
+  if (user.role === 'ADMIN' || user.role === 'AUDITOR') {
+    loadTopbarRealNotifications();
+  }
+}
+
+function applyRolePermissionsUI(user) {
+  if (!user) return;
+  if (user.role === 'MARKETING') {
+    document.body.classList.add('role-marketing');
+
+    // Hide sidebar links not in MARKETING_ALLOWED_PAGES
+    const navItems = document.querySelectorAll('.sidebar .nav-list .nav-item');
+    navItems.forEach(item => {
+      const link = item.querySelector('a');
+      if (link) {
+        const href = link.getAttribute('href') || '';
+        const page = href.split('/').pop().split('?')[0];
+        if (!MARKETING_ALLOWED_PAGES.includes(page)) {
+          item.style.display = 'none';
+        }
+      }
+    });
+
+    // Hide all delete buttons across all tables & pages
+    const hideDeleteButtons = () => {
+      document.querySelectorAll(`
+        .btn-danger,
+        [data-action="delete"],
+        .delete-btn,
+        .btn-delete,
+        button[onclick*="delete"],
+        a[onclick*="delete"],
+        button[onclick*="Delete"],
+        a[onclick*="Delete"],
+        button[onclick*="remove"],
+        button[title*="Delete"],
+        a[title*="Delete"]
+      `).forEach(btn => {
+        btn.style.display = 'none';
+        btn.style.pointerEvents = 'none';
+      });
+    };
+
+    hideDeleteButtons();
+    // Re-check on dynamic table renders
+    const observer = new MutationObserver(() => hideDeleteButtons());
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
 }
 
 function populateTopNavbarUser(user) {

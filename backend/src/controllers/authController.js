@@ -11,8 +11,8 @@ async function seedDefaultUsersIfEmpty() {
 
     // Ensure Roles exist (MySQL: INSERT IGNORE, SQLite: INSERT OR IGNORE)
     const rolesSql = db.getDriver() === 'mysql'
-      ? "INSERT IGNORE INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CLIENT'), (3, 'AUDITOR')"
-      : "INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CLIENT'), (3, 'AUDITOR')";
+      ? "INSERT IGNORE INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CLIENT'), (3, 'AUDITOR'), (4, 'MARKETING')"
+      : "INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'CLIENT'), (3, 'AUDITOR'), (4, 'MARKETING')";
     await db.query(rolesSql);
 
     // Fetch clients
@@ -129,8 +129,137 @@ async function getMe(req, res) {
   });
 }
 
+// User Management (Admin Only)
+async function getAllStaffUsers(req, res) {
+  try {
+    const users = await db.query(
+      `SELECT u.id, u.name, u.email, u.status, u.created_at, r.name as role, r.id as role_id 
+       FROM users u 
+       JOIN roles r ON u.role_id = r.id 
+       ORDER BY u.id ASC`
+    );
+    res.json({ success: true, users });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function createStaffUser(req, res) {
+  try {
+    const { name, email, password, role_id = 4, status = 'ACTIVE' } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const existing = await db.query('SELECT id FROM users WHERE email = ?', [cleanEmail]);
+    if (existing && existing.length > 0) {
+      return res.status(400).json({ success: false, message: 'A user with this email already exists.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const result = await db.query(
+      'INSERT INTO users (name, email, password_hash, role_id, status) VALUES (?, ?, ?, ?, ?)',
+      [name.trim(), cleanEmail, passwordHash, parseInt(role_id) || 4, status]
+    );
+
+    const newUserId = result.insertId || (await db.query('SELECT id FROM users WHERE email = ?', [cleanEmail]))[0]?.id;
+
+    await logAudit({
+      user: req.user,
+      action: 'CREATE',
+      entity_type: 'USER',
+      entity_id: String(newUserId),
+      new_data: { name, email: cleanEmail, role_id, status },
+      req
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Staff user created successfully.',
+      userId: newUserId
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function updateStaffUser(req, res) {
+  try {
+    const userId = req.params.id;
+    const { name, email, password, role_id, status } = req.body;
+
+    const oldUser = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+    if (!oldUser || oldUser.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    let passwordHash = oldUser[0].password_hash;
+    if (password && password.trim()) {
+      passwordHash = await bcrypt.hash(password.trim(), 10);
+    }
+
+    const updatedName = name !== undefined ? name.trim() : oldUser[0].name;
+    const updatedEmail = email !== undefined ? email.toLowerCase().trim() : oldUser[0].email;
+    const updatedRoleId = role_id !== undefined ? parseInt(role_id) : oldUser[0].role_id;
+    const updatedStatus = status !== undefined ? status : oldUser[0].status;
+
+    await db.query(
+      'UPDATE users SET name = ?, email = ?, password_hash = ?, role_id = ?, status = ? WHERE id = ?',
+      [updatedName, updatedEmail, passwordHash, updatedRoleId, updatedStatus, userId]
+    );
+
+    await logAudit({
+      user: req.user,
+      action: 'UPDATE',
+      entity_type: 'USER',
+      entity_id: String(userId),
+      old_data: oldUser[0],
+      new_data: { name: updatedName, email: updatedEmail, role_id: updatedRoleId, status: updatedStatus },
+      req
+    });
+
+    res.json({ success: true, message: 'User updated successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function deleteStaffUser(req, res) {
+  try {
+    const userId = req.params.id;
+    if (String(userId) === '1' || String(userId) === String(req.user.id)) {
+      return res.status(400).json({ success: false, message: 'Cannot delete the primary administrative account.' });
+    }
+
+    const oldUser = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+    if (!oldUser || oldUser.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    await db.query('DELETE FROM users WHERE id = ?', [userId]);
+
+    await logAudit({
+      user: req.user,
+      action: 'DELETE',
+      entity_type: 'USER',
+      entity_id: String(userId),
+      old_data: oldUser[0],
+      req
+    });
+
+    res.json({ success: true, message: 'User deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
 module.exports = {
   seedDefaultUsersIfEmpty,
   login,
-  getMe
+  getMe,
+  getAllStaffUsers,
+  createStaffUser,
+  updateStaffUser,
+  deleteStaffUser
 };

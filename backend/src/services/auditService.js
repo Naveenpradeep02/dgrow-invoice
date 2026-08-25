@@ -11,6 +11,9 @@ async function logAudit({ user, action, entity_type, entity_id, old_data = null,
     const oldJson = old_data ? JSON.stringify(old_data) : null;
     const newJson = new_data ? JSON.stringify(new_data) : null;
 
+    const validEntityTypes = ['INVOICE','CLIENT','SERVICE','PAYMENT','SETTINGS','USER'];
+    const safeEntityType = validEntityTypes.includes(String(entity_type).toUpperCase()) ? String(entity_type).toUpperCase() : 'USER';
+
     const sql = `
       INSERT INTO audit_logs (user_id, user_email, user_role, action, entity_type, entity_id, old_data, new_data, ip_address, user_agent)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -21,7 +24,7 @@ async function logAudit({ user, action, entity_type, entity_id, old_data = null,
       userEmail,
       userRole,
       action,
-      entity_type,
+      safeEntityType,
       String(entity_id),
       oldJson,
       newJson,

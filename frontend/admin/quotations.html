@@ -1612,10 +1612,33 @@
       return words ? `Indian Rupees ${words} Only.` : 'Indian Rupees Zero Only.';
     }
 
+    let companySettingsData = null;
+    async function loadCompanySettingsForQuotation() {
+      try {
+        const res = await apiFetch('/settings');
+        if (res && res.success && res.company) {
+          companySettingsData = res.company;
+        }
+      } catch (e) {}
+    }
+    loadCompanySettingsForQuotation();
+
     // Official Exact Invoice-Layout Generator
-    function previewExactQuotation(id) {
+    async function previewExactQuotation(id) {
       const q = quotationsList.find(item => item.id === id);
       if (!q) return;
+
+      if (!companySettingsData) {
+        await loadCompanySettingsForQuotation();
+      }
+      const comp = companySettingsData || {};
+      const acNum = comp.account_number || '50200090154952';
+      const ifsc = comp.ifsc_code || 'HDFC0000444';
+      const bName = comp.banking_name || 'D Grow Marketing Agency';
+      const bank = comp.bank_name || 'HDFC Bank';
+      const branch = comp.branch_name || 'Velachery';
+      const gpay = comp.gpay_number || '7373509585';
+      const upi = comp.upi_id || '7373509585@okbizaxis';
 
       const baseSubtotal = q.items.reduce((sum, it) => sum + (it.qty * it.rate), 0);
       const discount = q.negotiationAmount || 0;
@@ -1776,11 +1799,13 @@
             <div>
               <div class="inv-payment-box">
                 <div class="inv-payment-title">Bank & Payment Details:</div>
-                <div class="inv-payment-row"><span class="inv-payment-label">Ac Number</span><span>: 50200084920192</span></div>
-                <div class="inv-payment-row"><span class="inv-payment-label">IFSC Code</span><span>: HDFC0001234</span></div>
-                <div class="inv-payment-row"><span class="inv-payment-label">Banking Name</span><span>: D-GROW MARKETING</span></div>
-                <div class="inv-payment-row"><span class="inv-payment-label">Bank Name</span><span>: HDFC Bank Ltd</span></div>
-                <div class="inv-payment-row" style="margin-top:3px;"><span class="inv-payment-label">GPay / UPI</span><span>: <strong>9790123456@upi</strong></span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">Ac Number</span><span>: ${acNum}</span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">IFSC Code</span><span>: ${ifsc}</span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">Banking Name</span><span>: ${bName}</span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">Bank Name</span><span>: ${bank}</span></div>
+                <div class="inv-payment-row"><span class="inv-payment-label">Branch</span><span>: ${branch}</span></div>
+                <div class="inv-payment-row" style="margin-top:3px;"><span class="inv-payment-label">GPay</span><span>: <strong>${gpay}</strong></span></div>
+                ${upi ? `<div class="inv-payment-row" style="margin-top:2px;"><span class="inv-payment-label">UPI ID</span><span>: <strong>${upi}</strong></span></div>` : ''}
               </div>
               <div class="inv-signature-block" style="text-align:center; margin-top:6px;">
                 <div style="margin:2px 0; display:flex; justify-content:center; align-items:center;">

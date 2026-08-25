@@ -40,6 +40,7 @@ async function updateCompanySettings(req, res) {
       banking_name,
       branch_name,
       gpay_number,
+      upi_id,
       authorized_person,
       signature_title
     } = req.body;
@@ -48,26 +49,27 @@ async function updateCompanySettings(req, res) {
       `UPDATE company_settings SET
         company_name = ?, gstin = ?, address = ?, city = ?, state = ?, pincode = ?,
         phone = ?, email = ?, website = ?, bank_name = ?, account_number = ?, ifsc_code = ?,
-        banking_name = ?, branch_name = ?, gpay_number = ?, authorized_person = ?, signature_title = ?
+        banking_name = ?, branch_name = ?, gpay_number = ?, upi_id = ?, authorized_person = ?, signature_title = ?
        WHERE id = 1`,
       [
-        company_name || old[0].company_name,
-        gstin || old[0].gstin,
-        address || old[0].address,
-        city || old[0].city,
-        state || old[0].state,
-        pincode || old[0].pincode,
-        phone || old[0].phone,
-        email || old[0].email,
-        website || old[0].website,
-        bank_name || old[0].bank_name,
-        account_number || old[0].account_number,
-        ifsc_code || old[0].ifsc_code,
-        banking_name || old[0].banking_name,
-        branch_name || old[0].branch_name,
-        gpay_number || old[0].gpay_number,
-        authorized_person || old[0].authorized_person,
-        signature_title || old[0].signature_title
+        company_name !== undefined ? company_name : old[0].company_name,
+        gstin !== undefined ? gstin : old[0].gstin,
+        address !== undefined ? address : old[0].address,
+        city !== undefined ? city : old[0].city,
+        state !== undefined ? state : old[0].state,
+        pincode !== undefined ? pincode : old[0].pincode,
+        phone !== undefined ? phone : old[0].phone,
+        email !== undefined ? email : old[0].email,
+        website !== undefined ? website : old[0].website,
+        bank_name !== undefined ? bank_name : old[0].bank_name,
+        account_number !== undefined ? account_number : old[0].account_number,
+        ifsc_code !== undefined ? ifsc_code : old[0].ifsc_code,
+        banking_name !== undefined ? banking_name : old[0].banking_name,
+        branch_name !== undefined ? branch_name : old[0].branch_name,
+        gpay_number !== undefined ? gpay_number : old[0].gpay_number,
+        upi_id !== undefined ? upi_id : old[0].upi_id,
+        authorized_person !== undefined ? authorized_person : old[0].authorized_person,
+        signature_title !== undefined ? signature_title : old[0].signature_title
       ]
     );
 

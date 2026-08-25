@@ -1449,6 +1449,7 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
             <div class="inv-payment-row"><span class="inv-payment-label">Bank Name</span><span>: ${company.bank_name || ''}</span></div>
             <div class="inv-payment-row"><span class="inv-payment-label">Branch</span><span>: ${company.branch_name || ''}</span></div>
             <div class="inv-payment-row" style="margin-top:3px;"><span class="inv-payment-label">GPay</span><span>: <strong>${company.gpay_number || ''}</strong></span></div>
+            ${company.upi_id ? `<div class="inv-payment-row" style="margin-top:2px;"><span class="inv-payment-label">UPI ID</span><span>: <strong>${company.upi_id}</strong></span></div>` : ''}
           </div>
           <div class="inv-signature-block" style="text-align:center; margin-top:6px;">
             <div style="margin:2px 0; display:flex; justify-content:center; align-items:center;">

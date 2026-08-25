@@ -82,6 +82,11 @@ async function initDatabase() {
       await connection.query("ALTER TABLE invoices MODIFY COLUMN invoice_type VARCHAR(20) DEFAULT 'GST'");
     } catch (e) {}
 
+    // Ensure upi_id exists in company_settings
+    try {
+      await connection.query("ALTER TABLE company_settings ADD COLUMN upi_id VARCHAR(100) NULL DEFAULT '7373509585@okbizaxis'");
+    } catch (e) {}
+
     // Ensure enquiries and enquiry_timeline tables exist
     try {
       await connection.query(`

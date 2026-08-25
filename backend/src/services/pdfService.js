@@ -418,7 +418,8 @@ function generateInvoicePDF(res, invoiceData) {
 
   // Right Column: Payment Details Box
   let bankY = y + 14;
-  doc.roundedRect(330, bankY - 4, 235, 95, 4).fillAndStroke('#f8fafc', borderColor);
+  const paymentBoxHeight = company.upi_id ? 107 : 95;
+  doc.roundedRect(330, bankY - 4, 235, paymentBoxHeight, 4).fillAndStroke('#f8fafc', borderColor);
 
   doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#0f172a').text('Payment Details:', 340, bankY);
   bankY += 14;
@@ -435,6 +436,10 @@ function generateInvoicePDF(res, invoiceData) {
   doc.font('Helvetica-Bold').text('Branch', 340, bankY); doc.font('Helvetica').text(`: ${company.branch_name || 'Velachery'}`, 410, bankY);
   bankY += 12;
   doc.font('Helvetica-Bold').text('GPay', 340, bankY); doc.font('Helvetica-Bold').text(`: ${company.gpay_number || '7373509585'}`, 410, bankY);
+  if (company.upi_id) {
+    bankY += 12;
+    doc.font('Helvetica-Bold').text('UPI ID', 340, bankY); doc.font('Helvetica-Bold').text(`: ${company.upi_id}`, 410, bankY);
+  }
 
   // Signature Block
   const sealPath = path.join(__dirname, '../../../frontend/assets/seel.png');

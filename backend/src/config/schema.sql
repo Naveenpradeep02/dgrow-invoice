@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS company_settings (
   banking_name VARCHAR(150) DEFAULT 'D Grow Marketing Agency',
   branch_name VARCHAR(100) DEFAULT 'Velachery',
   gpay_number VARCHAR(30) DEFAULT '7373509585',
+  upi_id VARCHAR(100) DEFAULT '7373509585@okbizaxis',
   authorized_person VARCHAR(100) DEFAULT 'Srija R',
   signature_title VARCHAR(100) DEFAULT 'Proprietrix',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

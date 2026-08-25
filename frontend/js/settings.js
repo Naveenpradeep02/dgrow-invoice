@@ -29,6 +29,7 @@ async function loadSettingsPage() {
       document.getElementById('banking_name').value = company.banking_name || '';
       document.getElementById('branch_name').value = company.branch_name || '';
       document.getElementById('gpay_number').value = company.gpay_number || '';
+      document.getElementById('upi_id').value = company.upi_id || '';
       document.getElementById('authorized_person').value = company.authorized_person || '';
       document.getElementById('signature_title').value = company.signature_title || '';
     }
@@ -63,6 +64,7 @@ async function handleSaveCompanySettings(e) {
     banking_name: document.getElementById('banking_name').value,
     branch_name: document.getElementById('branch_name').value,
     gpay_number: document.getElementById('gpay_number').value,
+    upi_id: document.getElementById('upi_id').value,
     authorized_person: document.getElementById('authorized_person').value,
     signature_title: document.getElementById('signature_title').value
   };

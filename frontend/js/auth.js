@@ -100,7 +100,14 @@ function getAppPathPrefix() {
 
 function isMarketingRole(role) {
   const norm = String(role || '').toUpperCase().trim();
-  return norm === 'MARKETING' || norm === 'SALES_EXECUTIVE';
+  return (
+    norm === 'MARKETING' ||
+    norm === 'MARKETING_PERSON' ||
+    norm === 'MARKETER' ||
+    norm === 'SALES_EXECUTIVE' ||
+    norm === 'STAFF' ||
+    norm === '4'
+  );
 }
 
 function redirectUserByRole(role) {

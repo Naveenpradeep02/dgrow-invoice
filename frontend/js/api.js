@@ -98,6 +98,17 @@ function renderDataLoader(text = 'Loading details...', size = '') {
   `;
 }
 
+let isLoggingOut = false;
+
+function getAppPathPrefix() {
+  const path = window.location.pathname;
+  const match = path.match(/^(.*?)(\/(?:admin|client|auditor|login\.html|index\.html|$))/i);
+  if (match && match[1]) {
+    return match[1].replace(/\/+$/, '');
+  }
+  return '';
+}
+
 async function apiFetch(endpoint, options = {}) {
   const token = getToken();
   const headers = {
@@ -131,20 +142,20 @@ async function apiFetch(endpoint, options = {}) {
 
     if (!res.ok) {
       if (res.status === 401) {
-        if (!window.location.pathname.includes('/login.html')) {
+        if (!window.location.pathname.includes('/login.html') && !isLoggingOut) {
+          isLoggingOut = true;
+          const prefix = getAppPathPrefix();
           if (data.errorCode === 'ACCOUNT_DEACTIVATED') {
             sessionStorage.setItem('deactivated_logout_reason', data.message || 'Your account has been deactivated by administrator. You have been logged out.');
             clearAuthSession();
-            const prefix = window.location.pathname.includes('/frontend/') ? '/frontend' : '';
             window.location.href = `${prefix}/login.html`;
             return;
           }
           showToast(data.message || 'Session expired. Please login again.', 'error');
+          clearAuthSession();
           setTimeout(() => {
-            clearAuthSession();
-            const prefix = window.location.pathname.includes('/frontend/') ? '/frontend' : '';
             window.location.href = `${prefix}/login.html`;
-          }, 1000);
+          }, 800);
         }
       }
       throw new Error(data.message || `Request failed (${res.status})`);

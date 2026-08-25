@@ -46,10 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuthGuard();
   initSidebarCollapse();
 
-  // Periodic active status heartbeat (forces logout immediately when admin deactivates account)
+  // Periodic background active status check (only when logged in and active tab)
   if (!window.location.pathname.includes('/login.html') && getUser()) {
-    verifyLiveSessionStatus();
-    setInterval(verifyLiveSessionStatus, 15000);
+    setInterval(() => {
+      if (document.visibilityState === 'visible' && getUser()) {
+        verifyLiveSessionStatus();
+      }
+    }, 60000);
   }
 });
 

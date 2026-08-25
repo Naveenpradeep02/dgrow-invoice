@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create 3-Tier Proposal - D-GROW Invoice System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .builder-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-bottom: 5rem;
+    }
+
+    .tier-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      align-items: stretch;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 992px) {
+      .tier-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+    }
+
+    .tier-box {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .tier-box:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .tier-box.recommended {
+      border: 2px solid #e11d48;
+      box-shadow: 0 8px 25px rgba(225, 29, 72, 0.12);
+    }
+
+    .tier-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .badge-starter {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .badge-popular {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge-recommended {
+      background: #ffe4e6;
+      color: #e11d48;
+      border: 1px solid #fecdd3;
+    }
+
+    .feature-item-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.5rem;
+      transition: border-color 0.15s ease;
+    }
+
+    .feature-item-card:hover {
+      border-color: #cbd5e1;
+      background: #ffffff;
+    }
+
+    .action-floating-bar {
+      position: sticky;
+      bottom: 0.75rem;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="../assets/Logo.png" onerror="this.onerror=null; this.src='assets/Logo.png'; if(!this.complete) this.src='/assets/Logo.png';" alt="D-GROW Marketing Agency" class="brand-logo-img">
+        <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png';" alt="DG" class="brand-mini-icon" style="display:none; width:36px; height:36px; object-fit:contain; border-radius:8px; background:none; box-shadow:none;">
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item"><a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a></li>
+        <li class="nav-item"><a href="enquiries.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Enquiries</a></li>
+        <li class="nav-item"><a href="meetings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg> Meetings</a></li>
+        <li class="nav-item"><a href="marketers.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Marketers</a></li>
+        <li class="nav-item"><a href="invoices.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Invoices</a></li>
+        <li class="nav-item"><a href="create-invoice.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Create Invoice</a></li>
+        <li class="nav-item active"><a href="quotations.html?tab=proposals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Proposals</a></li>
+        <li class="nav-item"><a href="quotations.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3l-4 4z"/></svg> Quotations</a></li>
+        <li class="nav-item"><a href="clients.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Clients Master</a></li>
+        <li class="nav-item"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Services Master</a></li>
+        <li class="nav-item"><a href="payments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Payments</a></li>
+        <li class="nav-item"><a href="reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Reports & GST</a></li>
+        <li class="nav-item"><a href="salary.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Salary</a></li>
+        <li class="nav-item"><a href="miscellaneous.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Miscellaneous</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Quick search invoices, clients, payments..." id="globalQuickSearch" onkeydown="handleGlobalSearch(event)">
+          </div>
+        </div>
+
+        <div class="top-navbar-right">
+          <!-- Notification Bell with Dropdown -->
+          <div class="nav-dropdown-wrapper" id="notifDropdownWrapper">
+            <button type="button" class="topbar-icon-btn" id="notifToggleBtn" onclick="toggleNotificationDropdown(event)" title="Notifications">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge-pulse" id="notifBadgeCount">3</span>
+            </button>
+            
+            <div class="nav-dropdown-menu notif-dropdown-menu" id="notifDropdownMenu">
+              <div class="notif-header">
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <h4 style="margin:0; font-size:0.92rem; font-weight:700; color:var(--text-main);">Notifications</h4>
+                  <span class="badge" style="background:#fee2e2; color:#dc2626; font-size:0.7rem; font-weight:700; padding:0.15rem 0.45rem;">3 New</span>
+                </div>
+                <button type="button" class="notif-clear-btn" onclick="clearAllNotifications()">Mark all read</button>
+              </div>
+              <div class="notif-list" id="topbarNotifList">
+                <div class="notif-item unread">
+                  <div class="notif-icon payment">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div class="notif-body">
+                    <p class="notif-title">Payment Collected</p>
+                    <span class="notif-desc">₹10,73,564 total receipts recorded</span>
+                    <span class="notif-time">Just now</span>
+                  </div>
+                </div>
+                <div class="notif-item unread">
+                  <div class="notif-icon invoice">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                  </div>
+                  <div class="notif-body">
+                    <p class="notif-title">New Invoices Issued</p>
+                    <span class="notif-desc">42 invoices active in current cycle</span>
+                    <span class="notif-time">45 mins ago</span>
+                  </div>
+                </div>
+                <div class="notif-item">
+                  <div class="notif-icon pending">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+                  </div>
+                  <div class="notif-body">
+                    <p class="notif-title">GST Return Cycle</p>
+                    <span class="notif-desc">₹1,76,148 estimated tax liability</span>
+                    <span class="notif-time">2 hours ago</span>
+                  </div>
+                </div>
+              </div>
+              <div class="notif-footer">
+                <a href="notifications.html" style="display:inline-flex; align-items:center; justify-content:center; gap:0.35rem; width:100%;">Show all notifications →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile Dropdown Menu with Logout -->
+          <div class="nav-dropdown-wrapper" id="profileDropdownWrapper">
+            <button type="button" class="topbar-user-btn" id="userProfileToggleBtn" onclick="toggleUserProfileDropdown(event)">
+              <div class="user-avatar-circle">
+                <span id="topbarUserInitials">AD</span>
+              </div>
+              <div class="topbar-user-text">
+                <span class="user-name" id="topbarUserName">D-GROW Admin</span>
+                <span class="user-role-badge" id="topbarUserRole">ADMIN</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <div class="nav-dropdown-menu profile-dropdown-menu" id="profileDropdownMenu">
+              <div class="profile-dropdown-header">
+                <div class="profile-avatar-large">
+                  <span id="dropdownAvatarInitials">AD</span>
+                </div>
+                <div class="profile-header-info">
+                  <strong id="dropdownUserName">D-GROW Admin</strong>
+                  <span id="dropdownUserEmail">admin@dgrow.com</span>
+                  <span class="badge badge-paid" style="margin-top:0.25rem; font-size:0.7rem; align-self:flex-start;" id="dropdownUserRole">ADMIN ROLE</span>
+                </div>
+              </div>
+              
+              <div class="profile-dropdown-body">
+                <a href="settings.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Agency Settings
+                </a>
+                <a href="audit.html" class="profile-menu-item">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                  Audit Trail
+                </a>
+              </div>
+
+              <div class="profile-dropdown-footer">
+                <button type="button" class="profile-logout-btn" onclick="handleLogout()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Sign Out / Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="builder-container">
+        <!-- Page Title Header -->
+        <div class="page-header" style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div class="page-title">
+            <h1 id="pageMainHeading">Create 3-Tier Proposal</h1>
+            <p>Configure 3 bespoke package options (Starter Boost, Pro Accelerator, Growth Plan) with public client confirmation link.</p>
+          </div>
+          <div class="page-actions" style="display:flex; gap:0.5rem;">
+            <a href="quotations.html?tab=proposals" class="btn btn-secondary btn-sm" style="display:inline-flex; align-items:center; gap:0.4rem; font-weight:700;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Back to Proposals
+            </a>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="loadPresetCanvaPackages()" style="display:inline-flex; align-items:center; gap:0.4rem; font-weight:700; color:#e11d48; border-color:#fecdd3; background:#fff;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+              Load Canva Presets
+            </button>
+          </div>
+        </div>
+
+        <form id="createProposalForm" onsubmit="handleSaveProposalInnerPage(event)">
+          <input type="hidden" id="proposalEditId" value="">
+
+          <!-- SECTION 1: Client & Proposal Settings Card -->
+          <div class="card" style="margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+              <h3 style="margin:0; font-size: 1.1rem; color:var(--primary);">1. Client & Proposal Overview</h3>
+              <div style="display:flex; gap:0.4rem; background:#f1f5f9; padding:3px; border-radius:8px;">
+                <button type="button" id="btnModeExistingClient" class="btn btn-sm btn-primary" onclick="switchProposalClientMode('EXISTING')" style="font-size:0.75rem; font-weight:700; border-radius:6px;">
+                  Existing Client
+                </button>
+                <button type="button" id="btnModeNewLead" class="btn btn-sm btn-secondary" onclick="switchProposalClientMode('NEW_LEAD')" style="font-size:0.75rem; font-weight:700; border-radius:6px; border:none; background:transparent; color:#475569;">
+                  New Lead / Client
+                </button>
+              </div>
+            </div>
+
+            <!-- Existing Client Picker -->
+            <div id="proposalExistingClientRow" style="display:block; margin-bottom:1.25rem;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label required" style="font-size:0.78rem; font-weight:700;">Select Client / Prospect</label>
+                <select id="proposalClientSelect" class="form-select" onchange="onProposalClientSelected(event)" style="font-weight:600;">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <!-- Client Details Grid (Editable for both existing and new leads) -->
+            <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label required" style="font-size:0.78rem; font-weight:700;">Client / Business Name</label>
+                <input type="text" id="propClientName" class="form-input" placeholder="e.g. Marks Biotech Inc" required style="font-weight:700;">
+              </div>
+
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.78rem; font-weight:700;">Contact Person</label>
+                <input type="text" id="propContactPerson" class="form-input" placeholder="e.g. Dr. Ramesh">
+              </div>
+
+              <div class="form-group" style="margin:0;">
+                <label class="form-label required" style="font-size:0.78rem; font-weight:700;">Mobile (for WhatsApp)</label>
+                <input type="text" id="propMobile" class="form-input" placeholder="+91 98401 23456" required style="font-weight:700;">
+              </div>
+
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.78rem; font-weight:700;">Email Address</label>
+                <input type="email" id="propEmail" class="form-input" placeholder="client@example.com">
+              </div>
+            </div>
+
+            <!-- Proposal Meta Grid -->
+            <div style="display:grid; grid-template-columns:2fr 1fr; gap:1rem; padding-top:1rem; border-top:1px dashed #e2e8f0;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.78rem; font-weight:700;">Proposal Title</label>
+                <input type="text" id="proposalTitleInput" class="form-input" value="Digital Marketing Growth Proposal" style="font-weight:700;">
+              </div>
+
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:0.78rem; font-weight:700;">Billing Cycle</label>
+                <select id="proposalCycleInput" class="form-select" style="font-weight:600;">
+                  <option value="Monthly">Monthly Retainer</option>
+                  <option value="Quarterly">Quarterly Plan</option>
+                  <option value="Half-Yearly">Half-Yearly (6 Months)</option>
+                  <option value="Annual">Annual (12 Months)</option>
+                  <option value="One-Time">One-Time Project</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: 3-Tier Package Pricing & Deliverables -->
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+              <h3 style="margin:0; font-size: 1.1rem; color:var(--primary);">2. Configure 3 Pricing Packages & Deliverables</h3>
+              <span style="font-size:0.8rem; color:#64748b; font-weight:600;">All fields, prices, and features are 100% editable.</span>
+            </div>
+
+            <!-- Tier View Toggle Buttons: All vs Plan 1 vs Plan 2 vs Plan 3 -->
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.6rem; margin-bottom:1.25rem; padding:0.5rem 0.65rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
+              <div style="display:flex; gap:0.35rem; flex-wrap:wrap;" id="tierTabSwitcherGroup">
+                <button type="button" id="btnTierViewALL" class="btn btn-sm btn-primary" onclick="setTierViewFilter('ALL')" style="font-size:0.78rem; font-weight:700; border-radius:6px; display:inline-flex; align-items:center; gap:0.35rem;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+                  All 3 Plans (Side-by-Side)
+                </button>
+                <button type="button" id="btnTierView0" class="btn btn-sm btn-secondary" onclick="setTierViewFilter(0)" style="font-size:0.78rem; font-weight:700; border-radius:6px; border:none; background:transparent; color:#475569; display:inline-flex; align-items:center; gap:0.35rem;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/></svg>
+                  <span>Plan 1: Starter Boost</span>
+                </button>
+                <button type="button" id="btnTierView1" class="btn btn-sm btn-secondary" onclick="setTierViewFilter(1)" style="font-size:0.78rem; font-weight:700; border-radius:6px; border:none; background:transparent; color:#475569; display:inline-flex; align-items:center; gap:0.35rem;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                  <span>Plan 2: Pro Accelerator</span>
+                </button>
+                <button type="button" id="btnTierView2" class="btn btn-sm btn-secondary" onclick="setTierViewFilter(2)" style="font-size:0.78rem; font-weight:700; border-radius:6px; border:none; background:transparent; color:#475569; display:inline-flex; align-items:center; gap:0.35rem;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span>Plan 3: Growth Plan</span>
+                </button>
+              </div>
+
+              <span style="font-size:0.76rem; color:#64748b;">Click tabs to focus on a single plan or view all side-by-side.</span>
+            </div>
+
+            <!-- 3 Columns Container -->
+            <div class="tier-cards-grid" id="innerPagePackageCardsContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Floating Sticky Action Bar -->
+          <div class="action-floating-bar">
+            <a href="quotations.html?tab=proposals" class="btn btn-secondary" style="font-weight:700;">
+              Cancel
+            </a>
+            <div style="display:flex; gap:0.75rem;">
+              <button type="button" class="btn btn-secondary" onclick="previewProposalInNewTab()" style="display:inline-flex; align-items:center; gap:0.4rem; font-weight:700;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Live Preview
+              </button>
+              <button type="submit" class="btn btn-primary" id="btnSaveInnerProposal" style="background:linear-gradient(135deg, #e11d48, #be123c); display:inline-flex; align-items:center; gap:0.45rem; font-weight:800; padding:0.65rem 1.75rem; box-shadow:0 4px 15px rgba(225,29,72,0.3);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save & Generate Shareable Link →
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Share Popover Modal -->
+  <div class="modal-overlay" id="shareProposalModal">
+    <div class="modal-box" style="max-width: 520px; padding: 1.75rem; text-align: center;">
+      <div style="width:52px; height:52px; border-radius:50%; background:#f0fdf4; color:#15803d; display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem;">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3 style="margin:0 0 0.35rem 0; font-size: 1.25rem; font-weight: 800; color: #ffffff;">Proposal Link is Ready!</h3>
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 1.25rem;">
+        Share this tailored 3-tier growth proposal for <strong style="color:#ffffff;" id="shareModalClient">Client</strong> (<span id="shareModalCode">#PROP</span>).
+      </p>
+
+      <div style="background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.5rem; margin-bottom: 1.25rem; display: flex; gap: 0.4rem;">
+        <input type="text" id="shareModalUrlInput" readonly style="background: transparent; border: none; color: #f8fafc; font-size: 0.82rem; width: 100%; outline: none; font-family: monospace;" value="">
+        <button type="button" class="btn btn-primary btn-sm" onclick="copyProposalLink(document.getElementById('shareModalUrlInput').value)" style="white-space: nowrap; font-size: 0.75rem; display:inline-flex; align-items:center; gap:0.3rem;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Copy
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 1rem;">
+        <button type="button" class="btn btn-sm" id="shareModalWhatsAppBtn" style="background: #16a34a; color: #ffffff; border: none; font-weight: 800; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem;">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Share on WhatsApp
+        </button>
+        <a id="shareModalViewBtn" href="#" target="_blank" class="btn btn-secondary btn-sm" style="background: #334155; color: #ffffff; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem; text-decoration: none;">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Open Client View
+        </a>
+      </div>
+
+      <button type="button" onclick="closeShareProposalModal()" style="background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
+        Done / Return to Directory
+      </button>
+    </div>
+  </div>
+
+  <script src="../js/api.js?v=2.2"></script>
+  <script src="../js/auth.js?v=2.2"></script>
+  <script src="../js/package-proposals.js?v=2.2"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadClientsDirectory();
+      await loadServiceMasterOptions();
+      populateProposalClientsDropdown();
+      renderInnerPagePackageCards();
+
+      // Check if editing existing proposal via ?id=...
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('id');
+      if (editId) {
+        loadExistingProposalForEdit(editId);
+      }
+    });
+
+    let currentClientMode = 'EXISTING';
+
+    function switchProposalClientMode(mode) {
+      currentClientMode = mode;
+      const btnExisting = document.getElementById('btnModeExistingClient');
+      const btnNew = document.getElementById('btnModeNewLead');
+      const rowExisting = document.getElementById('proposalExistingClientRow');
+
+      if (mode === 'EXISTING') {
+        btnExisting.className = 'btn btn-sm btn-primary';
+        btnExisting.style.background = '';
+        btnExisting.style.color = '';
+        btnExisting.style.border = '';
+        btnNew.className = 'btn btn-sm btn-secondary';
+        btnNew.style.background = 'transparent';
+        btnNew.style.border = 'none';
+        btnNew.style.color = '#475569';
+        if (rowExisting) rowExisting.style.display = 'block';
+      } else {
+        btnNew.className = 'btn btn-sm btn-primary';
+        btnNew.style.background = '';
+        btnNew.style.color = '';
+        btnNew.style.border = '';
+        btnExisting.className = 'btn btn-sm btn-secondary';
+        btnExisting.style.background = 'transparent';
+        btnExisting.style.border = 'none';
+        btnExisting.style.color = '#475569';
+        if (rowExisting) rowExisting.style.display = 'none';
+
+        // Clear fields for fresh new client entry
+        const select = document.getElementById('proposalClientSelect');
+        if (select) select.value = '';
+        document.getElementById('propClientName').value = '';
+        document.getElementById('propContactPerson').value = '';
+        document.getElementById('propMobile').value = '';
+        document.getElementById('propEmail').value = '';
+        document.getElementById('propClientName').focus();
+      }
+    }
+
+    async function loadClientsDirectory() {
+      try {
+        const res = await apiFetch('/clients');
+        if (res && res.clients) {
+          allAvailableClients = res.clients;
+        }
+      } catch(e) {}
+    }
+
+    async function loadExistingProposalForEdit(id) {
+      try {
+        const res = await apiFetch(`/proposals/${id}`);
+        if (res && res.success && res.proposal) {
+          const p = res.proposal;
+          document.getElementById('proposalEditId').value = p.id;
+          document.getElementById('propClientName').value = p.client_name;
+          document.getElementById('propContactPerson').value = p.contact_person || '';
+          document.getElementById('propMobile').value = p.mobile;
+          document.getElementById('propEmail').value = p.email || '';
+          document.getElementById('proposalTitleInput').value = p.title;
+          document.getElementById('proposalCycleInput').value = p.billing_cycle || 'Monthly';
+          
+          if (p.packages && p.packages.length > 0) {
+            modalPackages = p.packages;
+            renderInnerPagePackageCards();
+          }
+          const headingEl = document.getElementById('pageMainHeading');
+          if (headingEl) {
+            headingEl.textContent = `Edit Proposal #${p.proposal_code} (${p.client_name})`;
+          }
+        }
+      } catch(e) {
+        showToast('Failed to load proposal details for edit', 'error');
+      }
+    }
+
+    let activeTierFilter = 'ALL'; // 'ALL', 0, 1, 2
+
+    function setTierViewFilter(filter) {
+      activeTierFilter = filter;
+      ['ALL', 0, 1, 2].forEach(k => {
+        const btn = document.getElementById(`btnTierView${k}`);
+        if (!btn) return;
+        if (k === filter || (typeof k === 'number' && typeof filter === 'number' && k === filter)) {
+          btn.className = 'btn btn-sm btn-primary';
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.border = '';
+        } else {
+          btn.className = 'btn btn-sm btn-secondary';
+          btn.style.background = 'transparent';
+          btn.style.border = 'none';
+          btn.style.color = '#475569';
+        }
+      });
+
+      const container = document.getElementById('innerPagePackageCardsContainer');
+      if (container) {
+        if (filter === 'ALL') {
+          container.style.gridTemplateColumns = 'repeat(2, 1fr)';
+          container.style.maxWidth = '100%';
+        } else {
+          container.style.gridTemplateColumns = '1fr';
+          container.style.maxWidth = '1100px';
+          container.style.margin = '0 auto';
+        }
+      }
+
+      renderInnerPagePackageCards();
+    }
+
+    function renderInnerPagePackageCards() {
+      const container = document.getElementById('innerPagePackageCardsContainer');
+      if (!container) return;
+
+      // Update Tab button names dynamically
+      if (document.getElementById('btnTierView0')) {
+        const span = document.getElementById('btnTierView0').querySelector('span');
+        if (span) span.textContent = `Plan 1: ${modalPackages[0]?.name || 'Starter'}`;
+      }
+      if (document.getElementById('btnTierView1')) {
+        const span = document.getElementById('btnTierView1').querySelector('span');
+        if (span) span.textContent = `Plan 2: ${modalPackages[1]?.name || 'Pro'}`;
+      }
+      if (document.getElementById('btnTierView2')) {
+        const span = document.getElementById('btnTierView2').querySelector('span');
+        if (span) span.textContent = `Plan 3: ${modalPackages[2]?.name || 'Growth'}`;
+      }
+
+      const isSingleMode = activeTierFilter !== 'ALL';
+      const listToRender = isSingleMode
+        ? (modalPackages[activeTierFilter] ? [{ pkg: modalPackages[activeTierFilter], pIdx: Number(activeTierFilter) }] : [])
+        : modalPackages.map((pkg, pIdx) => ({ pkg, pIdx }));
+
+      container.innerHTML = listToRender.map(({ pkg, pIdx }) => {
+        const isRecommended = pkg.badge_type === 'RECOMMENDED' || pkg.is_recommended;
+        const isPopular = pkg.badge_type === 'MOST_POPULAR';
+
+        let badgeClass = 'badge-starter';
+        let badgeIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+        if (isRecommended) {
+          badgeClass = 'badge-recommended';
+          badgeIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+        } else if (isPopular) {
+          badgeClass = 'badge-popular';
+          badgeIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+        }
+
+        // When viewing single plan OR when rendering the 3rd card in 2-column grid mode (spans across both columns):
+        const shouldSpanTwoColumns = isSingleMode || (activeTierFilter === 'ALL' && pIdx === 2);
+
+        if (shouldSpanTwoColumns) {
+          return `
+            <div class="tier-box ${isRecommended ? 'recommended' : ''}" style="${!isSingleMode ? 'grid-column: 1 / -1;' : ''} padding:1.5rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:1.5px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:0.65rem;">
+                  <span style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.25rem; color:${isRecommended ? '#e11d48' : '#0f172a'};">
+                    Tier #${pIdx + 1}: ${escapeHtml(pkg.name)}
+                  </span>
+                  <span class="tier-header-badge ${badgeClass}" style="font-size:0.78rem; padding:0.25rem 0.7rem;">
+                    ${badgeIcon}
+                    ${escapeHtml(pkg.badge_text || pkg.badge_type || 'STANDARD')}
+                  </span>
+                </div>
+                <div style="font-size:0.78rem; color:#64748b; font-weight:600;">
+                  ${isSingleMode ? 'Single Plan Focus Mode' : '⭐ Recommended Featured Tier'}
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1.35fr; gap:1.5rem; align-items:start;">
+                <!-- LEFT COLUMN: Plan Parameters & Pricing -->
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.25rem;">
+                  <div style="font-weight:800; font-size:0.9rem; color:#0f172a; margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#e11d48" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    Plan Pricing & Ribbon
+                  </div>
+
+                  <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label required" style="font-size:0.78rem; font-weight:700;">Package Name</label>
+                    <input type="text" class="form-input" value="${escapeAttr(pkg.name)}" oninput="modalPackages[${pIdx}].name = this.value; if(document.getElementById('btnTierView${pIdx}')) document.getElementById('btnTierView${pIdx}').querySelector('span').textContent = 'Plan ' + (${pIdx}+1) + ': ' + this.value;" style="font-weight:700; font-size:0.92rem;">
+                  </div>
+
+                  <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label required" style="font-size:0.78rem; font-weight:700;">Price (₹ / Month)</label>
+                    <input type="number" class="form-input" value="${pkg.price}" oninput="modalPackages[${pIdx}].price = parseFloat(this.value)||0; modalPackages[${pIdx}].price_formatted = 'Rs.' + Number(this.value).toLocaleString('en-IN') + '/ Month';" style="font-weight:800; font-size:1.15rem; color:#e11d48;">
+                  </div>
+
+                  <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label" style="font-size:0.78rem; font-weight:700;">Subtitle / Highlight Description</label>
+                    <input type="text" class="form-input" value="${escapeAttr(pkg.subtitle || '')}" oninput="modalPackages[${pIdx}].subtitle = this.value" placeholder="e.g. Starter Boost + Pro Accelerator (All In One)">
+                  </div>
+
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.78rem; font-weight:700;">Badge Ribbon Type</label>
+                    <select class="form-select" onchange="modalPackages[${pIdx}].badge_type = this.value; modalPackages[${pIdx}].is_recommended = (this.value === 'RECOMMENDED'); renderInnerPagePackageCards();" style="font-weight:600;">
+                      <option value="STARTER" ${pkg.badge_type === 'STARTER' ? 'selected' : ''}>Checkmark Circle (Starter Boost)</option>
+                      <option value="MOST_POPULAR" ${pkg.badge_type === 'MOST_POPULAR' ? 'selected' : ''}>MOST POPULAR (Pro Accelerator)</option>
+                      <option value="RECOMMENDED" ${pkg.badge_type === 'RECOMMENDED' ? 'selected' : ''}>RECOMMENDED ⭐ (Growth Plan)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Deliverables & Features Builder -->
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:1.25rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.4rem;">
+                    <div style="font-weight:800; font-size:0.9rem; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#e11d48" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                      Included Deliverables (${(pkg.services || []).length})
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addCustomFeatureToPackageInner(${pIdx})" style="font-size:0.75rem; padding:0.35rem 0.75rem; display:inline-flex; align-items:center; gap:0.3rem;">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Custom Bullet
+                    </button>
+                  </div>
+
+                  <!-- Quick Pick Dropdown from Services Master -->
+                  <div style="display:flex; gap:0.4rem; margin-bottom:0.75rem;">
+                    <select id="quickPickServiceInner_${pIdx}" class="form-select form-select-sm" style="font-size:0.8rem; flex:1;">
+                      <option value="">-- Add from Services Master --</option>
+                      ${availableServiceMasterItems.map(s => `<option value="${escapeAttr(s.name)}">${escapeHtml(s.name)} (₹${parseFloat(s.default_rate).toLocaleString('en-IN')})</option>`).join('')}
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addServiceFromMasterInner(${pIdx})" style="font-size:0.8rem; padding:0.35rem 0.85rem; display:inline-flex; align-items:center; gap:0.25rem;">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add
+                    </button>
+                  </div>
+
+                  <!-- Features Items List -->
+                  <div style="max-height:420px; overflow-y:auto; padding-right:4px;">
+                    ${renderInnerFeatureCards(pkg, pIdx)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // 2-Column Standard Card (For Plan 1 & Plan 2 in 2-column grid)
+        return `
+          <div class="tier-box ${isRecommended ? 'recommended' : ''}" style="padding:1.35rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid #f1f5f9;">
+              <span style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:${isRecommended ? '#e11d48' : '#0f172a'};">
+                Tier #${pIdx + 1}: ${escapeHtml(pkg.name)}
+              </span>
+              <span class="tier-header-badge ${badgeClass}">
+                ${badgeIcon}
+                ${escapeHtml(pkg.badge_text || pkg.badge_type || 'STANDARD')}
+              </span>
+            </div>
+
+            <!-- Name and Price -->
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+              <div>
+                <label class="form-label" style="font-size:0.75rem; font-weight:700;">Package Name</label>
+                <input type="text" class="form-input" value="${escapeAttr(pkg.name)}" oninput="modalPackages[${pIdx}].name = this.value" style="font-weight:700;">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.75rem; font-weight:700;">Price (₹ / Month)</label>
+                <input type="number" class="form-input" value="${pkg.price}" oninput="modalPackages[${pIdx}].price = parseFloat(this.value)||0; modalPackages[${pIdx}].price_formatted = 'Rs.' + Number(this.value).toLocaleString('en-IN') + '/ Month';" style="font-weight:800; color:#e11d48;">
+              </div>
+            </div>
+
+            <!-- Subtitle and Badge Type -->
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+              <div>
+                <label class="form-label" style="font-size:0.75rem; font-weight:700;">Subtitle Copy</label>
+                <input type="text" class="form-input" value="${escapeAttr(pkg.subtitle || '')}" oninput="modalPackages[${pIdx}].subtitle = this.value" placeholder="e.g. + Starter Boost">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.75rem; font-weight:700;">Badge Ribbon Type</label>
+                <select class="form-select" onchange="modalPackages[${pIdx}].badge_type = this.value; modalPackages[${pIdx}].is_recommended = (this.value === 'RECOMMENDED'); renderInnerPagePackageCards();">
+                  <option value="STARTER" ${pkg.badge_type === 'STARTER' ? 'selected' : ''}>Checkmark Circle (Starter)</option>
+                  <option value="MOST_POPULAR" ${pkg.badge_type === 'MOST_POPULAR' ? 'selected' : ''}>MOST POPULAR (Thumbs Up)</option>
+                  <option value="RECOMMENDED" ${pkg.badge_type === 'RECOMMENDED' ? 'selected' : ''}>RECOMMENDED (Star Badge)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Services Section -->
+            <div style="flex:1; display:flex; flex-direction:column;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <label class="form-label" style="font-size:0.8rem; font-weight:800; margin:0;">
+                  Included Deliverables (${(pkg.services || []).length})
+                </label>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addCustomFeatureToPackageInner(${pIdx})" style="font-size:0.72rem; padding:0.25rem 0.5rem; display:inline-flex; align-items:center; gap:0.25rem;">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Custom Bullet
+                </button>
+              </div>
+
+              <!-- Quick Pick Dropdown from Services Master -->
+              <div style="display:flex; gap:0.4rem; margin-bottom:0.75rem;">
+                <select id="quickPickServiceInner_${pIdx}" class="form-select form-select-sm" style="font-size:0.75rem; flex:1;">
+                  <option value="">-- Add from Services Master --</option>
+                  ${availableServiceMasterItems.map(s => `<option value="${escapeAttr(s.name)}">${escapeHtml(s.name)} (₹${parseFloat(s.default_rate).toLocaleString('en-IN')})</option>`).join('')}
+                </select>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addServiceFromMasterInner(${pIdx})" style="font-size:0.75rem; padding:0.25rem 0.65rem; display:inline-flex; align-items:center; gap:0.2rem;">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add
+                </button>
+              </div>
+
+              <!-- Features Items List -->
+              <div style="flex:1; max-height:360px; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem;">
+                ${renderInnerFeatureCards(pkg, pIdx)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderInnerFeatureCards(pkg, pIdx) {
+      const services = pkg.services || [];
+      if (services.length === 0) {
+        return '<div style="font-size:0.78rem; color:#94a3b8; text-align:center; padding:1.5rem 0.5rem;">No features added yet. Click "+ Custom Bullet" or choose from Services Master above.</div>';
+      }
+
+      return services.map((s, sIdx) => {
+        const title = typeof s === 'string' ? s : (s.title || s.name || '');
+        const subItems = (typeof s === 'object' && s.sub_items) ? s.sub_items.join('\n') : '';
+
+        return `
+          <div class="feature-item-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.4rem; margin-bottom:0.35rem;">
+              <input type="text" class="form-input form-input-sm" value="${escapeAttr(title)}" placeholder="Main Feature / Service Title" oninput="updatePackageFeatureTitle(${pIdx}, ${sIdx}, this.value)" style="font-weight:700; font-size:0.82rem; flex:1;">
+              <button type="button" onclick="removePackageFeatureInner(${pIdx}, ${sIdx})" style="background:#fee2e2; border:1px solid #fecaca; color:#dc2626; border-radius:4px; padding:2px 6px; cursor:pointer; font-weight:800; font-size:0.75rem;" title="Delete this deliverable">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <textarea rows="2" class="form-input form-input-sm" placeholder="Sub-deliverable points (one per line, e.g. Facebook, Instagram, Google Ads setup)" oninput="updatePackageFeatureSubItems(${pIdx}, ${sIdx}, this.value)" style="font-size:0.76rem; color:#475569; width:100%;">${escapeHtml(subItems)}</textarea>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addCustomFeatureToPackageInner(pIdx) {
+      if (!modalPackages[pIdx].services) modalPackages[pIdx].services = [];
+      modalPackages[pIdx].services.push({
+        title: 'New Service / Deliverable',
+        sub_items: ['• Detail deliverable point']
+      });
+      renderInnerPagePackageCards();
+    }
+
+    function addServiceFromMasterInner(pIdx) {
+      const select = document.getElementById(`quickPickServiceInner_${pIdx}`);
+      if (!select || !select.value) {
+        if (typeof showToast === 'function') {
+          showToast('Please select a service from the dropdown before clicking "+ Add"', 'info');
+        }
+        return;
+      }
+
+      const selectedName = select.value;
+      const matchedService = Array.isArray(availableServiceMasterItems)
+        ? availableServiceMasterItems.find(s => s.name === selectedName)
+        : null;
+
+      let subItems = ['• End-to-end execution & monthly reporting'];
+      if (matchedService && matchedService.description) {
+        const splitLines = matchedService.description.split('\n').map(l => l.trim()).filter(Boolean);
+        if (splitLines.length > 0) subItems = splitLines;
+      }
+
+      if (!modalPackages[pIdx].services) modalPackages[pIdx].services = [];
+      modalPackages[pIdx].services.push({
+        title: selectedName,
+        sub_items: subItems
+      });
+
+      renderInnerPagePackageCards();
+      if (typeof showToast === 'function') {
+        showToast(`Added "${selectedName}" to ${modalPackages[pIdx].name}`, 'success');
+      }
+    }
+
+    function removePackageFeatureInner(pIdx, sIdx) {
+      if (!modalPackages[pIdx].services) return;
+      modalPackages[pIdx].services.splice(sIdx, 1);
+      renderInnerPagePackageCards();
+    }
+
+    async function handleSaveProposalInnerPage(e) {
+      if (e) e.preventDefault();
+
+      const editId = document.getElementById('proposalEditId').value;
+      const clientName = document.getElementById('propClientName').value.trim();
+      const contactPerson = document.getElementById('propContactPerson').value.trim();
+      const mobile = document.getElementById('propMobile').value.trim();
+      const email = document.getElementById('propEmail').value.trim();
+      const title = document.getElementById('proposalTitleInput').value.trim();
+      const billingCycle = document.getElementById('proposalCycleInput').value;
+
+      if (!clientName || !mobile) {
+        showToast('Client / Business Name and Mobile Number are required.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btnSaveInnerProposal');
+      const origText = btn.innerHTML;
+      btn.innerHTML = 'Saving Proposal...';
+      btn.disabled = true;
+
+      try {
+        const payload = {
+          client_name: clientName,
+          contact_person: contactPerson,
+          mobile: mobile,
+          email: email,
+          title: title || 'Digital Marketing Growth Proposal',
+          billing_cycle: billingCycle,
+          packages: modalPackages
+        };
+
+        let res;
+        if (editId) {
+          res = await apiFetch(`/proposals/${editId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+          showToast('Proposal updated successfully!', 'success');
+          setTimeout(() => {
+            window.location.href = 'quotations.html?tab=proposals';
+          }, 600);
+        } else {
+          res = await apiFetch('/proposals', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          showToast('3-Tier Package Proposal created successfully!', 'success');
+
+          if (res.shareToken) {
+            openShareProposalModal(res.proposalId, res.proposalCode, res.shareToken, clientName, mobile);
+          }
+        }
+      } catch (err) {
+        showToast(err.message || 'Failed to save proposal', 'error');
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    }
+
+    function previewProposalInNewTab() {
+      const editId = document.getElementById('proposalEditId').value;
+      if (editId) {
+        apiFetch(`/proposals/${editId}`).then(res => {
+          if (res && res.proposal && res.proposal.share_token) {
+            const prefix = typeof getAppPathPrefix === 'function' ? getAppPathPrefix() : '';
+            window.open(`${window.location.origin}${prefix}/proposal.html?token=${res.proposal.share_token}`, '_blank');
+          }
+        });
+      } else {
+        showToast('Please save the proposal to preview the public live link.', 'info');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -124,6 +124,8 @@ const MARKETING_ALLOWED_PAGES = [
   'enquiry-view.html',
   'meetings.html',
   'quotations.html',
+  'create-proposal.html',
+  'proposal.html',
   'clients.html',
   'client-edit.html',
   'client-view.html',

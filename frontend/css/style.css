@@ -331,9 +331,15 @@ body.sidebar-collapsed .nav-item a svg {
   margin: 0 auto;
 }
 
-.app-container.sidebar-collapsed .sidebar-user,
-body.sidebar-collapsed .sidebar-user {
-  display: none !important;
+.main-content {
+  flex: 1;
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  min-height: 100vh;
+  padding: 1.5rem 2rem;
+  background-color: var(--bg-main, #f8fafc);
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
 }
 
 .app-container.sidebar-collapsed .main-content,

@@ -136,6 +136,70 @@ async function initDatabase() {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
 
+      // Ensure package_proposals table exists
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS package_proposals (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          proposal_code VARCHAR(50) NOT NULL UNIQUE,
+          share_token VARCHAR(100) NOT NULL UNIQUE,
+          client_id INT DEFAULT NULL,
+          client_name VARCHAR(255) NOT NULL,
+          contact_person VARCHAR(150) DEFAULT NULL,
+          mobile VARCHAR(30) NOT NULL,
+          email VARCHAR(150) DEFAULT NULL,
+          title VARCHAR(255) DEFAULT 'Digital Marketing Growth Proposal',
+          valid_until DATE DEFAULT NULL,
+          currency VARCHAR(10) DEFAULT 'INR',
+          billing_cycle VARCHAR(50) DEFAULT 'Monthly',
+          packages_json LONGTEXT NOT NULL,
+          selected_package_index INT DEFAULT NULL,
+          selected_package_name VARCHAR(100) DEFAULT NULL,
+          confirmed_at DATETIME DEFAULT NULL,
+          client_confirmed_ip VARCHAR(50) DEFAULT NULL,
+          status ENUM('DRAFT', 'SENT', 'VIEWED', 'ACCEPTED', 'CONVERTED') DEFAULT 'SENT',
+          converted_quotation_id INT DEFAULT NULL,
+          created_by INT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_token (share_token),
+          INDEX idx_status (status)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+
+      // Ensure quotations table exists
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS quotations (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          quote_number VARCHAR(50) NOT NULL UNIQUE,
+          client_id INT DEFAULT NULL,
+          client_name VARCHAR(255) NOT NULL,
+          contact_person VARCHAR(150) DEFAULT NULL,
+          mobile VARCHAR(20) NOT NULL,
+          email VARCHAR(150) DEFAULT NULL,
+          address TEXT DEFAULT NULL,
+          gstin VARCHAR(20) DEFAULT NULL,
+          is_lead TINYINT(1) DEFAULT 1,
+          quote_date DATE NOT NULL,
+          valid_until DATE NOT NULL,
+          subtotal DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+          negotiation_percent DECIMAL(5,2) DEFAULT 0.00,
+          negotiation_amount DECIMAL(12,2) DEFAULT 0.00,
+          taxable_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+          gst_rate DECIMAL(5,2) DEFAULT 18.00,
+          gst_amount DECIMAL(12,2) DEFAULT 0.00,
+          grand_total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+          status ENUM('DRAFT','SENT','NEGOTIATING','APPROVED','CONVERTED','REJECTED') DEFAULT 'SENT',
+          items_json LONGTEXT NOT NULL,
+          notes TEXT DEFAULT NULL,
+          converted_invoice_id INT DEFAULT NULL,
+          created_by INT DEFAULT 1,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_quote_client (client_id),
+          INDEX idx_quote_status (status)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+
       // Tables initialized without dummy seed data
     } catch (e) {
       console.error('[DB Migration Warning]', e.message);

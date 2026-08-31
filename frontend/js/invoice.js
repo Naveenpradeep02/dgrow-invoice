@@ -253,7 +253,10 @@ async function loadInvoicesList(fromDateOverride = '', toDateOverride = '') {
         <td>${formatDate(inv.invoice_date)}</td>
         <td>${inv.company_name}</td>
         <td><span class="badge badge-${inv.invoice_type.toLowerCase()}">${inv.invoice_type}</span></td>
-        <td><strong>${formatINR(inv.grand_total)}</strong></td>
+        <td>
+          <strong>${formatINR(inv.grand_total)}</strong>
+          ${parseFloat(inv.discount || 0) > 0 ? `<div style="font-size:0.72rem; color:#b45309; font-weight:600;">(Disc: -${formatINR(inv.discount)})</div>` : ''}
+        </td>
         <td>${formatINR(inv.paid_amount)}</td>
         <td><span class="badge badge-${inv.status.toLowerCase()}">${inv.status.replace('_', ' ')}</span></td>
         <td>
@@ -853,6 +856,10 @@ async function loadInvoiceDataForEdit(id) {
       }
     }
 
+    if (document.getElementById('discount_amount')) {
+      document.getElementById('discount_amount').value = inv.discount || 0;
+    }
+
     updateInvoiceCalculations();
   } catch (err) {
     showToast('Failed to load invoice for editing: ' + err.message, 'error');
@@ -991,6 +998,7 @@ function addInvoiceItemRow(serviceData = null) {
     <td><input type="text" class="form-input item-sac" value="${serviceData ? (serviceData.hsn_sac || '-') : '-'}" style="width:85px; text-align:center;"></td>
     <td><input type="number" class="form-input item-qty" value="${serviceData ? serviceData.quantity : 1}" min="1" step="1" oninput="updateInvoiceCalculations()" style="width:65px;"></td>
     <td><input type="number" class="form-input item-rate" value="${serviceData ? serviceData.rate : 0}" step="0.01" oninput="updateInvoiceCalculations()" style="width:105px;"></td>
+    <td><input type="number" class="form-input item-discount" value="${serviceData ? (serviceData.discount || 0) : 0}" min="0" step="0.01" oninput="onItemDiscountChanged()" style="width:85px; text-align:right;" placeholder="0"></td>
     <td class="gst-col"><input type="number" class="form-input item-gst" value="${serviceData ? serviceData.gst_rate : 18}" step="0.1" oninput="updateInvoiceCalculations()" style="width:65px;"></td>
     <td><strong class="item-amount">₹0</strong></td>
     <td>
@@ -1001,6 +1009,23 @@ function addInvoiceItemRow(serviceData = null) {
   `;
 
   container.appendChild(tr);
+  updateInvoiceCalculations();
+}
+
+function onItemDiscountChanged() {
+  const rows = document.querySelectorAll('#itemsTableBody tr');
+  let sumDisc = 0;
+  rows.forEach(tr => {
+    sumDisc += Math.max(0, parseFloat(tr.querySelector('.item-discount')?.value) || 0);
+  });
+  const overallInput = document.getElementById('discount_amount');
+  if (overallInput) {
+    overallInput.value = sumDisc > 0 ? parseFloat(sumDisc.toFixed(2)) : 0;
+  }
+  updateInvoiceCalculations();
+}
+
+function onOverallDiscountChanged() {
   updateInvoiceCalculations();
 }
 
@@ -1036,7 +1061,7 @@ function removeInvoiceItemRow(btn) {
   const container = document.getElementById('itemsTableBody');
   if (container.children.length > 1) {
     tr.remove();
-    updateInvoiceCalculations();
+    onItemDiscountChanged();
   } else {
     showToast('At least one line item is required.', 'error');
   }
@@ -1056,20 +1081,41 @@ function updateInvoiceCalculations() {
   const isInterstate = pos && !pos.toLowerCase().includes('tamil nadu');
 
   let subtotal = 0;
+  let itemDiscountSum = 0;
+
+  rows.forEach(tr => {
+    const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 0;
+    const rate = parseFloat(tr.querySelector('.item-rate')?.value) || 0;
+    const disc = Math.max(0, parseFloat(tr.querySelector('.item-discount')?.value) || 0);
+    const lineGross = qty * rate;
+
+    subtotal += lineGross;
+    itemDiscountSum += disc;
+  });
+
+  const overallDiscountInput = Math.max(0, parseFloat(document.getElementById('discount_amount')?.value) || 0);
+  const totalDiscount = Math.min(subtotal, Math.max(itemDiscountSum, overallDiscountInput));
+  const taxableAmount = Math.max(0, subtotal - totalDiscount);
+
   let totalTax = 0;
 
   rows.forEach(tr => {
-    const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
-    const rate = parseFloat(tr.querySelector('.item-rate').value) || 0;
-    const gstRate = isGstType ? (parseFloat(tr.querySelector('.item-gst').value) || 0) : 0;
-
+    const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 0;
+    const rate = parseFloat(tr.querySelector('.item-rate')?.value) || 0;
     const lineGross = qty * rate;
-    const lineTax = (lineGross * gstRate) / 100;
+    let disc = Math.max(0, parseFloat(tr.querySelector('.item-discount')?.value) || 0);
 
-    subtotal += lineGross;
+    // If individual discounts were not filled but overall was given, allocate proportionally for line display
+    if (itemDiscountSum === 0 && totalDiscount > 0) {
+      disc = subtotal > 0 ? (lineGross / subtotal) * totalDiscount : 0;
+    }
+
+    const lineTaxable = Math.max(0, lineGross - disc);
+    const gstRate = isGstType ? (parseFloat(tr.querySelector('.item-gst')?.value) || 0) : 0;
+    const lineTax = (lineTaxable * gstRate) / 100;
+
     totalTax += lineTax;
-
-    tr.querySelector('.item-amount').textContent = formatINR(lineGross);
+    tr.querySelector('.item-amount').textContent = formatINR(lineTaxable);
   });
 
   let cgst = 0, sgst = 0, igst = 0;
@@ -1083,10 +1129,15 @@ function updateInvoiceCalculations() {
     }
   }
 
-  const grandTotal = subtotal + totalTax;
+  const grandTotal = Math.round(taxableAmount + totalTax);
 
   // Update Summary UI
-  if (document.getElementById('summarySubtotal')) document.getElementById('summarySubtotal').textContent = formatINR(subtotal);
+  if (document.getElementById('summarySubtotal')) {
+    document.getElementById('summarySubtotal').textContent = formatINR(subtotal);
+  }
+  if (document.getElementById('summaryTaxable')) {
+    document.getElementById('summaryTaxable').textContent = formatINR(taxableAmount);
+  }
 
   const cgstRow = document.getElementById('summaryCgstRow');
   const sgstRow = document.getElementById('summarySgstRow');
@@ -1111,7 +1162,9 @@ function updateInvoiceCalculations() {
     }
   }
 
-  if (document.getElementById('summaryGrandTotal')) document.getElementById('summaryGrandTotal').textContent = formatINR(grandTotal);
+  if (document.getElementById('summaryGrandTotal')) {
+    document.getElementById('summaryGrandTotal').textContent = formatINR(grandTotal);
+  }
 }
 
 async function handleSaveInvoice(e) {
@@ -1147,6 +1200,7 @@ async function handleSaveInvoice(e) {
     const sac = tr.querySelector('.item-sac')?.value.trim() || '-';
     const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 1;
     const rate = parseFloat(tr.querySelector('.item-rate')?.value) || 0;
+    const discount = parseFloat(tr.querySelector('.item-discount')?.value) || 0;
     const gst = parseFloat(tr.querySelector('.item-gst')?.value) || 0;
 
     if (description && rate >= 0) {
@@ -1156,6 +1210,7 @@ async function handleSaveInvoice(e) {
         hsn_sac: sac,
         quantity: qty,
         rate: rate,
+        discount: discount,
         gst_rate: gst,
         item_order: idx + 1
       });
@@ -1167,6 +1222,7 @@ async function handleSaveInvoice(e) {
     return;
   }
 
+  const discountAmount = parseFloat(document.getElementById('discount_amount')?.value) || 0;
   const editId = document.getElementById('editInvoiceId')?.value;
   const btn = form.querySelector('button[type="submit"]');
   btn.disabled = true;
@@ -1184,6 +1240,7 @@ async function handleSaveInvoice(e) {
           place_of_supply,
           payment_terms_text,
           notes,
+          discount: discountAmount,
           items
         })
       });
@@ -1203,6 +1260,7 @@ async function handleSaveInvoice(e) {
           place_of_supply,
           payment_terms_text,
           notes,
+          discount: discountAmount,
           items,
           status: 'ISSUED'
         })
@@ -1384,6 +1442,7 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
                       ${parsed.subDetails.map(d => `<li>${d}</li>`).join('')}
                     </ul>
                   ` : `<span style="color:#9ca3af;">-</span>`}
+                  ${parseFloat(item.discount || 0) > 0 ? `<div style="font-size:8.5px; color:#b45309; font-weight:700; margin-top:3px;">Line Discount: -${formatINR(item.discount)}</div>` : ''}
                 </td>
                 ${idx === 0 ? `
                   <td rowspan="${items.length}" style="text-align:center; vertical-align:middle; font-weight:700; font-size:1.05rem; color:#111827; background:#ffffff; border-left:1px solid #d1d5db;">
@@ -1438,6 +1497,10 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
         <div>
           <table class="inv-totals-table">
             <tr><td class="total-label">Sub Total</td><td class="total-amount">${formatINR(invoice.subtotal)}</td></tr>
+            ${parseFloat(invoice.discount || 0) > 0 ? `
+              <tr><td class="total-label" style="color:#b45309; font-weight:700;">Discount</td><td class="total-amount" style="color:#b45309; font-weight:700;">-${formatINR(invoice.discount)}</td></tr>
+              <tr><td class="total-label">Taxable Amount</td><td class="total-amount">${formatINR(invoice.taxable_amount)}</td></tr>
+            ` : ''}
             ${isGST && invoice.cgst_amount > 0 ? `<tr><td class="total-label">CGST ${invoice.cgst_rate}%</td><td class="total-amount">${formatINR(invoice.cgst_amount)}</td></tr>` : ''}
             ${isGST && invoice.sgst_amount > 0 ? `<tr><td class="total-label">SGST ${invoice.sgst_rate}%</td><td class="total-amount">${formatINR(invoice.sgst_amount)}</td></tr>` : ''}
             ${isGST && invoice.igst_amount > 0 ? `<tr><td class="total-label">IGST ${invoice.igst_rate}%</td><td class="total-amount">${formatINR(invoice.igst_amount)}</td></tr>` : ''}

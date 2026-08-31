@@ -4,6 +4,7 @@ function calculateInvoiceTotals(invoiceData) {
   const {
     invoice_type = 'GST',
     items = [],
+    discount: invoiceLevelDiscount = 0,
     place_of_supply = 'Tamil Nadu',
     company_state = 'Tamil Nadu'
   } = invoiceData;
@@ -17,13 +18,31 @@ function calculateInvoiceTotals(invoiceData) {
   const isInterstate = place_of_supply && !place_of_supply.toLowerCase().includes(company_state.toLowerCase());
   const isGstInvoice = (invoice_type === 'GST' || invoice_type === 'GST_CLIENT');
 
+  // Check if item-level discounts exist
+  let rawSubtotal = 0;
+  let itemDiscountSum = 0;
+  items.forEach(it => {
+    const qty = parseFloat(it.quantity) || 1;
+    const rate = parseFloat(it.rate) || 0;
+    rawSubtotal += (qty * rate);
+    itemDiscountSum += Math.max(0, parseFloat(it.discount) || 0);
+  });
+
+  const parsedInvDiscount = Math.max(0, parseFloat(invoiceLevelDiscount) || 0);
+  const useProportionalDiscount = (itemDiscountSum === 0 && parsedInvDiscount > 0);
+
   items.forEach((item, index) => {
     const qty = parseFloat(item.quantity) || 1;
     const rate = parseFloat(item.rate) || 0;
-    const discount = parseFloat(item.discount) || 0;
-    const gstRate = isGstInvoice ? (parseFloat(item.gst_rate) || 18.0) : 0;
-
     const lineGross = qty * rate;
+
+    let discount = Math.max(0, parseFloat(item.discount) || 0);
+    if (useProportionalDiscount) {
+      discount = rawSubtotal > 0 ? (lineGross / rawSubtotal) * parsedInvDiscount : (parsedInvDiscount / (items.length || 1));
+      discount = parseFloat(discount.toFixed(2));
+    }
+
+    const gstRate = isGstInvoice ? (parseFloat(item.gst_rate) || 18.0) : 0;
     const lineTaxable = Math.max(0, lineGross - discount);
     const lineTax = (lineTaxable * gstRate) / 100;
     const lineTotal = lineTaxable + lineTax;
@@ -39,13 +58,18 @@ function calculateInvoiceTotals(invoiceData) {
       hsn_sac: item.hsn_sac || '998311',
       quantity: qty,
       rate: rate,
-      discount: discount,
+      discount: parseFloat(discount.toFixed(2)),
       gst_rate: gstRate,
       taxable_amount: parseFloat(lineTaxable.toFixed(2)),
       tax_amount: parseFloat(lineTax.toFixed(2)),
       total_amount: parseFloat(lineTotal.toFixed(2))
     });
   });
+
+  if (useProportionalDiscount) {
+    totalDiscount = Math.min(subtotal, parsedInvDiscount);
+    totalTaxable = Math.max(0, subtotal - totalDiscount);
+  }
 
   let cgstRate = 0;
   let cgstAmount = 0;

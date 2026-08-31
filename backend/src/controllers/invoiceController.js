@@ -326,6 +326,7 @@ async function createInvoice(req, res) {
       payment_terms_text = '100% payment in advance',
       status = 'ISSUED',
       notes = '',
+      discount = 0,
       items = []
     } = req.body;
 
@@ -348,6 +349,7 @@ async function createInvoice(req, res) {
     const totals = calculateInvoiceTotals({
       invoice_type,
       items,
+      discount,
       place_of_supply,
       company_state: companyState
     });
@@ -491,13 +493,19 @@ async function updateInvoice(req, res) {
       payment_terms_text = oldInv.payment_terms_text,
       status = oldInv.status,
       notes = oldInv.notes,
+      discount = oldInv.discount || 0,
       items = []
     } = req.body;
+
+    const companySettings = await db.query('SELECT state FROM company_settings WHERE id = 1');
+    const companyState = companySettings[0] ? companySettings[0].state : 'Tamil Nadu';
 
     const totals = calculateInvoiceTotals({
       invoice_type,
       items,
-      place_of_supply
+      discount,
+      place_of_supply,
+      company_state: companyState
     });
 
     const paidSoFar = parseFloat(oldInv.paid_amount) || 0;
@@ -515,13 +523,13 @@ async function updateInvoice(req, res) {
           invoice_type = ?, place_of_supply = ?, invoice_date = ?, due_date = ?, payment_terms_text = ?,
           subtotal = ?, discount = ?, taxable_amount = ?, cgst_rate = ?, cgst_amount = ?,
           sgst_rate = ?, sgst_amount = ?, igst_rate = ?, igst_amount = ?, round_off = ?,
-          grand_total = ?, balance_amount = ?, amount_in_words = ?, status = ?, notes = ?
+          grand_total = ?, amount_in_words = ?, status = ?, notes = ?
          WHERE id = ?`,
         [
           invoice_type, place_of_supply, invoice_date, due_date, payment_terms_text,
           totals.subtotal, totals.discount, totals.taxable_amount, totals.cgst_rate, totals.cgst_amount,
           totals.sgst_rate, totals.sgst_amount, totals.igst_rate, totals.igst_amount, totals.round_off,
-          totals.grand_total, newBalance, totals.amount_in_words, newStatus, notes, id
+          totals.grand_total, totals.amount_in_words, newStatus, notes, id
         ]
       );
 

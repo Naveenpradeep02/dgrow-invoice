@@ -377,8 +377,10 @@ function renderInvoicesTable(invoices = [], payments = [], client = {}) {
                   <strong style="font-family:monospace; font-size:0.92rem; color:var(--text-main);">${escapeAttr(inv.invoice_number)}</strong>
                 </td>
                 <td>${formatDate(inv.invoice_date)}</td>
-                <td>${formatDate(inv.due_date)}</td>
-                <td><strong>${formatINR(total)}</strong></td>
+                <td>
+                  <strong>${formatINR(total)}</strong>
+                  ${parseFloat(inv.discount || 0) > 0 ? `<div style="font-size:0.7rem; color:#b45309; font-weight:600;">(Disc: -${formatINR(inv.discount)})</div>` : ''}
+                </td>
                 <td style="color:#15803d; font-weight:700;">${formatINR(paid)}</td>
                 <td style="color:${bal > 0 ? '#ea580c' : '#15803d'}; font-weight:700;">${formatINR(bal)}</td>
                 <td>${statusBadge}</td>

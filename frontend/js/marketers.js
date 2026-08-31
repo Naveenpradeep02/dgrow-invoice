@@ -364,14 +364,17 @@ function renderActivityModalContent(data, activeTab = 'converted') {
 
     <!-- Modal Tabs -->
     <div style="display:flex; border-bottom:1px solid var(--border-color); gap:0.5rem; margin-bottom:1rem;">
-      <button type="button" class="tab-btn ${activeTab === 'converted' ? 'active' : ''}" onclick="renderActivityModalContent(selectedMarketerActivity, 'converted')" style="padding:0.5rem 1rem; border:none; background:none; font-weight:700; font-size:0.85rem; cursor:pointer; color:${activeTab === 'converted' ? 'var(--primary)' : 'var(--text-muted)'}; border-bottom:${activeTab === 'converted' ? '2px solid var(--primary)' : '2px solid transparent'};">
-        🏆 Converted Clients (${converted_clients.length})
+      <button type="button" class="tab-btn ${activeTab === 'converted' ? 'active' : ''}" onclick="renderActivityModalContent(selectedMarketerActivity, 'converted')" style="padding:0.5rem 1rem; border:none; background:none; font-weight:700; font-size:0.85rem; cursor:pointer; color:${activeTab === 'converted' ? 'var(--primary)' : 'var(--text-muted)'}; border-bottom:${activeTab === 'converted' ? '2px solid var(--primary)' : '2px solid transparent'}; display:inline-flex; align-items:center; gap:0.35rem;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+        Converted Clients (${converted_clients.length})
       </button>
-      <button type="button" class="tab-btn ${activeTab === 'enquiries' ? 'active' : ''}" onclick="renderActivityModalContent(selectedMarketerActivity, 'enquiries')" style="padding:0.5rem 1rem; border:none; background:none; font-weight:700; font-size:0.85rem; cursor:pointer; color:${activeTab === 'enquiries' ? 'var(--primary)' : 'var(--text-muted)'}; border-bottom:${activeTab === 'enquiries' ? '2px solid var(--primary)' : '2px solid transparent'};">
-        💬 All Enquiries Pipeline (${enquiries.length})
+      <button type="button" class="tab-btn ${activeTab === 'enquiries' ? 'active' : ''}" onclick="renderActivityModalContent(selectedMarketerActivity, 'enquiries')" style="padding:0.5rem 1rem; border:none; background:none; font-weight:700; font-size:0.85rem; cursor:pointer; color:${activeTab === 'enquiries' ? 'var(--primary)' : 'var(--text-muted)'}; border-bottom:${activeTab === 'enquiries' ? '2px solid var(--primary)' : '2px solid transparent'}; display:inline-flex; align-items:center; gap:0.35rem;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        All Enquiries Pipeline (${enquiries.length})
       </button>
-      <button type="button" class="tab-btn ${activeTab === 'meetings' ? 'active' : ''}" onclick="renderActivityModalContent(selectedMarketerActivity, 'meetings')" style="padding:0.5rem 1rem; border:none; background:none; font-weight:700; font-size:0.85rem; cursor:pointer; color:${activeTab === 'meetings' ? 'var(--primary)' : 'var(--text-muted)'}; border-bottom:${activeTab === 'meetings' ? '2px solid var(--primary)' : '2px solid transparent'};">
-        📅 Client Meetings (${meetings.length})
+      <button type="button" class="tab-btn ${activeTab === 'meetings' ? 'active' : ''}" onclick="renderActivityModalContent(selectedMarketerActivity, 'meetings')" style="padding:0.5rem 1rem; border:none; background:none; font-weight:700; font-size:0.85rem; cursor:pointer; color:${activeTab === 'meetings' ? 'var(--primary)' : 'var(--text-muted)'}; border-bottom:${activeTab === 'meetings' ? '2px solid var(--primary)' : '2px solid transparent'}; display:inline-flex; align-items:center; gap:0.35rem;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Client Meetings (${meetings.length})
       </button>
     </div>
 
@@ -395,7 +398,7 @@ function renderConvertedClientsTab(list) {
         <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
           <div>
             <div style="font-weight:800; font-size:0.95rem; color:#15803d;">${escapeHtml(c.business_name || c.name)}</div>
-            <div style="font-size:0.8rem; color:#475569; margin-top:2px;">Contact: ${escapeHtml(c.name)} • 📞 ${escapeHtml(c.mobile)}</div>
+            <div style="font-size:0.8rem; color:#475569; margin-top:2px;">Contact: ${escapeHtml(c.name)} • <span style="display:inline-flex; align-items:center; gap:0.2rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> ${escapeHtml(c.mobile)}</span></div>
             <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">Services: ${escapeHtml(c.services_interested || 'Digital Marketing')}</div>
           </div>
           <div style="text-align:right;">

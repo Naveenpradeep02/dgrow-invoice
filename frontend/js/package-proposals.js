@@ -643,7 +643,7 @@ function copyProposalLink(token) {
 
   if (navigator.clipboard) {
     navigator.clipboard.writeText(publicUrl).then(() => {
-      showToast('🔗 Public Proposal Link copied to clipboard!', 'success');
+      showToast('Public Proposal Link copied to clipboard!', 'success');
     }).catch(() => {
       prompt('Copy proposal link:', publicUrl);
     });
@@ -660,7 +660,7 @@ function shareProposalOnWhatsApp(token, clientName, mobile) {
   const msg = `Hi ${clientName || 'there'},
 
 Here is your customized Digital Marketing Growth Strategy Proposal from *D-GROW Marketing Agency*:
-👉 ${publicUrl}
+Proposal Link: ${publicUrl}
 
 Please review the 3 tailored package options (Starter Boost, Pro Accelerator, Growth Plan) and select your preferred plan directly on the link.
 

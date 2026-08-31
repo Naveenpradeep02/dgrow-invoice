@@ -395,10 +395,10 @@ function renderNestedEnquiryPage(enq, timeline) {
               <div>
                 <label class="form-label" style="font-size:0.75rem; margin-bottom:0.25rem;">Event Type</label>
                 <select class="form-input" id="nestedEventType" onchange="handleNestedEventTypeChange(this.value)" style="font-size:0.82rem; font-weight:700;">
-                  <option value="NEGOTIATION">🤝 Negotiation (Round)</option>
-                  <option value="CALL">📞 Phone Call Log</option>
-                  <option value="NOTE">📝 Discussion Note</option>
-                  <option value="QUOTATION">📄 Quotation Detail</option>
+                  <option value="NEGOTIATION">Negotiation (Round)</option>
+                  <option value="CALL">Phone Call Log</option>
+                  <option value="NOTE">Discussion Note</option>
+                  <option value="QUOTATION">Quotation Detail</option>
                 </select>
               </div>
               <div>

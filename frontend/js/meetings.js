@@ -99,13 +99,13 @@ function populateClientSelect(clients = [], enquiries = [], quotations = []) {
 
   // 1. Enquiries & Leads from the Enquiry List
   if (enquiries && enquiries.length > 0) {
-    html += '<optgroup label="📋 Enquiries & Leads (Inquiry List)">';
+    html += '<optgroup label="Enquiries & Leads (Inquiry List)">';
     enquiries.forEach(e => {
       const displayName = e.business_name || e.name || 'Unnamed Lead';
       const person = e.name && e.name !== e.business_name ? ` (${e.name})` : '';
       let tag = e.status ? ` • [${formatEnquiryStatusLabel(e.status)}]` : '';
       if (e.status === 'QUOTATION_SENT') {
-        tag = ' • 📄 [Quotation Sent]';
+        tag = ' • [Quotation Sent]';
       }
 
       html += `<option value="enq_${e.id}" data-type="ENQUIRY" data-enquiry-id="${e.id}" data-converted-client-id="${e.converted_client_id || ''}" data-name="${escapeAttr(displayName)}">
@@ -128,7 +128,7 @@ function populateClientSelect(clients = [], enquiries = [], quotations = []) {
     });
 
     if (uniqueQuotes.length > 0) {
-      html += '<optgroup label="📄 Quotation Sent Prospects">';
+      html += '<optgroup label="Quotation Sent Prospects">';
       uniqueQuotes.forEach(q => {
         const quoteNum = q.quote_number ? ` • Quote #${q.quote_number}` : '';
         const person = q.contact_person ? ` (${q.contact_person})` : '';
@@ -142,7 +142,7 @@ function populateClientSelect(clients = [], enquiries = [], quotations = []) {
 
   // 3. Onboarded Clients from Client Master
   if (clients && clients.length > 0) {
-    html += '<optgroup label="🏢 Onboarded Clients (Master Directory)">';
+    html += '<optgroup label="Onboarded Clients (Master Directory)">';
     clients.forEach(c => {
       const person = c.contact_person ? ` (${c.contact_person})` : '';
       html += `<option value="client_${c.id}" data-type="CLIENT" data-client-id="${c.id}" data-name="${escapeAttr(c.company_name)}">
@@ -274,7 +274,7 @@ function renderMeetingsTable(meetings = []) {
                 <td style="padding:0.85rem 1rem; vertical-align:middle;">
                   <div style="margin-bottom:3px;">
                     <span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem;">
-                      ${isOnline ? '🌐 Online Meet' : '🏢 Offline'}
+                      ${isOnline ? '<span style="display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Online Meet</span>' : '<span style="display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="18"/><line x1="15" y1="22" x2="15" y2="18"/><line x1="12" y1="22" x2="12" y2="18"/><line x1="8" y1="6" x2="8.01" y2="6"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="6" x2="16.01" y2="6"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg> Offline</span>'}
                     </span>
                   </div>
                   ${m.location ? `
@@ -344,8 +344,8 @@ function openViewMeetingModal(id) {
   document.getElementById('viewModalStatusBadge').innerHTML = statusBadgeHtml;
 
   document.getElementById('viewModalModeBadge').innerHTML = isOnline 
-    ? '<span class="badge" style="background:#f1f5f9; color:#0369a1; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem; padding:0.25rem 0.55rem;">🌐 Online Meeting</span>'
-    : '<span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem; padding:0.25rem 0.55rem;">🏢 Offline / In-Person</span>';
+    ? '<span class="badge" style="background:#f1f5f9; color:#0369a1; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem; padding:0.25rem 0.55rem; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Online Meeting</span>'
+    : '<span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem; padding:0.25rem 0.55rem; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="18"/><line x1="15" y1="22" x2="15" y2="18"/><line x1="12" y1="22" x2="12" y2="18"/><line x1="8" y1="6" x2="8.01" y2="6"/><line x1="12" y1="6" x2="12.01" y2="6"/><line x1="16" y1="6" x2="16.01" y2="6"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg> Offline / In-Person</span>';
 
   document.getElementById('viewModalTitle').textContent = m.title || 'Client Meeting';
   document.getElementById('viewModalClient').textContent = m.client_company || m.client_name || 'Client';
@@ -357,8 +357,8 @@ function openViewMeetingModal(id) {
   // Location / Link
   if (m.location) {
     document.getElementById('viewModalLocation').innerHTML = isOnline
-      ? `<a href="${escapeAttr(m.location)}" target="_blank" style="color:#0284c7; font-weight:700; text-decoration:underline;">Join Online Meeting (${escapeHtml(m.location)}) ↗</a>`
-      : `<span>📍 ${escapeHtml(m.location)}</span>`;
+      ? `<a href="${escapeAttr(m.location)}" target="_blank" style="color:#0284c7; font-weight:700; text-decoration:underline; display:inline-flex; align-items:center; gap:0.25rem;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Join Online Meeting (${escapeHtml(m.location)})</a>`
+      : `<span style="display:inline-flex; align-items:center; gap:0.3rem;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${escapeHtml(m.location)}</span>`;
   } else {
     document.getElementById('viewModalLocation').innerHTML = `<span style="color:#94a3b8; font-style:italic;">No specific venue/link specified</span>`;
   }

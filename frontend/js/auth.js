@@ -132,11 +132,7 @@ const MARKETING_ALLOWED_PAGES = [
   'meetings.html',
   'quotations.html',
   'create-proposal.html',
-  'proposal.html',
-  'clients.html',
-  'client-edit.html',
-  'client-view.html',
-  'services.html'
+  'proposal.html'
 ];
 
 function checkAuthGuard() {
@@ -174,7 +170,7 @@ function checkAuthGuard() {
     if (isMarketing) {
       const currentPage = path.split('/').pop().split('?')[0];
       if (!MARKETING_ALLOWED_PAGES.includes(currentPage)) {
-        showToast('Marketing role: Access restricted to sales and client management modules.', 'warning');
+        showToast('Field Marketer role: Access restricted to enquiries, meetings, and proposals.', 'warning');
         window.location.href = `${prefix}/admin/enquiries.html`;
         return;
       }
@@ -272,6 +268,35 @@ function populateTopNavbarUser(user) {
   if (document.getElementById('dropdownUserName')) document.getElementById('dropdownUserName').textContent = name;
   if (document.getElementById('dropdownUserEmail')) document.getElementById('dropdownUserEmail').textContent = email;
   if (document.getElementById('dropdownUserRole')) document.getElementById('dropdownUserRole').textContent = `${role} ROLE`;
+
+  // Hide admin-only menu items for Marketing role
+  const profileBody = document.querySelector('.profile-dropdown-body');
+  if (profileBody) {
+    if (isMarketingRole(role)) {
+      profileBody.style.display = 'none';
+    } else {
+      profileBody.style.display = 'block';
+    }
+  }
+
+  // Inject Change Password option for Admin into Profile Dropdown if missing
+  if (profileBody && role === 'ADMIN' && !profileBody.querySelector('[data-action="change-password"], a[href*="adminSecurityCard"]')) {
+    const prefix = getAppPathPrefix();
+    const item = document.createElement('a');
+    item.href = `${prefix}/admin/settings.html#adminSecurityCard`;
+    item.className = 'profile-menu-item';
+    item.setAttribute('data-action', 'change-password');
+    item.innerHTML = `
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Change Password
+    `;
+    const auditLink = profileBody.querySelector('a[href*="audit.html"]');
+    if (auditLink) {
+      profileBody.insertBefore(item, auditLink);
+    } else {
+      profileBody.appendChild(item);
+    }
+  }
 }
 
 function toggleNotificationDropdown(e) {

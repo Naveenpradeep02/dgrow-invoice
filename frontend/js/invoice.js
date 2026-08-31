@@ -275,6 +275,11 @@ async function loadInvoicesList(fromDateOverride = '', toDateOverride = '') {
                 Pay
               </button>
             ` : ''}
+            ${isAdmin ? `
+              <button onclick="handleDeleteInvoice(${inv.id}, '${inv.invoice_number}')" class="btn btn-secondary btn-sm" title="Delete Invoice" style="padding:0.35rem 0.55rem; display:inline-flex; align-items:center; justify-content:center; color:#ef4444; border-color:#fca5a5; background:#fff1f2;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+            ` : ''}
           </div>
         </td>
       </tr>
@@ -1239,23 +1244,45 @@ async function initInvoiceViewPage() {
     const user = getUser();
     const isAdmin = user && user.role === 'ADMIN';
 
-    if (isAdmin && res.invoice.status !== 'PAID' && res.invoice.status !== 'CANCELLED') {
+    if (isAdmin) {
       const pageActions = document.querySelector('.page-actions');
-      if (pageActions && !document.getElementById('btnViewPaymentDone')) {
-        const payBtn = document.createElement('button');
-        payBtn.id = 'btnViewPaymentDone';
-        payBtn.className = 'btn btn-primary';
-        payBtn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
-        payBtn.style.border = 'none';
-        payBtn.style.display = 'inline-flex';
-        payBtn.style.alignItems = 'center';
-        payBtn.style.gap = '0.35rem';
-        payBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Payment Done
-        `;
-        payBtn.onclick = () => handleQuickPaymentDone(res.invoice.id, res.invoice.invoice_number, res.invoice.balance_amount);
-        pageActions.insertBefore(payBtn, pageActions.firstChild);
+      if (pageActions) {
+        if (res.invoice.status !== 'PAID' && res.invoice.status !== 'CANCELLED' && !document.getElementById('btnViewPaymentDone')) {
+          const payBtn = document.createElement('button');
+          payBtn.id = 'btnViewPaymentDone';
+          payBtn.className = 'btn btn-primary';
+          payBtn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
+          payBtn.style.border = 'none';
+          payBtn.style.display = 'inline-flex';
+          payBtn.style.alignItems = 'center';
+          payBtn.style.gap = '0.35rem';
+          payBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Payment Done
+          `;
+          payBtn.onclick = () => handleQuickPaymentDone(res.invoice.id, res.invoice.invoice_number, res.invoice.balance_amount);
+          pageActions.insertBefore(payBtn, pageActions.firstChild);
+        }
+
+        if (!document.getElementById('btnViewDeleteInvoice')) {
+          const delBtn = document.createElement('button');
+          delBtn.id = 'btnViewDeleteInvoice';
+          delBtn.type = 'button';
+          delBtn.className = 'btn btn-secondary';
+          delBtn.style.color = '#ef4444';
+          delBtn.style.borderColor = '#fca5a5';
+          delBtn.style.background = '#fff1f2';
+          delBtn.style.display = 'inline-flex';
+          delBtn.style.alignItems = 'center';
+          delBtn.style.gap = '0.4rem';
+          delBtn.style.fontWeight = '700';
+          delBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            Delete Invoice
+          `;
+          delBtn.onclick = () => handleDeleteInvoiceFromView(res.invoice.id, res.invoice.invoice_number);
+          pageActions.appendChild(delBtn);
+        }
       }
     }
   } catch (err) {
@@ -1466,3 +1493,57 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
   const pdfBtn = document.getElementById('btnDownloadPDF');
   if (pdfBtn) pdfBtn.href = `${API_BASE}/invoices/${invoice.id}/pdf?token=${getToken()}`;
 }
+
+// --- DELETE INVOICE ACTIONS (ADMIN ONLY) ---
+async function handleDeleteInvoice(invoiceId, invoiceNumber) {
+  if (!confirm(`Are you sure you want to permanently delete Invoice "${invoiceNumber}"?\n\nThis will delete the invoice, its line items, and any payment records linked to it. This action cannot be reversed.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/invoices/${invoiceId}`, {
+      method: 'DELETE'
+    });
+
+    if (res && res.success) {
+      showToast(res.message || `Invoice ${invoiceNumber} deleted successfully.`, 'success');
+      if (typeof loadInvoicesList === 'function') {
+        loadInvoicesList();
+      }
+    } else {
+      showToast(res?.message || 'Failed to delete invoice.', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to delete invoice: ' + err.message, 'error');
+  }
+}
+
+async function handleDeleteInvoiceFromView(invoiceId, invoiceNumber) {
+  if (!invoiceId) {
+    const params = new URLSearchParams(window.location.search);
+    invoiceId = params.get('id');
+  }
+  const displayNum = invoiceNumber || document.querySelector('.inv-top-num-highlight')?.textContent || 'this invoice';
+
+  if (!confirm(`Are you sure you want to permanently delete ${displayNum}?\n\nThis will permanently remove the invoice from the system.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/invoices/${invoiceId}`, {
+      method: 'DELETE'
+    });
+
+    if (res && res.success) {
+      showToast(res.message || 'Invoice deleted successfully.', 'success');
+      setTimeout(() => {
+        window.location.href = 'invoices.html';
+      }, 700);
+    } else {
+      showToast(res?.message || 'Failed to delete invoice.', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to delete invoice: ' + err.message, 'error');
+  }
+}
+

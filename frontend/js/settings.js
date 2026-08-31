@@ -132,7 +132,7 @@ async function loadStaffUsers() {
       } else if (u.role === 'MARKETING') {
         roleBadgeColor = '#059669';
         roleBg = '#d1fae5';
-        accessScope = 'Enquiries, Meetings, Quotes, Clients, Services (No Delete)';
+        accessScope = 'Enquiries, Meetings, Quotes & Proposals (No Delete)';
       } else if (u.role === 'AUDITOR') {
         roleBadgeColor = '#d97706';
         roleBg = '#fef3c7';
@@ -149,30 +149,32 @@ async function loadStaffUsers() {
 
       return `
         <tr>
-          <td>
-            <div style="font-weight:700; color:var(--text-main);">${escapeHtml(u.name)}</div>
-            ${isSelf ? `<span style="font-size:0.7rem; color:#2563eb; font-weight:600;">(Current Login)</span>` : ''}
+          <td style="vertical-align:middle; white-space:nowrap;">
+            <div style="font-weight:700; color:var(--text-main); font-size:0.88rem;">${escapeHtml(u.name)}</div>
+            ${isSelf ? `<span style="font-size:0.7rem; color:#2563eb; font-weight:600; display:block; margin-top:2px;">(Current Login)</span>` : ''}
           </td>
-          <td><code style="font-size:0.85rem; color:#0f172a; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${escapeHtml(u.email)}</code></td>
-          <td style="text-align:center;">
-            <span class="badge" style="background:${roleBg}; color:${roleBadgeColor}; font-weight:700; font-size:0.75rem; padding:0.25rem 0.6rem;">
+          <td style="vertical-align:middle;">
+            <code style="font-size:0.82rem; color:#0f172a; background:#f1f5f9; padding:4px 8px; border-radius:4px; display:inline-block; max-width:270px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle;" title="${escapeAttr(u.email)}">${escapeHtml(u.email)}</code>
+          </td>
+          <td style="text-align:center; vertical-align:middle; white-space:nowrap;">
+            <span class="badge" style="background:${roleBg}; color:${roleBadgeColor}; font-weight:700; font-size:0.75rem; padding:0.25rem 0.65rem; display:inline-block;">
               ${escapeHtml(u.role)}
             </span>
           </td>
-          <td style="text-align:center; font-size:0.8rem; color:#475569;">
+          <td style="text-align:left; vertical-align:middle; font-size:0.82rem; color:#475569; line-height:1.4;">
             ${accessScope}
           </td>
-          <td style="text-align:center;">
+          <td style="text-align:center; vertical-align:middle; white-space:nowrap;">
             ${statusBadge}
           </td>
-          <td style="text-align:right;">
-            <div style="display:inline-flex; gap:0.35rem; align-items:center;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="openEditStaffModal(${u.id})" style="padding:0.25rem 0.55rem; font-size:0.78rem;">Edit</button>
+          <td style="text-align:center; vertical-align:middle; white-space:nowrap;">
+            <div style="display:inline-flex; gap:0.4rem; align-items:center; justify-content:center; white-space:nowrap;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openEditStaffModal(${u.id})" style="padding:0.3rem 0.65rem; font-size:0.78rem; font-weight:600;">Edit</button>
               ${!isPrimaryAdmin && !isSelf ? `
-                <button type="button" class="btn btn-secondary btn-sm" onclick="handleToggleStaffStatus(${u.id}, '${u.status}')" style="padding:0.25rem 0.55rem; font-size:0.78rem; color:${u.status === 'ACTIVE' ? '#b91c1c' : '#15803d'};">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="handleToggleStaffStatus(${u.id}, '${u.status}')" style="padding:0.3rem 0.65rem; font-size:0.78rem; font-weight:600; color:${u.status === 'ACTIVE' ? '#b91c1c' : '#15803d'};">
                   ${u.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
                 </button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="handleDeleteStaff(${u.id}, '${escapeHtml(u.name)}')" style="padding:0.25rem 0.55rem; font-size:0.78rem;">
+                <button type="button" class="btn btn-danger btn-sm" onclick="handleDeleteStaff(${u.id}, '${escapeHtml(u.name)}')" style="padding:0.3rem 0.65rem; font-size:0.78rem; font-weight:600;">
                   Delete
                 </button>
               ` : ''}
@@ -297,4 +299,170 @@ const originalLoadSettingsPage = loadSettingsPage;
 loadSettingsPage = async function() {
   await originalLoadSettingsPage();
   await loadStaffUsers();
+  
+  // Check if URL has hash #adminSecurityCard
+  if (window.location.hash === '#adminSecurityCard') {
+    setTimeout(focusAdminSecurityCard, 300);
+  }
 };
+
+// -------------------------------------------------------------
+// Admin Password Change & Security
+// -------------------------------------------------------------
+
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+
+  if (btnEl) {
+    if (isPassword) {
+      // Eye Off Icon
+      btnEl.innerHTML = `
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>
+      `;
+      btnEl.title = 'Hide Password';
+    } else {
+      // Eye Open Icon
+      btnEl.innerHTML = `
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      `;
+      btnEl.title = 'Show Password';
+    }
+  }
+}
+
+function validatePasswordInputs() {
+  const newPass = (document.getElementById('new_password')?.value || '').trim();
+  const confirmPass = (document.getElementById('confirm_password')?.value || '').trim();
+  
+  const newHint = document.getElementById('newPasswordHint');
+  const confirmHint = document.getElementById('confirmPasswordHint');
+
+  if (newHint) {
+    if (newPass.length > 0 && newPass.length < 6) {
+      newHint.style.color = '#ef4444';
+      newHint.textContent = `Too short (${newPass.length}/6 characters)`;
+    } else if (newPass.length >= 6) {
+      newHint.style.color = '#10b981';
+      newHint.textContent = '✓ Length requirement met';
+    } else {
+      newHint.style.color = 'var(--text-muted)';
+      newHint.textContent = 'Minimum 6 characters';
+    }
+  }
+
+  if (confirmHint) {
+    if (!confirmPass) {
+      confirmHint.style.color = 'var(--text-muted)';
+      confirmHint.textContent = 'Must match new password';
+    } else if (newPass === confirmPass) {
+      confirmHint.style.color = '#10b981';
+      confirmHint.textContent = '✓ Passwords match';
+    } else {
+      confirmHint.style.color = '#ef4444';
+      confirmHint.textContent = '✗ Passwords do not match';
+    }
+  }
+}
+
+async function handleChangeAdminPassword(e) {
+  e.preventDefault();
+
+  const oldPass = document.getElementById('old_password').value.trim();
+  const newPass = document.getElementById('new_password').value.trim();
+  const confirmPass = document.getElementById('confirm_password').value.trim();
+  const btn = document.getElementById('btnUpdatePassword');
+
+  if (!oldPass || !newPass || !confirmPass) {
+    showToast('Please enter old password, new password, and confirm password.', 'error');
+    return;
+  }
+
+  if (newPass.length < 6) {
+    showToast('New password must be at least 6 characters.', 'error');
+    document.getElementById('new_password').focus();
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    showToast('New password and Confirm password do not match.', 'error');
+    document.getElementById('confirm_password').focus();
+    return;
+  }
+
+  if (oldPass === newPass) {
+    showToast('New password must be different from current old password.', 'error');
+    document.getElementById('new_password').focus();
+    return;
+  }
+
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Updating Password...';
+  btn.disabled = true;
+
+  try {
+    const res = await apiFetch('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        oldPassword: oldPass,
+        newPassword: newPass,
+        confirmPassword: confirmPass
+      })
+    });
+
+    if (res.success) {
+      showToast(res.message || 'Password changed successfully!', 'success');
+      document.getElementById('changePasswordForm').reset();
+      validatePasswordInputs();
+      
+      // Reset input types back to password
+      ['old_password', 'new_password', 'confirm_password'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.type = 'password';
+      });
+    } else {
+      showToast(res.message || 'Failed to change password.', 'error');
+    }
+  } catch (err) {
+    showToast(err.message || 'Error changing password.', 'error');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
+function focusAdminSecurityCard(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const card = document.getElementById('adminSecurityCard');
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+    card.style.borderColor = 'var(--primary)';
+    card.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.15)';
+    setTimeout(() => {
+      card.style.boxShadow = '';
+      card.style.borderColor = '';
+    }, 2000);
+    const oldPassInput = document.getElementById('old_password');
+    if (oldPassInput) oldPassInput.focus();
+  } else {
+    // Navigate to settings page if on another page
+    const prefix = typeof getAppPathPrefix === 'function' ? getAppPathPrefix() : '';
+    window.location.href = `${prefix}/admin/settings.html#adminSecurityCard`;
+  }
+}
+
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.validatePasswordInputs = validatePasswordInputs;
+window.handleChangeAdminPassword = handleChangeAdminPassword;
+window.focusAdminSecurityCard = focusAdminSecurityCard;
+

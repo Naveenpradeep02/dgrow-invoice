@@ -567,6 +567,47 @@ async function cancelInvoice(req, res) {
   }
 }
 
+// Permanently Delete Invoice (Admin Only)
+async function deleteInvoice(req, res) {
+  try {
+    const { id } = req.params;
+    const oldInv = await db.query('SELECT * FROM invoices WHERE id = ? OR invoice_number = ?', [id, id]);
+    if (!oldInv || !oldInv[0]) {
+      return res.status(404).json({ success: false, message: 'Invoice not found.' });
+    }
+
+    const invoice = oldInv[0];
+    const invoiceId = invoice.id;
+
+    // Delete associated payments first to respect foreign keys
+    await db.query('DELETE FROM payments WHERE invoice_id = ?', [invoiceId]);
+
+    // Delete associated invoice line items
+    await db.query('DELETE FROM invoice_items WHERE invoice_id = ?', [invoiceId]);
+
+    // Delete the invoice record
+    await db.query('DELETE FROM invoices WHERE id = ?', [invoiceId]);
+
+    // Log audit trail
+    await logAudit({
+      user: req.user,
+      action: 'DELETE',
+      entity_type: 'INVOICE',
+      entity_id: String(invoiceId),
+      old_data: invoice,
+      req
+    });
+
+    res.json({
+      success: true,
+      message: `Invoice ${invoice.invoice_number} deleted successfully.`
+    });
+  } catch (err) {
+    console.error('[Delete Invoice Error]', err);
+    res.status(500).json({ success: false, message: err.message || 'Failed to delete invoice.' });
+  }
+}
+
 module.exports = {
   seedSampleInvoiceIfEmpty,
   getNextInvoiceNumber,
@@ -574,5 +615,7 @@ module.exports = {
   getInvoiceById,
   createInvoice,
   updateInvoice,
-  cancelInvoice
+  cancelInvoice,
+  deleteInvoice
 };
+

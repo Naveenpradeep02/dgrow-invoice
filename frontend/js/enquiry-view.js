@@ -181,9 +181,15 @@ function renderEnquiryHero(enq, timeline = []) {
               ${SVG_ICONS.CHECK} Convert to Client Master
             </button>
           ` : `
-            <a href="clients.html?search=${encodeURIComponent(enq.business_name)}" class="btn btn-secondary btn-sm" style="display:inline-flex; align-items:center; gap:0.35rem; color:#15803d; border-color:#86efac; background:#f0fdf4; font-weight:700;">
-              ${SVG_ICONS.USER} View Client Master #${enq.converted_client_id}
-            </a>
+            ${typeof isMarketingRole === 'function' && isMarketingRole(getUser()?.role) ? `
+              <span class="badge" style="display:inline-flex; align-items:center; gap:0.35rem; color:#15803d; background:#dcfce7; border:1px solid #86efac; font-weight:700; padding:0.35rem 0.65rem; border-radius:6px;">
+                ${SVG_ICONS.USER} Onboarded Client #${enq.converted_client_id}
+              </span>
+            ` : `
+              <a href="clients.html?search=${encodeURIComponent(enq.business_name)}" class="btn btn-secondary btn-sm" style="display:inline-flex; align-items:center; gap:0.35rem; color:#15803d; border-color:#86efac; background:#f0fdf4; font-weight:700;">
+                ${SVG_ICONS.USER} View Client Master #${enq.converted_client_id}
+              </a>
+            `}
           `}
 
           <button type="button" class="btn btn-secondary btn-sm" onclick="openEditModalFromNested()" style="display:inline-flex; align-items:center; gap:0.35rem;">
@@ -322,9 +328,11 @@ function renderNestedEnquiryPage(enq, timeline) {
               <p style="margin:0 0 0.65rem 0; font-size:0.8rem; color:#15803d;">
                 This lead has been successfully converted into an active client record in Client Master.
               </p>
-              <a href="clients.html?search=${encodeURIComponent(enq.business_name)}" class="btn btn-primary btn-sm" style="background:#15803d; border:none; padding:0.3rem 0.65rem; font-size:0.75rem;">
-                Open Client Master Profile →
-              </a>
+              ${typeof isMarketingRole === 'function' && isMarketingRole(getUser()?.role) ? '' : `
+                <a href="clients.html?search=${encodeURIComponent(enq.business_name)}" class="btn btn-primary btn-sm" style="background:#15803d; border:none; padding:0.3rem 0.65rem; font-size:0.75rem;">
+                  Open Client Master Profile →
+                </a>
+              `}
             </div>
           ` : `
             <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:8px; padding:0.85rem 1rem; color:#92400e; font-size:0.84rem;">

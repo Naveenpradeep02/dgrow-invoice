@@ -6,6 +6,7 @@ const { authorizeRoles } = require('../middleware/roleMiddleware');
 
 router.post('/login', authController.login);
 router.get('/me', authenticateToken, authController.getMe);
+router.post('/change-password', authenticateToken, authController.changePassword);
 
 // Admin-only User Management
 router.get('/users', authenticateToken, authorizeRoles('ADMIN'), authController.getAllStaffUsers);

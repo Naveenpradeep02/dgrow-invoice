@@ -70,5 +70,6 @@ router.get('/:id/pdf', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, authorizeRoles('ADMIN'), invoiceController.createInvoice);
 router.put('/:id', authenticateToken, authorizeRoles('ADMIN'), invoiceController.updateInvoice);
 router.post('/:id/cancel', authenticateToken, authorizeRoles('ADMIN'), invoiceController.cancelInvoice);
+router.delete('/:id', authenticateToken, authorizeRoles('ADMIN'), invoiceController.deleteInvoice);
 
 module.exports = router;

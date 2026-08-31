@@ -20,12 +20,19 @@ async function seedDefaultUsersIfEmpty() {
     const clientId = clients[0] ? clients[0].id : 1;
 
     // Automatically update/migrate Admin in production DB on server startup
-    const existingAdmin = await db.query("SELECT id FROM users WHERE id = 1 OR email = 'admin@dgrow.com' OR email = 'info@dgrowmarketing.com' ORDER BY id ASC LIMIT 1");
+    const existingAdmin = await db.query("SELECT id, password_hash FROM users WHERE id = 1 OR email = 'admin@dgrow.com' OR email = 'info@dgrowmarketing.com' ORDER BY id ASC LIMIT 1");
     if (existingAdmin && existingAdmin.length > 0) {
-      await db.query(
-        "UPDATE users SET name = 'D-GROW Admin', email = 'info@dgrowmarketing.com', password_hash = ?, role_id = 1, status = 'ACTIVE' WHERE id = ?",
-        [defaultAdminPass, existingAdmin[0].id]
-      );
+      if (!existingAdmin[0].password_hash) {
+        await db.query(
+          "UPDATE users SET name = 'D-GROW Admin', email = 'info@dgrowmarketing.com', password_hash = ?, role_id = 1, status = 'ACTIVE' WHERE id = ?",
+          [defaultAdminPass, existingAdmin[0].id]
+        );
+      } else {
+        await db.query(
+          "UPDATE users SET name = 'D-GROW Admin', email = 'info@dgrowmarketing.com', role_id = 1, status = 'ACTIVE' WHERE id = ?",
+          [existingAdmin[0].id]
+        );
+      }
     } else {
       await db.query(
         'INSERT INTO users (name, email, password_hash, role_id) VALUES (?, ?, ?, ?)',
@@ -267,12 +274,98 @@ async function deleteStaffUser(req, res) {
   }
 }
 
+async function changePassword(req, res) {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized request.' });
+    }
+
+    const {
+      oldPassword,
+      newPassword,
+      confirmPassword,
+      old_password,
+      new_password,
+      confirm_password
+    } = req.body;
+
+    const currentPass = (oldPassword !== undefined ? oldPassword : old_password || '').trim();
+    const newPass = (newPassword !== undefined ? newPassword : new_password || '').trim();
+    const confirmPass = (confirmPassword !== undefined ? confirmPassword : confirm_password || '').trim();
+
+    if (!currentPass || !newPass || !confirmPass) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required: Old Password, New Password, and Confirm Password.'
+      });
+    }
+
+    if (newPass.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters in length.'
+      });
+    }
+
+    if (newPass !== confirmPass) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password and Confirm password do not match.'
+      });
+    }
+
+    if (currentPass === newPass) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be different from your current old password.'
+      });
+    }
+
+    const users = await db.query('SELECT id, name, email, password_hash FROM users WHERE id = ?', [userId]);
+    const user = users[0];
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User account not found.' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPass, user.password_hash);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Incorrect old password. Please verify your current password.'
+      });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPass, 10);
+    await db.query('UPDATE users SET password_hash = ? WHERE id = ?', [newPasswordHash, userId]);
+
+    await logAudit({
+      user: req.user,
+      action: 'PASSWORD_CHANGE',
+      entity_type: 'USER',
+      entity_id: String(userId),
+      new_data: { note: 'Admin changed password successfully' },
+      req
+    });
+
+    return res.json({
+      success: true,
+      message: 'Password changed successfully! Please use your new password for future logins.'
+    });
+  } catch (err) {
+    console.error('[Change Password Error]', err);
+    return res.status(500).json({ success: false, message: err.message || 'Failed to change password.' });
+  }
+}
+
 module.exports = {
   seedDefaultUsersIfEmpty,
   login,
   getMe,
+  changePassword,
   getAllStaffUsers,
   createStaffUser,
   updateStaffUser,
   deleteStaffUser
 };
+

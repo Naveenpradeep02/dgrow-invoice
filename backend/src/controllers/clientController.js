@@ -1,24 +1,88 @@
 const db = require('../config/database');
 const { logAudit } = require('../services/auditService');
 
+// Helper to verify if a marketing user is authorized to access a specific client
+async function checkMarketerClientAccess(user, client) {
+  if (!user) return false;
+  const role = String(user.role || '').toUpperCase().trim();
+  if (role === 'ADMIN' || role === 'AUDITOR') return true;
+  if (role === 'CLIENT') return user.client_id === client.id;
+
+  if (role === 'MARKETING') {
+    // 1. Direct assignment to this user
+    if (client.assigned_to && client.assigned_to === user.id) return true;
+    // 2. Created by this marketer
+    if (client.created_by && client.created_by === user.id) return true;
+    // 3. Marketing person name match (case-insensitive substring/equality)
+    if (client.marketing_person) {
+      const cMkt = client.marketing_person.toLowerCase().trim();
+      const uName = (user.name || '').toLowerCase().trim();
+      if (cMkt === uName || cMkt.includes(uName) || uName.includes(cMkt)) return true;
+    }
+    // 4. Team assignment record
+    const teamRows = await db.query(
+      "SELECT id FROM team_assignments WHERE client_id = ? AND user_id = ? AND status = 'ACTIVE' LIMIT 1",
+      [client.id, user.id]
+    );
+    if (teamRows && teamRows.length > 0) return true;
+
+    // 5. Converted enquiry record owned/referred by this marketer
+    const enqRows = await db.query(
+      `SELECT id FROM enquiries 
+       WHERE converted_client_id = ? 
+         AND (created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?)) 
+       LIMIT 1`,
+      [client.id, user.id, user.name, `%${user.name}%`]
+    );
+    if (enqRows && enqRows.length > 0) return true;
+
+    return false;
+  }
+  return false;
+}
+
 async function getAllClients(req, res) {
   try {
-    const { search = '', status = '' } = req.query;
-    let sql = 'SELECT * FROM clients WHERE 1=1';
+    const { search = '', status = '', marketer_id = '' } = req.query;
+    let sql = `
+      SELECT c.*, u.name as assigned_marketer_name, u.email as assigned_marketer_email
+      FROM clients c
+      LEFT JOIN users u ON c.assigned_to = u.id
+      WHERE 1=1
+    `;
     const params = [];
 
+    // Marketing Profile Isolation:
+    // Marketers only see their own referral or explicitly assigned clients!
+    if (req.user && req.user.role === 'MARKETING') {
+      const userWildcard = `%${req.user.name}%`;
+      sql += ` AND (
+        c.assigned_to = ?
+        OR c.created_by = ?
+        OR LOWER(c.marketing_person) = LOWER(?)
+        OR LOWER(c.marketing_person) LIKE LOWER(?)
+        OR c.id IN (SELECT client_id FROM team_assignments WHERE user_id = ? AND status = 'ACTIVE')
+        OR c.id IN (SELECT converted_client_id FROM enquiries WHERE (created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?)) AND converted_client_id IS NOT NULL)
+      )`;
+      params.push(req.user.id, req.user.id, req.user.name, userWildcard, req.user.id, req.user.id, req.user.name, userWildcard);
+    } else if (req.user && req.user.role === 'ADMIN' && marketer_id) {
+      // Admin filtering clients by assigned marketer
+      sql += ` AND (c.assigned_to = ? OR c.id IN (SELECT client_id FROM team_assignments WHERE user_id = ? AND status = 'ACTIVE'))`;
+      params.push(marketer_id, marketer_id);
+    }
+
     if (search) {
-      sql += ' AND (company_name LIKE ? OR contact_person LIKE ? OR email LIKE ? OR gstin LIKE ?)';
+      sql += ' AND (c.company_name LIKE ? OR c.contact_person LIKE ? OR c.email LIKE ? OR c.gstin LIKE ? OR c.marketing_person LIKE ? OR u.name LIKE ?)';
       const term = `%${search}%`;
-      params.push(term, term, term, term);
+      params.push(term, term, term, term, term, term);
     }
 
     if (status) {
-      sql += ' AND status = ?';
+      sql += ' AND c.status = ?';
       params.push(status);
     }
 
-    sql += ' ORDER BY company_name ASC';
+    sql += ' ORDER BY c.company_name ASC';
 
     const clients = await db.query(sql, params);
     res.json({ success: true, clients });
@@ -30,11 +94,30 @@ async function getAllClients(req, res) {
 async function getClientById(req, res) {
   try {
     const { id } = req.params;
-    const clients = await db.query('SELECT * FROM clients WHERE id = ?', [id]);
+    const clients = await db.query(
+      `SELECT c.*, u.name as assigned_marketer_name, u.email as assigned_marketer_email
+       FROM clients c
+       LEFT JOIN users u ON c.assigned_to = u.id
+       WHERE c.id = ?`,
+      [id]
+    );
     if (!clients[0]) {
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
-    res.json({ success: true, client: clients[0] });
+
+    const client = clients[0];
+    if (req.user && req.user.role === 'MARKETING') {
+      const hasAccess = await checkMarketerClientAccess(req.user, client);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You do not have permission to view this client profile. Only your assigned/referred clients are visible.',
+          errorCode: 'FORBIDDEN_CLIENT_ACCESS'
+        });
+      }
+    }
+
+    res.json({ success: true, client });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -59,7 +142,9 @@ async function createClient(req, res) {
       onboarding_date,
       status = 'ACTIVE',
       payment_terms_type = 'SINGLE',
-      payment_schedule_json
+      payment_schedule_json,
+      assigned_to,
+      marketing_person
     } = req.body;
 
     if (!company_name || !mobile || !email || !address) {
@@ -69,10 +154,27 @@ async function createClient(req, res) {
     const presetJson = typeof preset_services_json === 'object' ? JSON.stringify(preset_services_json) : (preset_services_json || null);
     const scheduleJson = typeof payment_schedule_json === 'object' ? JSON.stringify(payment_schedule_json) : (payment_schedule_json || null);
 
+    let finalAssignedTo = null;
+    let finalMarketingPerson = null;
+    const createdBy = req.user ? req.user.id : null;
+
+    if (req.user && req.user.role === 'MARKETING') {
+      // Automatically assign to this marketer
+      finalAssignedTo = req.user.id;
+      finalMarketingPerson = req.user.name;
+    } else {
+      finalAssignedTo = assigned_to ? parseInt(assigned_to, 10) : null;
+      finalMarketingPerson = marketing_person || null;
+      if (finalAssignedTo && !finalMarketingPerson) {
+        const u = await db.query('SELECT name FROM users WHERE id = ?', [finalAssignedTo]);
+        if (u[0]) finalMarketingPerson = u[0].name;
+      }
+    }
+
     const result = await db.query(
       `INSERT INTO clients 
-      (company_name, contact_person, mobile, email, address, city, state, pincode, gstin, pan, billing_address, shipping_address, preset_services_json, onboarding_date, status, payment_terms_type, payment_schedule_json)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (company_name, contact_person, mobile, email, address, city, state, pincode, gstin, pan, billing_address, shipping_address, preset_services_json, onboarding_date, status, payment_terms_type, payment_schedule_json, assigned_to, marketing_person, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         company_name,
         contact_person || null,
@@ -90,18 +192,31 @@ async function createClient(req, res) {
         onboarding_date || null,
         status || 'ACTIVE',
         payment_terms_type || 'SINGLE',
-        scheduleJson
+        scheduleJson,
+        finalAssignedTo,
+        finalMarketingPerson,
+        createdBy
       ]
     );
 
     const newClientId = result.insertId;
+
+    // Record in team_assignments
+    if (finalAssignedTo) {
+      try {
+        await db.query(
+          "INSERT INTO team_assignments (client_id, user_id, role_type, status) VALUES (?, ?, 'MARKETING', 'ACTIVE')",
+          [newClientId, finalAssignedTo]
+        );
+      } catch (e) {}
+    }
 
     await logAudit({
       user: req.user,
       action: 'CREATE',
       entity_type: 'CLIENT',
       entity_id: newClientId,
-      new_data: req.body,
+      new_data: { ...req.body, assigned_to: finalAssignedTo, marketing_person: finalMarketingPerson },
       req
     });
 
@@ -123,6 +238,17 @@ async function updateClient(req, res) {
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
 
+    if (req.user && req.user.role === 'MARKETING') {
+      const hasAccess = await checkMarketerClientAccess(req.user, oldClient[0]);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You do not have permission to update this client.',
+          errorCode: 'FORBIDDEN_CLIENT_ACCESS'
+        });
+      }
+    }
+
     const {
       company_name,
       contact_person,
@@ -140,11 +266,31 @@ async function updateClient(req, res) {
       onboarding_date,
       status,
       payment_terms_type,
-      payment_schedule_json
+      payment_schedule_json,
+      assigned_to,
+      marketing_person
     } = req.body;
 
     const presetJson = typeof preset_services_json === 'object' ? JSON.stringify(preset_services_json) : (preset_services_json !== undefined ? preset_services_json : oldClient[0].preset_services_json);
     const scheduleJson = typeof payment_schedule_json === 'object' ? JSON.stringify(payment_schedule_json) : (payment_schedule_json !== undefined ? payment_schedule_json : oldClient[0].payment_schedule_json);
+
+    let finalAssignedTo = oldClient[0].assigned_to;
+    let finalMarketingPerson = oldClient[0].marketing_person;
+
+    // Only Admin can assign/reassign client to another marketer
+    if (req.user && req.user.role === 'ADMIN') {
+      if (assigned_to !== undefined) {
+        finalAssignedTo = assigned_to ? parseInt(assigned_to, 10) : null;
+        if (finalAssignedTo) {
+          const u = await db.query('SELECT name FROM users WHERE id = ?', [finalAssignedTo]);
+          finalMarketingPerson = u[0] ? u[0].name : (marketing_person || finalMarketingPerson);
+        } else {
+          finalMarketingPerson = marketing_person !== undefined ? marketing_person : null;
+        }
+      } else if (marketing_person !== undefined) {
+        finalMarketingPerson = marketing_person;
+      }
+    }
 
     await db.query(
       `UPDATE clients SET
@@ -164,7 +310,9 @@ async function updateClient(req, res) {
         onboarding_date = ?,
         status = ?,
         payment_terms_type = ?,
-        payment_schedule_json = ?
+        payment_schedule_json = ?,
+        assigned_to = ?,
+        marketing_person = ?
       WHERE id = ?`,
       [
         company_name || oldClient[0].company_name,
@@ -184,9 +332,24 @@ async function updateClient(req, res) {
         status || oldClient[0].status || 'ACTIVE',
         payment_terms_type || oldClient[0].payment_terms_type || 'SINGLE',
         scheduleJson,
+        finalAssignedTo,
+        finalMarketingPerson,
         id
       ]
     );
+
+    // Sync team_assignments if admin changed assignment
+    if (req.user && req.user.role === 'ADMIN' && assigned_to !== undefined) {
+      try {
+        await db.query("UPDATE team_assignments SET status = 'INACTIVE' WHERE client_id = ?", [id]);
+        if (finalAssignedTo) {
+          await db.query(
+            "INSERT INTO team_assignments (client_id, user_id, role_type, status) VALUES (?, ?, 'MARKETING', 'ACTIVE')",
+            [id, finalAssignedTo]
+          );
+        }
+      } catch (e) {}
+    }
 
     await logAudit({
       user: req.user,
@@ -194,11 +357,70 @@ async function updateClient(req, res) {
       entity_type: 'CLIENT',
       entity_id: id,
       old_data: oldClient[0],
-      new_data: req.body,
+      new_data: { ...req.body, assigned_to: finalAssignedTo, marketing_person: finalMarketingPerson },
       req
     });
 
     res.json({ success: true, message: 'Client updated successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// Admin 1-Click Client Assignment to Marketer
+async function assignClient(req, res) {
+  try {
+    const { id } = req.params;
+    const { marketer_id } = req.body;
+
+    const clients = await db.query('SELECT * FROM clients WHERE id = ?', [id]);
+    if (!clients[0]) {
+      return res.status(404).json({ success: false, message: 'Client not found.' });
+    }
+
+    let marketerName = null;
+    const mId = marketer_id ? parseInt(marketer_id, 10) : null;
+
+    if (mId) {
+      const users = await db.query('SELECT id, name FROM users WHERE id = ?', [mId]);
+      if (!users[0]) {
+        return res.status(400).json({ success: false, message: 'Selected marketer user not found.' });
+      }
+      marketerName = users[0].name;
+    }
+
+    await db.query(
+      'UPDATE clients SET assigned_to = ?, marketing_person = ? WHERE id = ?',
+      [mId, marketerName, id]
+    );
+
+    // Sync team_assignments
+    try {
+      await db.query("UPDATE team_assignments SET status = 'INACTIVE' WHERE client_id = ?", [id]);
+      if (mId) {
+        await db.query(
+          "INSERT INTO team_assignments (client_id, user_id, role_type, status) VALUES (?, ?, 'MARKETING', 'ACTIVE')",
+          [id, mId]
+        );
+      }
+    } catch (e) {}
+
+    await logAudit({
+      user: req.user,
+      action: 'UPDATE',
+      entity_type: 'CLIENT',
+      entity_id: id,
+      new_data: { assigned_to: mId, marketing_person: marketerName },
+      old_data: { assigned_to: clients[0].assigned_to, marketing_person: clients[0].marketing_person },
+      req
+    });
+
+    res.json({
+      success: true,
+      message: mId ? `Client assigned to ${marketerName} successfully.` : 'Client unassigned successfully.',
+      assigned_to: mId,
+      marketing_person: marketerName
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -210,11 +432,29 @@ async function getClient360History(req, res) {
     const { id } = req.params;
 
     // 1. Client profile
-    const clientRows = await db.query('SELECT * FROM clients WHERE id = ?', [id]);
+    const clientRows = await db.query(
+      `SELECT c.*, u.name as assigned_marketer_name, u.email as assigned_marketer_email
+       FROM clients c
+       LEFT JOIN users u ON c.assigned_to = u.id
+       WHERE c.id = ?`,
+      [id]
+    );
     if (!clientRows || !clientRows[0]) {
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
     const client = clientRows[0];
+
+    // Marketing Role Access Protection
+    if (req.user && req.user.role === 'MARKETING') {
+      const hasAccess = await checkMarketerClientAccess(req.user, client);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You do not have permission to view 360° history for this client.',
+          errorCode: 'FORBIDDEN_CLIENT_ACCESS'
+        });
+      }
+    }
 
     // 2. Invoices & line items
     let invSql = `
@@ -472,6 +712,7 @@ module.exports = {
   getClient360History,
   createClient,
   updateClient,
+  assignClient,
   addClientCallLog,
   addClientAdCampaign,
   updateClientAdCampaign

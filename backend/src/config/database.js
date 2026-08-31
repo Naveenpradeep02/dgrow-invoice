@@ -77,6 +77,35 @@ async function initDatabase() {
       await connection.query("ALTER TABLE clients MODIFY COLUMN status VARCHAR(50) DEFAULT 'ACTIVE'");
     } catch (e) {}
 
+    // Add marketer assignment & referral columns to clients
+    try {
+      await connection.query("ALTER TABLE clients ADD COLUMN assigned_to INT NULL");
+    } catch (e) {}
+
+    try {
+      await connection.query("ALTER TABLE clients ADD COLUMN marketing_person VARCHAR(150) NULL");
+    } catch (e) {}
+
+    try {
+      await connection.query("ALTER TABLE clients ADD COLUMN created_by INT NULL");
+    } catch (e) {}
+
+    // Ensure team_assignments table exists for client assignments
+    try {
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS team_assignments (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          client_id INT NOT NULL,
+          user_id INT NOT NULL,
+          role_type VARCHAR(50) DEFAULT 'MARKETING',
+          assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          status VARCHAR(20) DEFAULT 'ACTIVE',
+          INDEX idx_team_client (client_id),
+          INDEX idx_team_user (user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+    } catch (e) {}
+
     // Ensure invoice_type column accommodates GST, GST_CLIENT, and NON_GST
     try {
       await connection.query("ALTER TABLE invoices MODIFY COLUMN invoice_type VARCHAR(20) DEFAULT 'GST'");
@@ -91,6 +120,18 @@ async function initDatabase() {
     try {
       await connection.query("INSERT IGNORE INTO roles (id, name) VALUES (4, 'MARKETING')");
       await connection.query("UPDATE roles SET name = 'MARKETING' WHERE id = 4 OR name = 'SALES_EXECUTIVE'");
+    } catch (e) {}
+
+    // Ensure Sai and Angel marketing accounts exist for testing role isolation
+    try {
+      const defaultHash = '$2a$10$1MLSIew7xsIfcTTnlUsjju4.RRbrpRxKpXYRJpiiwndmCIDPaLd9q'; // Dgrow@123
+      await connection.query(
+        `INSERT IGNORE INTO users (name, email, password_hash, role_id, status)
+         VALUES 
+          ('Sai', 'sai@dgrowmarketing.com', ?, 4, 'ACTIVE'),
+          ('Angel', 'angel@dgrowmarketing.com', ?, 4, 'ACTIVE')`,
+        [defaultHash, defaultHash]
+      );
     } catch (e) {}
 
     // Ensure enquiries and enquiry_timeline tables exist

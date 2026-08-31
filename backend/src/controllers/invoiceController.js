@@ -178,6 +178,17 @@ async function getAllInvoices(req, res) {
       sql += " AND i.invoice_type = 'GST'";
     }
 
+    // Marketing role protection: Field Marketers only see invoices of their assigned/referred clients
+    if (req.user.role === 'MARKETING') {
+      const wildcard = `%${req.user.name}%`;
+      sql += ` AND i.client_id IN (
+        SELECT id FROM clients 
+        WHERE assigned_to = ? OR created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?)
+           OR id IN (SELECT client_id FROM team_assignments WHERE user_id = ? AND status = 'ACTIVE')
+      )`;
+      params.push(req.user.id, req.user.id, req.user.name, wildcard, req.user.id);
+    }
+
     if (search) {
       sql += ' AND (i.invoice_number LIKE ? OR c.company_name LIKE ?)';
       const term = `%${search}%`;

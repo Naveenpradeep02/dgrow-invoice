@@ -2,32 +2,157 @@
 
 let allMeetings = [];
 let allClients = [];
+let allEnquiries = [];
+let allQuotations = [];
 let activeStatusFilter = 'ALL';
 let searchTimeout = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadClientsList();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadClientsList();
   loadMeetings();
+  checkUrlParamsForQuickSchedule();
 });
 
-async function loadClientsList() {
-  try {
-    const res = await apiFetch('/clients');
-    if (res && res.clients) {
-      allClients = res.clients;
-      populateClientSelect(allClients);
+function checkUrlParamsForQuickSchedule() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const enquiryId = urlParams.get('enquiry_id');
+  const clientId = urlParams.get('client_id');
+  const action = urlParams.get('action');
+
+  if (action === 'new' || enquiryId || clientId) {
+    openNewMeetingModal();
+    const select = document.getElementById('meetingClientSelect');
+    if (select) {
+      if (enquiryId) {
+        const opt = select.querySelector(`option[data-type="ENQUIRY"][data-enquiry-id="${enquiryId}"]`);
+        if (opt) select.value = opt.value;
+      } else if (clientId) {
+        const opt = select.querySelector(`option[data-type="CLIENT"][data-client-id="${clientId}"]`);
+        if (opt) select.value = opt.value;
+      }
     }
-  } catch (e) {
-    console.warn('Could not load clients list for meetings select:', e);
   }
 }
 
-function populateClientSelect(clients = []) {
+async function loadClientsList() {
+  try {
+    const [clientsRes, enquiriesRes, quotationsRes] = await Promise.allSettled([
+      apiFetch('/clients'),
+      apiFetch('/enquiries'),
+      apiFetch('/proposals/quotations/list')
+    ]);
+
+    if (clientsRes.status === 'fulfilled' && clientsRes.value && clientsRes.value.clients) {
+      allClients = clientsRes.value.clients;
+    }
+
+    if (enquiriesRes.status === 'fulfilled' && enquiriesRes.value && enquiriesRes.value.enquiries) {
+      allEnquiries = enquiriesRes.value.enquiries;
+    }
+
+    if (quotationsRes.status === 'fulfilled' && quotationsRes.value && quotationsRes.value.quotations) {
+      allQuotations = quotationsRes.value.quotations;
+    }
+
+    // Merge any locally saved quotations if present
+    try {
+      const localQuotes = JSON.parse(localStorage.getItem('dgrow_quotations_v2') || '[]');
+      if (Array.isArray(localQuotes)) {
+        localQuotes.forEach(lq => {
+          const qNum = lq.quoteNumber || lq.quote_number;
+          if (qNum && !allQuotations.some(q => q.quote_number === qNum)) {
+            allQuotations.push({
+              id: lq.id || `loc_${Date.now()}`,
+              quote_number: qNum,
+              client_name: lq.clientName || lq.client_name,
+              contact_person: lq.contactPerson || lq.contact_person,
+              status: lq.status || 'SENT'
+            });
+          }
+        });
+      }
+    } catch (e) {}
+
+    populateClientSelect(allClients, allEnquiries, allQuotations);
+  } catch (e) {
+    console.warn('Could not load prospects list for meetings select:', e);
+  }
+}
+
+function formatEnquiryStatusLabel(status) {
+  switch (status) {
+    case 'NEW': return 'New Lead';
+    case 'IN_DISCUSSION': return 'In Discussion';
+    case 'QUOTATION_SENT': return 'Quotation Sent';
+    case 'NEGOTIATION': return 'Negotiation';
+    case 'ONBOARDED': return 'Onboarded';
+    case 'LOST': return 'Lost';
+    default: return status || '';
+  }
+}
+
+function populateClientSelect(clients = [], enquiries = [], quotations = []) {
   const select = document.getElementById('meetingClientSelect');
   if (!select) return;
 
-  select.innerHTML = '<option value="">Select a Client from Master...</option>' + 
-    clients.map(c => `<option value="${c.id}" data-name="${escapeAttr(c.company_name)}">${escapeAttr(c.company_name)} (${escapeAttr(c.contact_person || 'Client')})</option>`).join('');
+  let html = '<option value="">Select a Client, Enquiry, or Quotation Prospect...</option>';
+
+  // 1. Enquiries & Leads from the Enquiry List
+  if (enquiries && enquiries.length > 0) {
+    html += '<optgroup label="📋 Enquiries & Leads (Inquiry List)">';
+    enquiries.forEach(e => {
+      const displayName = e.business_name || e.name || 'Unnamed Lead';
+      const person = e.name && e.name !== e.business_name ? ` (${e.name})` : '';
+      let tag = e.status ? ` • [${formatEnquiryStatusLabel(e.status)}]` : '';
+      if (e.status === 'QUOTATION_SENT') {
+        tag = ' • 📄 [Quotation Sent]';
+      }
+
+      html += `<option value="enq_${e.id}" data-type="ENQUIRY" data-enquiry-id="${e.id}" data-converted-client-id="${e.converted_client_id || ''}" data-name="${escapeAttr(displayName)}">
+        ${escapeHtml(displayName)}${escapeHtml(person)}${tag}
+      </option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  // 2. Prospects who have received a Quotation
+  if (quotations && quotations.length > 0) {
+    const seenNames = new Set();
+    const uniqueQuotes = [];
+    quotations.forEach(q => {
+      const name = (q.client_name || '').trim();
+      if (name && !seenNames.has(name.toLowerCase())) {
+        seenNames.add(name.toLowerCase());
+        uniqueQuotes.push(q);
+      }
+    });
+
+    if (uniqueQuotes.length > 0) {
+      html += '<optgroup label="📄 Quotation Sent Prospects">';
+      uniqueQuotes.forEach(q => {
+        const quoteNum = q.quote_number ? ` • Quote #${q.quote_number}` : '';
+        const person = q.contact_person ? ` (${q.contact_person})` : '';
+        html += `<option value="quote_${q.id}" data-type="QUOTATION" data-client-id="${q.client_id || ''}" data-name="${escapeAttr(q.client_name)}">
+          ${escapeHtml(q.client_name)}${escapeHtml(person)}${escapeHtml(quoteNum)} [Quotation Sent]
+        </option>`;
+      });
+      html += '</optgroup>';
+    }
+  }
+
+  // 3. Onboarded Clients from Client Master
+  if (clients && clients.length > 0) {
+    html += '<optgroup label="🏢 Onboarded Clients (Master Directory)">';
+    clients.forEach(c => {
+      const person = c.contact_person ? ` (${c.contact_person})` : '';
+      html += `<option value="client_${c.id}" data-type="CLIENT" data-client-id="${c.id}" data-name="${escapeAttr(c.company_name)}">
+        ${escapeHtml(c.company_name)}${escapeHtml(person)}
+      </option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  select.innerHTML = html;
 }
 
 async function loadMeetings() {
@@ -114,7 +239,9 @@ function renderMeetingsTable(meetings = []) {
 
             const clientLink = m.client_id 
               ? `<a href="client-view.html?id=${m.client_id}" style="font-weight:700; color:var(--text-main, #0f172a); font-size:0.9rem; text-decoration:none;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-main)'">${escapeHtml(m.client_company || m.client_name || 'Client')}</a>`
-              : `<strong style="font-size:0.9rem; color:#0f172a;">${escapeHtml(m.client_name || 'Prospect')}</strong>`;
+              : (m.enquiry_id 
+                  ? `<a href="enquiry-view.html?id=${m.enquiry_id}" style="font-weight:700; color:#0284c7; font-size:0.9rem; text-decoration:none;" title="View Lead / Enquiry">${escapeHtml(m.client_name || 'Enquiry Lead')} <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:0.68rem; padding:0.1rem 0.35rem; border:1px solid #bfdbfe; margin-left:3px;">Lead</span></a>`
+                  : `<strong style="font-size:0.9rem; color:#0f172a;">${escapeHtml(m.client_name || 'Prospect')}</strong>`);
 
             return `
               <tr style="border-bottom:1px solid #f1f5f9; transition: background 0.15s ease;">
@@ -348,7 +475,21 @@ function editMeeting(id) {
 
   document.getElementById('meetingId').value = m.id;
   document.getElementById('meetingModalTitle').textContent = 'Edit / Reschedule Meeting';
-  document.getElementById('meetingClientSelect').value = m.client_id || '';
+
+  const select = document.getElementById('meetingClientSelect');
+  if (select) {
+    if (m.enquiry_id) {
+      const enqOpt = select.querySelector(`option[data-type="ENQUIRY"][data-enquiry-id="${m.enquiry_id}"]`) || select.querySelector(`option[value="enq_${m.enquiry_id}"]`);
+      if (enqOpt) select.value = enqOpt.value;
+    } else if (m.client_id) {
+      const clientOpt = select.querySelector(`option[data-type="CLIENT"][data-client-id="${m.client_id}"]`) || select.querySelector(`option[value="client_${m.client_id}"]`) || select.querySelector(`option[value="${m.client_id}"]`);
+      if (clientOpt) select.value = clientOpt.value;
+    } else if (m.client_name) {
+      const nameOpt = select.querySelector(`option[data-name="${escapeAttr(m.client_name)}"]`);
+      if (nameOpt) select.value = nameOpt.value;
+    }
+  }
+
   document.getElementById('meetingTitle').value = m.title;
   document.getElementById('meetingMode').value = m.meeting_mode || 'ONLINE';
   document.getElementById('meetingStatus').value = m.status || 'SCHEDULED';
@@ -367,8 +508,31 @@ async function submitMeetingForm(e) {
 
   const id = document.getElementById('meetingId').value;
   const select = document.getElementById('meetingClientSelect');
-  const client_id = select.value || null;
-  const client_name = select.options[select.selectedIndex]?.dataset.name || '';
+  const selectedOpt = select.options[select.selectedIndex];
+
+  if (!selectedOpt || !select.value) {
+    showToast('Please select a client, enquiry, or quotation prospect.', 'error');
+    return;
+  }
+
+  const optType = selectedOpt.dataset.type || 'CLIENT';
+  let client_id = null;
+  let enquiry_id = null;
+  let client_name = selectedOpt.dataset.name || selectedOpt.text.trim();
+
+  if (optType === 'CLIENT') {
+    client_id = parseInt(selectedOpt.dataset.clientId || select.value.replace('client_', ''), 10) || null;
+  } else if (optType === 'ENQUIRY') {
+    enquiry_id = parseInt(selectedOpt.dataset.enquiryId || select.value.replace('enq_', ''), 10) || null;
+    if (selectedOpt.dataset.convertedClientId) {
+      client_id = parseInt(selectedOpt.dataset.convertedClientId, 10);
+    }
+  } else if (optType === 'QUOTATION') {
+    if (selectedOpt.dataset.clientId) {
+      client_id = parseInt(selectedOpt.dataset.clientId, 10) || null;
+    }
+  }
+
   const title = document.getElementById('meetingTitle').value.trim();
   const meeting_mode = document.getElementById('meetingMode').value;
   const status = document.getElementById('meetingStatus').value;
@@ -383,20 +547,30 @@ async function submitMeetingForm(e) {
   btn.textContent = 'Saving...';
 
   try {
+    const payload = {
+      client_id,
+      client_name,
+      enquiry_id,
+      title,
+      meeting_mode,
+      status,
+      meeting_date,
+      meeting_time,
+      location,
+      agenda,
+      minutes_notes
+    };
+
     if (id) {
       await apiFetch(`/meetings/${id}`, {
         method: 'PUT',
-        body: JSON.stringify({
-          client_id, client_name, title, meeting_mode, status, meeting_date, meeting_time, location, agenda, minutes_notes
-        })
+        body: JSON.stringify(payload)
       });
       showToast('✓ Meeting updated successfully!', 'success');
     } else {
       await apiFetch('/meetings', {
         method: 'POST',
-        body: JSON.stringify({
-          client_id, client_name, title, meeting_mode, status, meeting_date, meeting_time, location, agenda, minutes_notes
-        })
+        body: JSON.stringify(payload)
       });
       showToast('✓ Meeting scheduled successfully!', 'success');
     }

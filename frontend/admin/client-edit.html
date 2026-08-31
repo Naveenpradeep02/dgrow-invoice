@@ -217,6 +217,22 @@
 
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
             <div class="form-group">
+              <label class="form-label">Assigned Field Marketer / Referral</label>
+              <select id="assigned_to" class="form-select">
+                <option value="">-- Unassigned (Direct Client) --</option>
+              </select>
+              <span class="text-muted" style="font-size:0.75rem; display:block; margin-top:0.3rem;">
+                ℹ In field marketer logins (e.g. Sai, Siva, Angel), only their assigned clients appear.
+              </span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Referral Notes / Tag</label>
+              <input type="text" id="marketing_person" class="form-input" placeholder="e.g. Referred by Sai / Walk-in / Campaign">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
+            <div class="form-group">
               <label class="form-label">GSTIN (Optional)</label>
               <input type="text" id="gstin" class="form-input" placeholder="33AAACM1234F1Z5">
             </div>

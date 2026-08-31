@@ -61,6 +61,13 @@ async function getAllEnquiries(req, res) {
       params.push(status);
     }
 
+    // Marketing Profile Isolation:
+    // Marketers only see their own assigned/referred enquiries
+    if (req.user && req.user.role === 'MARKETING') {
+      sql += ` AND (e.created_by = ? OR LOWER(e.marketing_person) = LOWER(?) OR LOWER(e.marketing_person) LIKE LOWER(?))`;
+      params.push(req.user.id, req.user.name, `%${req.user.name}%`);
+    }
+
     const { start, end } = getDateRange(time_filter, from_date, to_date);
     if (start && end) {
       sql += ` AND e.created_at >= ? AND e.created_at <= ?`;
@@ -97,6 +104,23 @@ async function getEnquiryById(req, res) {
     const enquiry = enquiries[0];
     if (!enquiry) {
       return res.status(404).json({ success: false, message: 'Enquiry not found.' });
+    }
+
+    // Access check for field marketer
+    if (req.user && req.user.role === 'MARKETING') {
+      const isOwner = (enquiry.created_by === req.user.id) ||
+        (enquiry.marketing_person && (
+          enquiry.marketing_person.toLowerCase().trim() === req.user.name.toLowerCase().trim() ||
+          enquiry.marketing_person.toLowerCase().includes(req.user.name.toLowerCase().trim()) ||
+          req.user.name.toLowerCase().includes(enquiry.marketing_person.toLowerCase().trim())
+        ));
+      if (!isOwner) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You do not have permission to view this enquiry. Only your own leads are accessible.',
+          errorCode: 'FORBIDDEN_ENQUIRY_ACCESS'
+        });
+      }
     }
 
     const timeline = await db.query(
@@ -137,6 +161,11 @@ async function createEnquiry(req, res) {
       });
     }
 
+    let finalMarketingPerson = (marketing_person || '').trim();
+    if (req.user && req.user.role === 'MARKETING' && !finalMarketingPerson) {
+      finalMarketingPerson = req.user.name;
+    }
+
     const result = await db.query(
       `INSERT INTO enquiries 
        (name, email, mobile, business_name, source, marketing_person, services_interested, estimated_budget, status, notes, created_by)
@@ -147,7 +176,7 @@ async function createEnquiry(req, res) {
         mobile.trim(),
         business_name.trim(),
         source,
-        (marketing_person || '').trim(),
+        finalMarketingPerson,
         (services_interested || '').trim(),
         parseFloat(estimated_budget || 0),
         status,
@@ -197,6 +226,22 @@ async function updateEnquiry(req, res) {
 
     if (!oldEnquiry) {
       return res.status(404).json({ success: false, message: 'Enquiry not found.' });
+    }
+
+    if (req.user && req.user.role === 'MARKETING') {
+      const isOwner = (oldEnquiry.created_by === req.user.id) ||
+        (oldEnquiry.marketing_person && (
+          oldEnquiry.marketing_person.toLowerCase().trim() === req.user.name.toLowerCase().trim() ||
+          oldEnquiry.marketing_person.toLowerCase().includes(req.user.name.toLowerCase().trim()) ||
+          req.user.name.toLowerCase().includes(oldEnquiry.marketing_person.toLowerCase().trim())
+        ));
+      if (!isOwner) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You do not have permission to modify this enquiry.',
+          errorCode: 'FORBIDDEN_ENQUIRY_ACCESS'
+        });
+      }
     }
 
     const {
@@ -334,11 +379,23 @@ async function convertToClient(req, res) {
       }
     }
 
+    // Determine assigned marketer from enquiry
+    let marketerId = enq.created_by;
+    let marketerName = enq.marketing_person;
+    if (!marketerId && marketerName) {
+      const mUser = await db.query('SELECT id FROM users WHERE LOWER(name) = LOWER(?) LIMIT 1', [marketerName.trim()]);
+      if (mUser[0]) marketerId = mUser[0].id;
+    }
+    if (!marketerId && req.user && req.user.role === 'MARKETING') {
+      marketerId = req.user.id;
+      marketerName = req.user.name;
+    }
+
     if (!clientId) {
       const cRes = await db.query(
         `INSERT INTO clients 
-         (company_name, contact_person, mobile, email, address, city, state, pincode, onboarding_date, status, payment_terms_type)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', 'SINGLE')`,
+         (company_name, contact_person, mobile, email, address, city, state, pincode, onboarding_date, status, payment_terms_type, assigned_to, marketing_person, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', 'SINGLE', ?, ?, ?)`,
         [
           enq.business_name,
           enq.name,
@@ -348,10 +405,28 @@ async function convertToClient(req, res) {
           'Chennai',
           'Tamil Nadu',
           '600001',
-          new Date().toISOString().split('T')[0]
+          new Date().toISOString().split('T')[0],
+          marketerId || null,
+          marketerName || null,
+          req.user ? req.user.id : null
         ]
       );
       clientId = cRes.insertId;
+
+      if (marketerId) {
+        try {
+          await db.query(
+            "INSERT INTO team_assignments (client_id, user_id, role_type, status) VALUES (?, ?, 'MARKETING', 'ACTIVE')",
+            [clientId, marketerId]
+          );
+        } catch (e) {}
+      }
+    } else {
+      // Update existing client with assigned marketer if unassigned
+      await db.query(
+        "UPDATE clients SET assigned_to = COALESCE(assigned_to, ?), marketing_person = COALESCE(marketing_person, ?) WHERE id = ?",
+        [marketerId || null, marketerName || null, clientId]
+      );
     }
 
     // Mark enquiry as ONBOARDED
@@ -422,6 +497,13 @@ async function getEnquiryMetrics(req, res) {
 
     let whereClause = 'WHERE 1=1';
     const params = [];
+
+    // Marketing Role Isolation for metrics
+    if (req.user && req.user.role === 'MARKETING') {
+      whereClause += ' AND (created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?))';
+      params.push(req.user.id, req.user.name, `%${req.user.name}%`);
+    }
+
     if (start && end) {
       whereClause += ' AND created_at >= ? AND created_at <= ?';
       params.push(start, end);

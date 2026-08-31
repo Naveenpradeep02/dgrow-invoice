@@ -1,13 +1,54 @@
 // Client Master Management Script
 
+let cachedMarketersList = [];
+
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('clientsTableBody')) {
-    loadClients();
+    initClientsMasterPage();
   }
   if (document.getElementById('clientForm')) {
     initClientEditPage();
   }
 });
+
+async function initClientsMasterPage() {
+  const user = typeof getUser === 'function' ? getUser() : null;
+  const isAdmin = user && user.role === 'ADMIN';
+
+  // Load marketers for Admin filtering and modal
+  if (isAdmin) {
+    await loadMarketersForAdmin();
+    const filterWrapper = document.getElementById('marketerFilterWrapper');
+    if (filterWrapper) filterWrapper.style.display = 'block';
+  }
+
+  loadClients();
+}
+
+async function loadMarketersForAdmin() {
+  try {
+    const res = await apiFetch('/auth/users');
+    if (res.success && Array.isArray(res.users)) {
+      cachedMarketersList = res.users.filter(u => u.role === 'MARKETING' || u.role_id === 4 || String(u.role).toUpperCase() === 'MARKETING');
+      
+      // Populate Table Filter Dropdown
+      const filterSelect = document.getElementById('clientMarketerFilter');
+      if (filterSelect) {
+        filterSelect.innerHTML = '<option value="">-- All Field Marketers --</option>' +
+          cachedMarketersList.map(m => `<option value="${m.id}">Marketer: ${escapeHtml(m.name)}</option>`).join('');
+      }
+
+      // Populate Modal Dropdown
+      const modalSelect = document.getElementById('modalMarketerSelect');
+      if (modalSelect) {
+        modalSelect.innerHTML = '<option value="">-- Unassigned (Direct Client) --</option>' +
+          cachedMarketersList.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.email)})</option>`).join('');
+      }
+    }
+  } catch (e) {
+    console.warn('Could not load marketers list for admin:', e);
+  }
+}
 
 function getClientStatusBadge(status = 'ACTIVE') {
   const s = String(status || 'ACTIVE').toUpperCase();
@@ -32,14 +73,22 @@ async function loadClients() {
   if (!tbody) return;
 
   const search = document.getElementById('clientSearch')?.value || '';
+  const status = document.getElementById('clientStatusFilter')?.value || '';
+  const marketerId = document.getElementById('clientMarketerFilter')?.value || '';
+  const currentUser = typeof getUser === 'function' ? getUser() : null;
+  const isAdmin = currentUser && currentUser.role === 'ADMIN';
 
   try {
-    tbody.innerHTML = renderTableLoader(7, 'Loading clients...');
-    const query = new URLSearchParams({ search }).toString();
-    const res = await apiFetch(`/clients?${query}`);
+    tbody.innerHTML = renderTableLoader(8, 'Loading clients...');
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+    if (marketerId) params.append('marketer_id', marketerId);
+
+    const res = await apiFetch(`/clients?${params.toString()}`);
 
     if (!res.clients || res.clients.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:2rem;">No clients registered.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:2rem; color:var(--text-muted);">No clients found.</td></tr>';
       return;
     }
 
@@ -58,19 +107,45 @@ async function loadClients() {
         termsLabel = `<span class="badge" style="background:#e0e7ff; color:#3730a3; font-weight:600;">Split Pay${count}</span>`;
       }
 
+      // Marketer Column Display
+      let marketerDisplay = '';
+      if (c.assigned_marketer_name) {
+        marketerDisplay = `<span class="badge" style="background:#ecfdf5; color:#065f46; font-weight:700; border:1px solid #a7f3d0; display:inline-flex; align-items:center; gap:0.25rem;">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${escapeHtml(c.assigned_marketer_name)}
+        </span>`;
+      } else if (c.marketing_person) {
+        marketerDisplay = `<span class="badge" style="background:#eff6ff; color:#1e40af; font-weight:600; border:1px solid #bfdbfe; display:inline-flex; align-items:center; gap:0.25rem;">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${escapeHtml(c.marketing_person)}
+        </span>`;
+      } else {
+        marketerDisplay = `<span class="badge" style="background:#f8fafc; color:#94a3b8; font-size:0.75rem;">Direct / Unassigned</span>`;
+      }
+
+      const assignBtnHtml = isAdmin ? `
+        <button type="button" onclick="openAssignMarketerModal(${c.id}, '${escapeAttr(c.company_name)}', ${c.assigned_to || 'null'})" class="btn btn-secondary btn-sm" title="Assign / Reassign Marketer" style="padding:0.18rem 0.45rem; font-size:0.7rem; color:#0369a1; border-color:#bae6fd; background:#f0f9ff; margin-top:3px; display:inline-flex; align-items:center; gap:2px;">
+          Assign
+        </button>
+      ` : '';
+
       return `
         <tr>
           <td>
             <a href="client-view.html?id=${c.id}" style="color:var(--text-main); font-weight:700; text-decoration:none; font-size:0.92rem;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-main)'">
-              ${c.company_name}
+              ${escapeHtml(c.company_name)}
             </a>
-            ${c.contact_person ? `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${c.contact_person}</div>` : ''}
+            ${c.contact_person ? `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${escapeHtml(c.contact_person)}</div>` : ''}
           </td>
-          <td>${c.mobile}<br><span style="font-size:0.75rem; color:var(--text-muted);">${c.email}</span></td>
+          <td>${escapeHtml(c.mobile)}<br><span style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(c.email)}</span></td>
+          <td>
+            <div>${marketerDisplay}</div>
+            ${assignBtnHtml}
+          </td>
           <td>${c.onboarding_date ? formatDate(c.onboarding_date) : '-'}</td>
           <td>${statusBadge}</td>
           <td>${termsLabel}</td>
-          <td>${c.gstin ? `<code>${c.gstin}</code>` : '<span class="text-muted">Unregistered</span>'}</td>
+          <td>${c.gstin ? `<code>${escapeHtml(c.gstin)}</code>` : '<span class="text-muted">Unregistered</span>'}</td>
           <td>
             <div style="display:flex; gap:0.35rem; align-items:center;">
               <a href="client-view.html?id=${c.id}" class="btn btn-secondary btn-sm" title="View 360° History & Financials" style="padding:0.3rem 0.55rem; display:inline-flex; align-items:center; gap:0.25rem; font-weight:700; text-decoration:none; color:var(--primary); border-color:#fecdd3; background:#fff1f2;">
@@ -87,7 +162,54 @@ async function loadClients() {
       `;
     }).join('');
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-danger" style="padding:2rem;">Error: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-danger" style="padding:2rem;">Error: ${escapeHtml(err.message)}</td></tr>`;
+  }
+}
+
+// Modal management for 1-click Assignment
+function openAssignMarketerModal(clientId, companyName, currentMarketerId) {
+  const modal = document.getElementById('assignMarketerModal');
+  if (!modal) return;
+
+  document.getElementById('modalClientId').value = clientId;
+  document.getElementById('modalClientCompanyName').textContent = companyName;
+
+  const select = document.getElementById('modalMarketerSelect');
+  if (select) {
+    select.value = currentMarketerId || '';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeAssignMarketerModal() {
+  const modal = document.getElementById('assignMarketerModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitClientAssignment() {
+  const clientId = document.getElementById('modalClientId').value;
+  const marketerId = document.getElementById('modalMarketerSelect').value;
+  const saveBtn = document.getElementById('btnSaveClientAssignment');
+
+  if (!clientId) return;
+
+  try {
+    if (saveBtn) saveBtn.disabled = true;
+    const res = await apiFetch(`/clients/${clientId}/assign`, {
+      method: 'PUT',
+      body: JSON.stringify({ marketer_id: marketerId ? parseInt(marketerId, 10) : null })
+    });
+
+    if (!res.success) throw new Error(res.message || 'Failed to update assignment.');
+
+    showToast(res.message, 'success');
+    closeAssignMarketerModal();
+    loadClients();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
   }
 }
 
@@ -246,7 +368,34 @@ function getPaymentScheduleObject() {
   }
 }
 
+async function populateEditPageMarketers(user) {
+  const select = document.getElementById('assigned_to');
+  if (!select) return;
+
+  const isMarketing = user && user.role === 'MARKETING';
+
+  try {
+    const res = await apiFetch('/auth/users');
+    if (res.success && Array.isArray(res.users)) {
+      const marketers = res.users.filter(u => u.role === 'MARKETING' || u.role_id === 4 || String(u.role).toUpperCase() === 'MARKETING');
+      
+      select.innerHTML = '<option value="">-- Unassigned (Direct Client) --</option>' +
+        marketers.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.email)})</option>`).join('');
+    }
+  } catch (e) {}
+
+  if (isMarketing) {
+    select.value = String(user.id);
+    select.disabled = true;
+    const noteInput = document.getElementById('marketing_person');
+    if (noteInput && !noteInput.value) noteInput.value = user.name;
+  }
+}
+
 async function initClientEditPage() {
+  const user = typeof getUser === 'function' ? getUser() : null;
+  await populateEditPageMarketers(user);
+
   const urlParams = new URLSearchParams(window.location.search);
   const id = urlParams.get('id');
 
@@ -290,6 +439,14 @@ async function loadClientDataForEdit(id) {
     if (document.getElementById('pincode')) document.getElementById('pincode').value = c.pincode || '';
     if (document.getElementById('gstin')) document.getElementById('gstin').value = c.gstin || '';
     if (document.getElementById('pan')) document.getElementById('pan').value = c.pan || '';
+
+    // Marketer Assignment
+    if (document.getElementById('assigned_to') && c.assigned_to) {
+      document.getElementById('assigned_to').value = String(c.assigned_to);
+    }
+    if (document.getElementById('marketing_person') && c.marketing_person) {
+      document.getElementById('marketing_person').value = c.marketing_person;
+    }
 
     // Onboarding date
     if (document.getElementById('onboarding_date')) {
@@ -523,7 +680,9 @@ async function handleSaveClient(e) {
     status: document.getElementById('status')?.value || 'ACTIVE',
     payment_terms_type: paymentTermType,
     payment_schedule_json: paymentSchedule,
-    preset_services_json: presetServices
+    preset_services_json: presetServices,
+    assigned_to: document.getElementById('assigned_to')?.value ? parseInt(document.getElementById('assigned_to').value, 10) : null,
+    marketing_person: document.getElementById('marketing_person')?.value.trim() || null
   };
 
   try {

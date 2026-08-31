@@ -14,6 +14,7 @@ router.get('/:id', authenticateToken, authorizeRoles('ADMIN', 'MARKETING', 'AUDI
 router.post('/', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), proposalController.createProposal);
 router.put('/:id', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), proposalController.updateProposal);
 router.delete('/:id', authenticateToken, authorizeRoles('ADMIN'), proposalController.deleteProposal);
+router.get('/quotations/list', authenticateToken, authorizeRoles('ADMIN', 'MARKETING', 'AUDITOR'), proposalController.getAllQuotations);
 router.post('/:id/convert-quotation', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), proposalController.convertProposalToQuotation);
 
 module.exports = router;

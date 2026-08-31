@@ -366,8 +366,27 @@ function openNewEnquiryModal() {
   const form = document.getElementById('newEnquiryForm');
   if (form) form.reset();
 
-  document.getElementById('newEnqSource').value = 'WEBSITE';
-  toggleMarketingPersonField('newEnqSource', 'newEnqRepContainer');
+  const user = typeof getUser === 'function' ? getUser() : null;
+  const isMarketing = user && user.role === 'MARKETING';
+
+  if (isMarketing) {
+    document.getElementById('newEnqSource').value = 'MARKETING_PERSON';
+    toggleMarketingPersonField('newEnqSource', 'newEnqRepContainer');
+    const mktInput = document.getElementById('newEnqMarketingPerson');
+    if (mktInput) {
+      mktInput.value = user.name || '';
+      mktInput.readOnly = true;
+      mktInput.style.background = '#f1f5f9';
+    }
+  } else {
+    document.getElementById('newEnqSource').value = 'WEBSITE';
+    toggleMarketingPersonField('newEnqSource', 'newEnqRepContainer');
+    const mktInput = document.getElementById('newEnqMarketingPerson');
+    if (mktInput) {
+      mktInput.readOnly = false;
+      mktInput.style.background = '';
+    }
+  }
   document.getElementById('newEnquiryModal').classList.add('active');
 }
 

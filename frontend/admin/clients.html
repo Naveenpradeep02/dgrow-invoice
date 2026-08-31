@@ -156,7 +156,25 @@
       </div>
 
       <div class="card" style="padding:1rem; margin-bottom:1.5rem;">
-        <input type="text" id="clientSearch" class="form-input" placeholder="Search client company, contact, or GSTIN..." oninput="loadClients()">
+        <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+          <div style="flex:1; min-width:240px;">
+            <input type="text" id="clientSearch" class="form-input" placeholder="Search client company, contact, GSTIN, or marketer..." oninput="loadClients()">
+          </div>
+          <div id="marketerFilterWrapper" style="display:none; min-width:220px;">
+            <select id="clientMarketerFilter" class="form-select" onchange="loadClients()">
+              <option value="">-- All Field Marketers --</option>
+            </select>
+          </div>
+          <div style="min-width:160px;">
+            <select id="clientStatusFilter" class="form-select" onchange="loadClients()">
+              <option value="">All Statuses</option>
+              <option value="ACTIVE" selected>Active</option>
+              <option value="ONBOARDING">Onboarding</option>
+              <option value="LEAD">Lead</option>
+              <option value="INACTIVE">Inactive</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div class="card" style="padding:0;">
@@ -166,6 +184,7 @@
               <tr>
                 <th>Company Name</th>
                 <th>Contact Info</th>
+                <th>Assigned Marketer</th>
                 <th>Onboard Date</th>
                 <th>Status</th>
                 <th>Payment Terms</th>
@@ -174,9 +193,35 @@
               </tr>
             </thead>
             <tbody id="clientsTableBody">
-              <tr><td colspan="7" class="text-center">Loading clients...</td></tr>
+              <tr><td colspan="8" class="text-center">Loading clients...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Quick Assign Marketer Modal for Admin -->
+      <div id="assignMarketerModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(3px);">
+        <div class="modal-card" style="background:#ffffff; border-radius:12px; max-width:460px; width:90%; padding:1.5rem; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #f1f5f9; padding-bottom:0.75rem;">
+            <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#0f172a;">Assign Client to Marketer</h3>
+            <button type="button" onclick="closeAssignMarketerModal()" style="background:none; border:none; font-size:1.25rem; color:#94a3b8; cursor:pointer;">&times;</button>
+          </div>
+          <p style="font-size:0.875rem; color:#64748b; margin-bottom:1.25rem;">
+            Assign <strong id="modalClientCompanyName" style="color:#0f172a;"></strong> to a field marketer profile (Sai, Siva, Angel, etc.). Only the assigned marketer will see this client upon login.
+          </p>
+          <input type="hidden" id="modalClientId">
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label" style="font-weight:600; font-size:0.85rem;">Select Field Marketer</label>
+            <select id="modalMarketerSelect" class="form-select" style="width:100%;">
+              <option value="">-- Unassigned (Direct Client) --</option>
+            </select>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="closeAssignMarketerModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnSaveClientAssignment" onclick="submitClientAssignment()" style="background:var(--primary, #e11d48); font-weight:700;">
+              Save Assignment
+            </button>
+          </div>
         </div>
       </div>
     </main>

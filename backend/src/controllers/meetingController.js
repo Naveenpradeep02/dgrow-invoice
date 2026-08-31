@@ -44,6 +44,30 @@ async function getAllMeetings(req, res) {
       params.push(term, term, term, term);
     }
 
+    // Marketing Profile Isolation
+    let countWhere = 'WHERE 1=1';
+    const countParams = [];
+    if (req.user && req.user.role === 'MARKETING') {
+      const wildcard = `%${req.user.name}%`;
+      const marketerScope = ` AND (
+        m.created_by = ?
+        OR m.client_id IN (
+          SELECT id FROM clients 
+          WHERE assigned_to = ? OR created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?)
+             OR id IN (SELECT client_id FROM team_assignments WHERE user_id = ? AND status = 'ACTIVE')
+        )
+        OR m.enquiry_id IN (
+          SELECT id FROM enquiries 
+          WHERE created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?)
+        )
+      )`;
+      sql += marketerScope;
+      params.push(req.user.id, req.user.id, req.user.id, req.user.name, wildcard, req.user.id, req.user.id, req.user.name, wildcard);
+
+      countWhere += marketerScope;
+      countParams.push(req.user.id, req.user.id, req.user.id, req.user.name, wildcard, req.user.id, req.user.id, req.user.name, wildcard);
+    }
+
     sql += ' ORDER BY m.meeting_date DESC, m.meeting_time ASC';
 
     const meetings = await db.query(sql, params);
@@ -55,8 +79,9 @@ async function getAllMeetings(req, res) {
         SUM(CASE WHEN status = 'SCHEDULED' THEN 1 ELSE 0 END) as scheduled_count,
         SUM(CASE WHEN status = 'DONE' THEN 1 ELSE 0 END) as completed_count,
         SUM(CASE WHEN status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelled_count
-      FROM meetings
-    `);
+      FROM meetings m
+      ${countWhere}
+    `, countParams);
 
     res.json({
       success: true,
@@ -168,6 +193,7 @@ async function updateMeeting(req, res) {
       title,
       client_id,
       client_name,
+      enquiry_id,
       meeting_mode,
       meeting_date,
       meeting_time,
@@ -188,8 +214,9 @@ async function updateMeeting(req, res) {
     await db.query(`
       UPDATE meetings SET
         title = COALESCE(?, title),
-        client_id = COALESCE(?, client_id),
+        client_id = ?,
         client_name = COALESCE(?, client_name),
+        enquiry_id = ?,
         meeting_mode = COALESCE(?, meeting_mode),
         meeting_date = COALESCE(?, meeting_date),
         meeting_time = COALESCE(?, meeting_time),
@@ -200,8 +227,9 @@ async function updateMeeting(req, res) {
       WHERE id = ?
     `, [
       title || null,
-      client_id || null,
+      client_id !== undefined ? client_id : null,
       resolvedClientName || null,
+      enquiry_id !== undefined ? enquiry_id : null,
       meeting_mode || null,
       meeting_date || null,
       meeting_time || null,

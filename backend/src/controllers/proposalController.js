@@ -44,6 +44,20 @@ async function getAllProposals(req, res) {
       params.push(status);
     }
 
+    // Marketing profile isolation
+    if (req.user && req.user.role === 'MARKETING') {
+      const wildcard = `%${req.user.name}%`;
+      sql += ` AND (
+        p.created_by = ?
+        OR p.client_id IN (
+          SELECT id FROM clients 
+          WHERE assigned_to = ? OR created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?)
+             OR id IN (SELECT client_id FROM team_assignments WHERE user_id = ? AND status = 'ACTIVE')
+        )
+      )`;
+      params.push(req.user.id, req.user.id, req.user.id, req.user.name, wildcard, req.user.id);
+    }
+
     sql += ` ORDER BY p.id DESC`;
 
     const proposals = await db.query(sql, params);
@@ -607,6 +621,30 @@ async function convertProposalToQuotation(req, res) {
   }
 }
 
+async function getAllQuotations(req, res) {
+  try {
+    let sql = 'SELECT * FROM quotations WHERE 1=1';
+    const params = [];
+    if (req.user && req.user.role === 'MARKETING') {
+      const wildcard = `%${req.user.name}%`;
+      sql += ` AND (
+        created_by = ? 
+        OR client_id IN (
+          SELECT id FROM clients 
+          WHERE assigned_to = ? OR created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?)
+             OR id IN (SELECT client_id FROM team_assignments WHERE user_id = ? AND status = 'ACTIVE')
+        )
+      )`;
+      params.push(req.user.id, req.user.id, req.user.id, req.user.name, wildcard, req.user.id);
+    }
+    sql += ' ORDER BY id DESC';
+    const quotations = await db.query(sql, params);
+    res.json({ success: true, quotations });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
 module.exports = {
   getAllProposals,
   getProposalById,
@@ -615,5 +653,6 @@ module.exports = {
   deleteProposal,
   getPublicProposal,
   confirmPublicPackage,
-  convertProposalToQuotation
+  convertProposalToQuotation,
+  getAllQuotations
 };

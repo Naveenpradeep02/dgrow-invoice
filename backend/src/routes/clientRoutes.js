@@ -9,6 +9,7 @@ router.get('/:id', authenticateToken, authorizeRoles('ADMIN', 'AUDITOR', 'CLIENT
 router.get('/:id/360-history', authenticateToken, authorizeRoles('ADMIN', 'AUDITOR', 'CLIENT', 'MARKETING'), clientController.getClient360History);
 router.post('/', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), clientController.createClient);
 router.put('/:id', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), clientController.updateClient);
+router.put('/:id/assign', authenticateToken, authorizeRoles('ADMIN'), clientController.assignClient);
 router.post('/:id/call-log', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), clientController.addClientCallLog);
 router.post('/:id/ads', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), clientController.addClientAdCampaign);
 router.put('/:id/ads/:adId', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), clientController.updateClientAdCampaign);

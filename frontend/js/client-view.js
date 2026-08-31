@@ -109,6 +109,13 @@ function renderClient360View(data) {
               <span class="hero-meta-item"><a href="mailto:${escapeAttr(client.email)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:3px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> ${escapeAttr(client.email)}</a></span>
               ${client.gstin ? `<span>&bull;</span><span class="hero-meta-item">GSTIN: <code>${escapeAttr(client.gstin)}</code></span>` : ''}
               ${client.onboarding_date ? `<span>&bull;</span><span class="hero-meta-item"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Onboarded ${formatDate(client.onboarding_date)}</span>` : ''}
+              <span>&bull;</span>
+              <span class="hero-meta-item" style="color:#0f172a; font-weight:700;">
+                Field Marketer: 
+                <span class="badge" style="background:#ecfdf5; color:#065f46; font-weight:700; border:1px solid #a7f3d0; margin-left:4px;">
+                  👤 ${escapeAttr(client.assigned_marketer_name || client.marketing_person || 'Direct / Unassigned')}
+                </span>
+              </span>
             </div>
           </div>
         </div>
@@ -137,6 +144,11 @@ function renderClient360View(data) {
         <a href="quotations.html" class="btn btn-secondary btn-sm" style="color:#c2410c; border-color:#fed7aa; background:#fff7ed; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem;">
           ${SVG.QUOTE} + Issue Quotation
         </a>
+        ${(typeof getUser === 'function' && getUser() && getUser().role === 'ADMIN') ? `
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openAssignMarketerModalFromView()" style="color:#0369a1; border-color:#bae6fd; background:#f0f9ff; font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;">
+            👤 Reassign Marketer
+          </button>
+        ` : ''}
       </div>
     </div>
 
@@ -964,4 +976,93 @@ function getInitials(name) {
   const parts = name.trim().split(' ').filter(Boolean);
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+// 1-Click Marketer Assignment from 360 View
+async function openAssignMarketerModalFromView() {
+  if (!clientData || !clientData.client) return;
+  const client = clientData.client;
+
+  let modal = document.getElementById('assignMarketerModalView');
+  if (!modal) {
+    // Dynamically insert modal
+    const div = document.createElement('div');
+    div.id = 'assignMarketerModalView';
+    div.className = 'modal-overlay';
+    div.style.cssText = 'display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(3px);';
+    div.innerHTML = `
+      <div class="modal-card" style="background:#ffffff; border-radius:12px; max-width:460px; width:90%; padding:1.5rem; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #f1f5f9; padding-bottom:0.75rem;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#0f172a;">Assign Client to Marketer</h3>
+          <button type="button" onclick="closeAssignMarketerModalFromView()" style="background:none; border:none; font-size:1.25rem; color:#94a3b8; cursor:pointer;">&times;</button>
+        </div>
+        <p style="font-size:0.875rem; color:#64748b; margin-bottom:1.25rem;">
+          Assign <strong id="viewModalCompanyName" style="color:#0f172a;"></strong> to a field marketer profile (Sai, Siva, Angel, etc.). Only the assigned marketer will see this client upon login.
+        </p>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-label" style="font-weight:600; font-size:0.85rem;">Select Field Marketer</label>
+          <select id="viewModalMarketerSelect" class="form-select" style="width:100%;">
+            <option value="">-- Unassigned (Direct Client) --</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeAssignMarketerModalFromView()">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnSaveAssignmentView" onclick="submitMarketerAssignmentFromView()" style="background:var(--primary, #e11d48); font-weight:700;">
+            Save Assignment
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(div);
+    modal = div;
+  }
+
+  document.getElementById('viewModalCompanyName').textContent = client.company_name;
+
+  try {
+    const res = await apiFetch('/auth/users');
+    if (res.success && Array.isArray(res.users)) {
+      const marketers = res.users.filter(u => u.role === 'MARKETING' || u.role_id === 4 || String(u.role).toUpperCase() === 'MARKETING');
+      const select = document.getElementById('viewModalMarketerSelect');
+      if (select) {
+        select.innerHTML = '<option value="">-- Unassigned (Direct Client) --</option>' +
+          marketers.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.email)})</option>`).join('');
+        select.value = client.assigned_to || '';
+      }
+    }
+  } catch (e) {
+    console.warn('Error loading marketers:', e);
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeAssignMarketerModalFromView() {
+  const modal = document.getElementById('assignMarketerModalView');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitMarketerAssignmentFromView() {
+  if (!clientData || !clientData.client) return;
+  const clientId = clientData.client.id;
+  const marketerId = document.getElementById('viewModalMarketerSelect').value;
+  const btn = document.getElementById('btnSaveAssignmentView');
+
+  try {
+    if (btn) btn.disabled = true;
+    const res = await apiFetch(`/clients/${clientId}/assign`, {
+      method: 'PUT',
+      body: JSON.stringify({ marketer_id: marketerId ? parseInt(marketerId, 10) : null })
+    });
+
+    if (!res.success) throw new Error(res.message || 'Failed to update assignment.');
+
+    showToast(res.message, 'success');
+    closeAssignMarketerModalFromView();
+    loadClient360Page(clientId);
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }

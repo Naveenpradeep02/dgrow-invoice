@@ -241,6 +241,47 @@ async function initDatabase() {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
 
+      // Ensure deleted_invoices history table exists
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS deleted_invoices (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          original_invoice_id INT NULL,
+          invoice_number VARCHAR(50) NOT NULL,
+          invoice_type VARCHAR(20) DEFAULT 'GST',
+          client_id INT NULL,
+          client_name VARCHAR(255) NULL,
+          client_snapshot_json LONGTEXT NULL,
+          place_of_supply VARCHAR(100) NULL,
+          invoice_date DATE NULL,
+          due_date DATE NULL,
+          payment_terms_text VARCHAR(255) NULL,
+          subtotal DECIMAL(12,2) DEFAULT 0.00,
+          discount DECIMAL(12,2) DEFAULT 0.00,
+          taxable_amount DECIMAL(12,2) DEFAULT 0.00,
+          cgst_rate DECIMAL(5,2) DEFAULT 0.00,
+          cgst_amount DECIMAL(12,2) DEFAULT 0.00,
+          sgst_rate DECIMAL(5,2) DEFAULT 0.00,
+          sgst_amount DECIMAL(12,2) DEFAULT 0.00,
+          igst_rate DECIMAL(5,2) DEFAULT 0.00,
+          igst_amount DECIMAL(12,2) DEFAULT 0.00,
+          round_off DECIMAL(12,2) DEFAULT 0.00,
+          grand_total DECIMAL(12,2) DEFAULT 0.00,
+          paid_amount DECIMAL(12,2) DEFAULT 0.00,
+          amount_in_words VARCHAR(255) NULL,
+          status_at_deletion VARCHAR(50) NULL,
+          notes TEXT NULL,
+          items_json LONGTEXT NULL,
+          payments_json LONGTEXT NULL,
+          invoice_snapshot_json LONGTEXT NULL,
+          deleted_by INT NULL,
+          deleted_by_name VARCHAR(150) NULL,
+          deletion_reason VARCHAR(255) NULL,
+          deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_del_inv_num (invoice_number),
+          INDEX idx_del_date (deleted_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+
       // Tables initialized without dummy seed data
     } catch (e) {
       console.error('[DB Migration Warning]', e.message);

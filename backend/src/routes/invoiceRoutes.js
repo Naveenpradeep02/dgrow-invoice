@@ -6,6 +6,13 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
 
 router.get('/next-number', authenticateToken, authorizeRoles('ADMIN'), invoiceController.getNextInvoiceNumber);
+
+// Deleted Invoices History Routes (Admin Only - defined before /:id)
+router.get('/deleted-history', authenticateToken, authorizeRoles('ADMIN'), invoiceController.getDeletedInvoices);
+router.get('/deleted-history/:id', authenticateToken, authorizeRoles('ADMIN'), invoiceController.getDeletedInvoiceById);
+router.post('/deleted-history/:id/restore', authenticateToken, authorizeRoles('ADMIN'), invoiceController.restoreInvoice);
+router.delete('/deleted-history/:id', authenticateToken, authorizeRoles('ADMIN'), invoiceController.purgeDeletedInvoice);
+
 router.get('/', authenticateToken, invoiceController.getAllInvoices);
 router.get('/:id', authenticateToken, invoiceController.getInvoiceById);
 

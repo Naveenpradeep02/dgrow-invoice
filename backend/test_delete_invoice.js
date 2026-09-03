@@ -8,7 +8,7 @@ async function makeRequest({ path, method = 'GET', body = null, headers = {} }) 
     const dataString = body ? JSON.stringify(body) : null;
     const options = {
       hostname: 'localhost',
-      port: 5000,
+      port: process.env.PORT || 8000,
       path: '/api' + path,
       method,
       headers: {

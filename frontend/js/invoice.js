@@ -4,6 +4,80 @@ let currentItems = [];
 let availableClients = [];
 let availableServices = [];
 
+function getDefaultSubDetailsForService(serviceName) {
+  const s = (serviceName || '').toLowerCase();
+  if (s.includes('performance') || s.includes('ad') || s.includes('campaign') || s.includes('meta') || s.includes('google') || s.includes('ppc')) {
+    return [
+      'Meta & Google Ads Campaign Setup & Management',
+      'Target Audience Research & Strategic Retargeting',
+      'Ad Creative Copywriting & High-CTR Optimization',
+      'Conversion Tracking & Weekly ROAS Performance Report'
+    ];
+  }
+  if (s.includes('seo') || s.includes('search engine')) {
+    return [
+      'Technical SEO Audit & On-Page Keyword Optimization',
+      'High-Authority Backlink Building & Content Strategy',
+      'Google Search Console & Organic Visibility Tracking',
+      'Monthly Keyword Rankings & Organic Traffic Report'
+    ];
+  }
+  if (s.includes('social') || s.includes('smm')) {
+    return [
+      'Monthly Social Media Content Calendar & Scheduling',
+      'Creative Graphic Posts & Video Reels Production',
+      'Community Engagement & Audience Interaction',
+      'Monthly Reach, Impressions & Follower Growth Report'
+    ];
+  }
+  if (s.includes('web') || s.includes('site') || s.includes('dev') || s.includes('ui') || s.includes('app')) {
+    return [
+      'Responsive UI/UX Web Design & Front-end Development',
+      'Fast Page Load Optimization & Mobile Compatibility',
+      'Lead Generation Forms & WhatsApp API Integration',
+      'SSL Security, Domain Mapping & Maintenance'
+    ];
+  }
+  if (s.includes('whatsapp')) {
+    return [
+      'Official WhatsApp Cloud API Integration & Setup',
+      'Custom Automated Chatbot & Keyword Triggers',
+      'Broadcast Campaign Management & Message Templates',
+      'Delivery, Read-Rate & Conversion Tracking'
+    ];
+  }
+  if (s.includes('email')) {
+    return [
+      'Custom Newsletter & Email Campaign Template Design',
+      'Audience Segmentation & Spam Score Optimization',
+      'Automated Lead Nurturing & Follow-up Workflows',
+      'Open Rate, Click-Through & Conversion Analytics'
+    ];
+  }
+  if (s.includes('brand') || s.includes('logo') || s.includes('design')) {
+    return [
+      'Unique High-Resolution Logo Concepts (Vector Formats)',
+      'Typography, Color Palette & Brand Style Guide',
+      'Stationery & Social Media Brand Assets Mockups',
+      'Full Commercial Copyright & Master Source Files'
+    ];
+  }
+  if (s.includes('credit') || s.includes('tool') || s.includes('software') || s.includes('buying')) {
+    return [
+      'Enterprise Platform License & Account Activation',
+      'API Key Generation & Secure Webhook Integration',
+      'Usage Quota Allocation & Deliverability Monitoring',
+      'Priority Technical Support & Maintenance'
+    ];
+  }
+  return [
+    'Digital Marketing Strategy & Execution',
+    'Campaign Deliverables Management & Quality Assurance',
+    'Ongoing Optimization & Account Management Support',
+    'Monthly Performance & Progress Review Report'
+  ];
+}
+
 function parseItemDetails(item) {
   if (!item) return { serviceName: 'Service', subDetails: [], hsnSac: '998311', amount: 0 };
   const rawDesc = (item.description || item.name || '').trim();
@@ -33,6 +107,11 @@ function parseItemDetails(item) {
   }
 
   const cleanSubDetails = subDetails.map(d => String(d).replace(/^[•\-\*\+]\s*/, '').trim()).filter(d => d.length > 0);
+
+  // Auto-fill sub-details if empty so Details column is always professional and complete
+  if (cleanSubDetails.length === 0) {
+    cleanSubDetails.push(...getDefaultSubDetailsForService(serviceName));
+  }
 
   const rawHsn = item.hsn_sac || item.hsnSac || item.hsn;
   const validHsn = (rawHsn && String(rawHsn) !== '0' && String(rawHsn) !== 'null' && String(rawHsn) !== 'undefined') ? String(rawHsn).trim() : '998311';
@@ -243,6 +322,10 @@ async function loadInvoicesList(fromDateOverride = '', toDateOverride = '') {
     if (document.getElementById('summaryCount')) {
       document.getElementById('summaryCount').textContent = `${res.invoices.length} Invoices (${validCount} Active)`;
     }
+    if (document.getElementById('badgeActiveCount')) {
+      document.getElementById('badgeActiveCount').textContent = res.invoices.length;
+    }
+    updateDeletedBadgeCount();
 
     const user = getUser();
     const isAdmin = user && user.role === 'ADMIN';
@@ -1557,9 +1640,480 @@ function renderA4InvoiceSheet({ invoice, items, company, terms }) {
   if (pdfBtn) pdfBtn.href = `${API_BASE}/invoices/${invoice.id}/pdf?token=${getToken()}`;
 }
 
+// --- DELETE HISTORY & ARCHIVE ACTIONS (ADMIN ONLY) ---
+let currentInvoiceTab = 'active';
+let cachedDeletedInvoices = [];
+
+async function updateDeletedBadgeCount() {
+  const user = getUser();
+  if (!user || user.role !== 'ADMIN') return;
+  const badge = document.getElementById('badgeDeletedCount');
+  if (!badge) return;
+
+  try {
+    const res = await apiFetch('/invoices/deleted-history');
+    if (res && res.success && res.deleted_invoices) {
+      badge.textContent = res.deleted_invoices.length;
+    }
+  } catch (e) {}
+}
+
+function switchInvoiceTab(tab) {
+  currentInvoiceTab = tab;
+  const activeSection = document.getElementById('activeInvoicesSection');
+  const deletedSection = document.getElementById('deletedHistorySection');
+  const tabActiveBtn = document.getElementById('tabActiveInvoices');
+  const tabDeletedBtn = document.getElementById('tabDeletedHistory');
+  const pageHeading = document.getElementById('pageHeading');
+  const pageSubHeading = document.getElementById('pageSubHeading');
+  const btnCreate = document.getElementById('btnCreateInvoice');
+
+  if (tab === 'active') {
+    if (activeSection) activeSection.style.display = 'block';
+    if (deletedSection) deletedSection.style.display = 'none';
+    if (btnCreate) btnCreate.style.display = 'inline-flex';
+
+    if (pageHeading) pageHeading.textContent = 'Invoice Register';
+    if (pageSubHeading) pageSubHeading.textContent = 'Manage and issue GST & Non-GST financial invoices.';
+
+    if (tabActiveBtn) {
+      tabActiveBtn.style.background = '#ffffff';
+      tabActiveBtn.style.color = 'var(--text-main)';
+      tabActiveBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+    }
+    if (tabDeletedBtn) {
+      tabDeletedBtn.style.background = 'transparent';
+      tabDeletedBtn.style.color = '#64748b';
+      tabDeletedBtn.style.boxShadow = 'none';
+    }
+    loadInvoicesList();
+  } else {
+    if (activeSection) activeSection.style.display = 'none';
+    if (deletedSection) deletedSection.style.display = 'block';
+    if (btnCreate) btnCreate.style.display = 'none';
+
+    if (pageHeading) pageHeading.textContent = 'Delete History';
+    if (pageSubHeading) pageSubHeading.textContent = 'Archived record of deleted invoices. You can inspect details, restore, or permanently purge them.';
+
+    if (tabActiveBtn) {
+      tabActiveBtn.style.background = 'transparent';
+      tabActiveBtn.style.color = '#64748b';
+      tabActiveBtn.style.boxShadow = 'none';
+    }
+    if (tabDeletedBtn) {
+      tabDeletedBtn.style.background = '#ffffff';
+      tabDeletedBtn.style.color = 'var(--text-main)';
+      tabDeletedBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+    }
+    loadDeletedInvoices();
+  }
+}
+
+async function loadDeletedInvoices() {
+  const tbody = document.getElementById('deletedTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:2rem;">Loading delete history...</td></tr>`;
+
+  try {
+    const searchVal = document.getElementById('searchDeletedInput')?.value?.trim() || '';
+    const queryStr = searchVal ? `?search=${encodeURIComponent(searchVal)}` : '';
+    const res = await apiFetch(`/invoices/deleted-history${queryStr}`);
+
+    if (!res || !res.success) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger" style="padding:2rem;">Failed to load delete history.</td></tr>`;
+      return;
+    }
+
+    cachedDeletedInvoices = res.deleted_invoices || [];
+    const badge = document.getElementById('badgeDeletedCount');
+    if (badge) badge.textContent = cachedDeletedInvoices.length;
+
+    if (cachedDeletedInvoices.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center" style="padding:3rem 1rem; color:#64748b;">
+            <div style="font-size:1.5rem; margin-bottom:0.5rem; color:#94a3b8;">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </div>
+            <strong>No Invoices in Delete History</strong>
+            <p style="margin:0.25rem 0 0 0; font-size:0.85rem; color:#94a3b8;">Invoices deleted from the register will appear here for audit and restoration.</p>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = cachedDeletedInvoices.map(inv => {
+      const delDate = inv.deleted_at ? new Date(inv.deleted_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+      return `
+        <tr>
+          <td><strong>${inv.invoice_number}</strong></td>
+          <td>
+            <div style="font-size:0.85rem; color:#334155;">${delDate}</div>
+            <div style="font-size:0.72rem; color:#94a3b8;">${inv.deletion_reason || 'Deleted by admin'}</div>
+          </td>
+          <td>${inv.client_name || 'N/A'}</td>
+          <td><span class="badge badge-${(inv.invoice_type || 'GST').toLowerCase()}">${inv.invoice_type || 'GST'}</span></td>
+          <td><strong>${formatINR(inv.grand_total)}</strong></td>
+          <td><span class="badge badge-${(inv.status_at_deletion || 'ISSUED').toLowerCase()}">${(inv.status_at_deletion || 'ISSUED').replace('_', ' ')}</span></td>
+          <td>
+            <div style="font-size:0.85rem; color:#0284c7; font-weight:600;">${inv.deleted_by_name || 'Admin'}</div>
+          </td>
+          <td style="text-align:center;">
+            <div style="display:inline-flex; gap:0.35rem; align-items:center; justify-content:center;">
+              <button onclick="viewDeletedInvoiceDetails(${inv.id})" class="btn btn-secondary btn-sm" title="View Archived Details" style="padding:0.35rem 0.6rem; display:inline-flex; align-items:center; gap:0.25rem;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View
+              </button>
+              <button onclick="handleRestoreInvoice(${inv.id}, '${inv.invoice_number}')" class="btn btn-primary btn-sm" style="background:#16a34a; border:none; padding:0.35rem 0.65rem; display:inline-flex; align-items:center; gap:0.3rem;" title="Restore to Active Invoices">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                Restore
+              </button>
+              <button onclick="handlePurgeInvoice(${inv.id}, '${inv.invoice_number}')" class="btn btn-secondary btn-sm" title="Permanently Purge" style="padding:0.35rem 0.55rem; color:#ef4444; border-color:#fca5a5; background:#fff1f2;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-danger" style="padding:2rem;">Error loading delete history: ${err.message}</td></tr>`;
+  }
+}
+
+let deletedSearchTimeout = null;
+function applyDeletedFilters() {
+  clearTimeout(deletedSearchTimeout);
+  deletedSearchTimeout = setTimeout(() => {
+    loadDeletedInvoices();
+  }, 250);
+}
+
+async function viewDeletedInvoiceDetails(id) {
+  const modal = document.getElementById('deletedInvoiceDetailsModal');
+  const body = document.getElementById('delModalBody');
+  const footer = document.getElementById('delModalFooter');
+  const title = document.getElementById('delModalTitle');
+  const subtitle = document.getElementById('delModalSubtitle');
+
+  if (!modal || !body) return;
+
+  body.innerHTML = '<div style="text-align:center; padding:3rem; color:#64748b;"><div style="font-size:1.5rem; margin-bottom:0.5rem;">⏳</div>Loading archived invoice details...</div>';
+  
+  modal.style.display = 'flex';
+  modal.classList.add('active');
+  modal.style.opacity = '1';
+  modal.style.pointerEvents = 'auto';
+
+  try {
+    const res = await apiFetch(`/invoices/deleted-history/${id}`);
+    if (!res || !res.success || !res.invoice) {
+      body.innerHTML = `
+        <div style="text-align:center; padding:2.5rem 1rem;">
+          <div style="font-size:2rem; margin-bottom:0.5rem;">⚠️</div>
+          <h4 style="color:#b91c1c; margin:0 0 0.5rem 0;">Record Not Found</h4>
+          <p style="color:#64748b; font-size:0.9rem; margin:0 0 1.25rem 0;">This invoice may have already been restored back to active invoices or purged from history.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="closeDeletedDetailsModal(); loadDeletedInvoices();">Refresh Delete History</button>
+        </div>
+      `;
+      footer.innerHTML = '<button type="button" class="btn btn-secondary" onclick="closeDeletedDetailsModal()">Close</button>';
+      return;
+    }
+
+    const inv = res.invoice;
+    if (title) title.textContent = `Invoice ${inv.invoice_number}`;
+    if (subtitle) subtitle.textContent = `Archived on ${inv.deleted_at ? new Date(inv.deleted_at).toLocaleString('en-IN') : 'N/A'}`;
+
+    const items = inv.items || res.items || [];
+    const payments = inv.payments || [];
+    const client = inv.client_snapshot || {};
+    const company = res.company || {};
+    const terms = res.terms || {};
+
+    body.innerHTML = `
+      <!-- Deletion Audit Ribbon -->
+      <div style="width:100%; max-width:820px; background:#fff1f2; border:1px solid #fecdd3; border-radius:8px; padding:0.75rem 1.25rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+        <div>
+          <div style="font-weight:800; color:#9f1239; font-size:0.85rem; letter-spacing:0.02em; display:flex; align-items:center; gap:0.4rem;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            DELETION AUDIT TRAIL &bull; ARCHIVED DOCUMENT
+          </div>
+          <div style="color:#be123c; font-size:0.78rem; margin-top:0.2rem;">
+            Deleted by: <strong>${inv.deleted_by_name || 'D-GROW Admin'}</strong> on ${formatDate(inv.deleted_at)} &bull; Reason: <em>${inv.deletion_reason || 'Moved to delete history by admin'}</em>
+          </div>
+        </div>
+        <span class="badge" style="background:#ffe4e6; color:#9f1239; font-weight:800; font-size:0.75rem; border:1px solid #f43f5e; padding:0.25rem 0.65rem;">
+          STATUS AT DELETION: ${inv.status_at_deletion || 'ISSUED'}
+        </span>
+      </div>
+
+      <!-- Real A4 Official Invoice Sheet -->
+      <div class="invoice-sheet" id="deletedPrintableInvoice" style="position:relative; width:100%; max-width:820px; box-shadow:0 10px 30px rgba(0,0,0,0.4); margin-bottom:1rem; border-radius:4px; overflow:hidden; background:#ffffff; text-align:left;">
+        <!-- Watermark -->
+        <div style="position:absolute; top:45%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); font-size:4.5rem; font-weight:900; color:rgba(239, 68, 68, 0.06); pointer-events:none; text-transform:uppercase; white-space:nowrap; z-index:0; letter-spacing:0.1em; user-select:none;">
+          ARCHIVED INVOICE
+        </div>
+
+        <!-- Agency Header -->
+        <div class="inv-agency-header" style="position:relative; z-index:1;">
+          <div class="inv-brand-left">
+            <img src="../assets/Logosym.png" onerror="this.onerror=null; this.src='assets/Logosym.png'; if(!this.complete) this.src='/assets/Logosym.png';" alt="D-GROW Marketing Agency Logo" style="max-height: 48px; max-width: 200px; object-fit: contain;">
+            <div class="inv-agency-details" style="margin-left: 10px;">
+              <h2>${company.company_name || 'D-GROW MARKETING AGENCY'}</h2>
+              <p><strong>GSTIN Number:</strong> ${company.gstin || '33OUUPS5195G1ZJ'}</p>
+              <p><strong>Address:</strong> ${company.address || 'SF No: 14/3, Plot No. 141, Radha Ave Main Rd, Ganga Nagar, Valasaravakkam'}, ${company.city || 'Chennai'} - ${company.pincode || '600087'}</p>
+              <p><strong>Contact No:</strong> ${company.phone || '+91 98765 43210'}</p>
+              <p><strong>Email:</strong> ${company.email || 'billing@dgrow.in'}</p>
+            </div>
+          </div>
+          <div class="inv-title-right" style="text-align:right;">
+            <h1>Invoice</h1>
+            <div style="display:inline-block; font-size:8px; font-weight:800; text-transform:uppercase; background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:2px 8px; border-radius:3px; margin-top:4px;">
+              ARCHIVED IN HISTORY
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Info -->
+        <div class="inv-info-section" style="position:relative; z-index:1;">
+          <div>
+            <div class="inv-info-row"><span class="inv-info-label"># Invoice</span><span class="inv-info-val">: ${inv.invoice_number}</span></div>
+            <div class="inv-info-row"><span class="inv-info-label">Date</span><span class="inv-info-val">: ${formatDate(inv.invoice_date)}</span></div>
+            <div class="inv-info-row"><span class="inv-info-label">Terms</span><span class="inv-info-val">: ${inv.payment_terms_text || '100% payment in advance'}</span></div>
+            <div class="inv-info-row"><span class="inv-info-label">Due Date</span><span class="inv-info-val">: ${formatDate(inv.due_date)}</span></div>
+          </div>
+          <div>
+            <div class="inv-info-row"><span class="inv-info-label">Place of Supply</span><span class="inv-info-val">: ${(inv.place_of_supply || 'Tamil Nadu').replace(/\s*\(\d+\)/g, '')}</span></div>
+            <div class="inv-info-row"><span class="inv-info-label">Invoice Type</span><span class="inv-info-val">: ${inv.invoice_type || 'GST'}</span></div>
+          </div>
+        </div>
+
+        <!-- Billed To -->
+        <div class="inv-bill-to" style="position:relative; z-index:1;">
+          <div class="inv-bill-header">Billed To</div>
+          <div class="inv-bill-body">
+            <div class="inv-bill-left">
+              <div class="inv-client-name">${client.company_name || inv.client_name || 'Client Name'}</div>
+              <div class="inv-client-address-title"><strong>Address:</strong></div>
+              <div class="inv-client-address-text">${formatAddress3Lines(client).join('<br>') || 'Address on record'}</div>
+            </div>
+            <div class="inv-bill-right">
+              <div><strong>Mobile Number:</strong> ${client.mobile || '-'}</div>
+              ${client.gstin ? `<div style="margin-top:4px;"><strong>GSTIN:</strong> ${client.gstin}</div>` : `<div style="margin-top:4px; color:#64748b;"><strong>GSTIN:</strong> Unregistered / Non-GST</div>`}
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Table -->
+        <table class="inv-items-table" style="position:relative; z-index:1;">
+          <thead>
+            <tr>
+              <th style="width:40px; text-align:center;">No</th>
+              <th style="width:160px;">Service</th>
+              <th style="width:85px; text-align:center;">HSN/SAC</th>
+              <th>Details</th>
+              <th style="width:120px; text-align:center;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((item, idx) => {
+              const parsed = parseItemDetails(item);
+              return `
+                <tr>
+                  <td style="text-align:center; font-weight:700;">${idx + 1}</td>
+                  <td style="font-weight:700; color:#111827; vertical-align:top;">${parsed.serviceName}</td>
+                  <td style="text-align:center; vertical-align:top; color:#4b5563;">${parsed.hsnSac || '998311'}</td>
+                  <td style="vertical-align:top;">
+                    ${parsed.subDetails.length > 0 ? `
+                      <ul class="inv-details-list">
+                        ${parsed.subDetails.map(d => `<li>${d}</li>`).join('')}
+                      </ul>
+                    ` : `<span style="color:#9ca3af;">-</span>`}
+                    ${parseFloat(item.discount || 0) > 0 ? `<div style="font-size:8.5px; color:#b45309; font-weight:700; margin-top:3px;">Line Discount: -${formatINR(item.discount)}</div>` : ''}
+                  </td>
+                  ${idx === 0 ? `
+                    <td rowspan="${items.length}" style="text-align:center; vertical-align:middle; font-weight:700; font-size:1.05rem; color:#111827; background:#ffffff; border-left:1px solid #d1d5db;">
+                      ${formatINR(inv.subtotal)}
+                    </td>
+                  ` : ''}
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+
+        <!-- Totals & Words -->
+        <div class="inv-totals-grid" style="position:relative; z-index:1;">
+          <div class="inv-words-box">
+            <div class="inv-words-title">Total In Words</div>
+            <div class="inv-words-text">${inv.amount_in_words || 'Rupees Only.'}</div>
+            ${inv.notes ? `<div style="margin-top:8px; font-size:9.5px;"><strong>Notes:</strong> ${inv.notes}</div>` : ''}
+          </div>
+          <div>
+            <table class="inv-totals-table">
+              <tr><td class="total-label">Sub Total</td><td class="total-amount">${formatINR(inv.subtotal)}</td></tr>
+              ${parseFloat(inv.discount || 0) > 0 ? `
+                <tr><td class="total-label" style="color:#b45309; font-weight:700;">Discount</td><td class="total-amount" style="color:#b45309; font-weight:700;">-${formatINR(inv.discount)}</td></tr>
+                <tr><td class="total-label">Taxable Amount</td><td class="total-amount">${formatINR(inv.taxable_amount)}</td></tr>
+              ` : ''}
+              ${parseFloat(inv.cgst_amount || 0) > 0 ? `<tr><td class="total-label">CGST ${inv.cgst_rate}%</td><td class="total-amount">${formatINR(inv.cgst_amount)}</td></tr>` : ''}
+              ${parseFloat(inv.sgst_amount || 0) > 0 ? `<tr><td class="total-label">SGST ${inv.sgst_rate}%</td><td class="total-amount">${formatINR(inv.sgst_amount)}</td></tr>` : ''}
+              ${parseFloat(inv.igst_amount || 0) > 0 ? `<tr><td class="total-label">IGST ${inv.igst_rate}%</td><td class="total-amount">${formatINR(inv.igst_amount)}</td></tr>` : ''}
+              ${inv.round_off ? `<tr><td class="total-label">Round Off</td><td class="total-amount">${formatINR(inv.round_off)}</td></tr>` : ''}
+              <tr class="inv-grand-total-row"><td>Total</td><td style="text-align:right;">${formatINR(inv.grand_total)}</td></tr>
+              ${parseFloat(inv.paid_amount || 0) > 0 ? `
+                <tr class="inv-paid-row">
+                  <td class="total-label">Paid Amount</td>
+                  <td class="total-amount">${formatINR(inv.paid_amount)}</td>
+                </tr>
+              ` : ''}
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer Grid -->
+        <div class="inv-footer-grid" style="position:relative; z-index:1;">
+          <div class="inv-terms-col">
+            <div class="inv-terms-title">Terms & Conditions</div>
+            <div class="inv-term-item"><strong>Scope of Work</strong><p>${(terms.scope_of_work || '1. Services include the specific digital marketing services mentioned in the invoice').replace(/\n/g, '<br>')}</p></div>
+            <div class="inv-term-item"><strong>Payment Terms</strong><p>${(terms.payment_terms || '1. Full payment should be made every month in advance.').replace(/\n/g, '<br>')}</p></div>
+            <div class="inv-term-item"><strong>Ownership and Usage</strong><p>${(terms.ownership_usage || '1. The client receives ownership rights to the final deliverables upon full payment.').replace(/\n/g, '<br>')}</p></div>
+          </div>
+          <div>
+            <div class="inv-payment-box">
+              <div class="inv-payment-title">Payment Details:</div>
+              <div class="inv-payment-row"><span class="inv-payment-label">Ac Number</span><span>: ${company.account_number || '0987654321'}</span></div>
+              <div class="inv-payment-row"><span class="inv-payment-label">IFSC Code</span><span>: ${company.ifsc_code || 'HDFC0001234'}</span></div>
+              <div class="inv-payment-row"><span class="inv-payment-label">Banking Name</span><span>: ${company.banking_name || 'D-GROW MARKETING'}</span></div>
+              <div class="inv-payment-row"><span class="inv-payment-label">Bank Name</span><span>: ${company.bank_name || 'HDFC Bank'}</span></div>
+              <div class="inv-payment-row"><span class="inv-payment-label">GPay</span><span>: <strong>${company.gpay_number || '+91 98765 43210'}</strong></span></div>
+              ${company.upi_id ? `<div class="inv-payment-row"><span class="inv-payment-label">UPI ID</span><span>: <strong>${company.upi_id}</strong></span></div>` : ''}
+            </div>
+            <div class="inv-signature-block" style="text-align:center; margin-top:6px;">
+              <div style="margin:2px 0; display:flex; justify-content:center; align-items:center;">
+                <img src="../assets/seel.png" onerror="this.onerror=null; this.src='assets/seel.png'; if(!this.complete) this.src='/assets/seel.png';" alt="Official Seal & Signature" style="max-height:72px; max-width:160px; object-fit:contain; display:block; margin:0 auto;">
+              </div>
+              <div class="inv-signature-label" style="font-size:8.5px; color:#6b7280; font-weight:600; margin-top:1px;">Authorized Signature</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    footer.innerHTML = `
+      <button type="button" class="btn btn-secondary" onclick="closeDeletedDetailsModal()">Close</button>
+      <div style="display:flex; gap:0.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="handlePurgeInvoice(${inv.id}, '${inv.invoice_number}')" style="color:#ef4444; border-color:#fca5a5; background:#fff1f2;">
+          Permanently Purge
+        </button>
+        <button type="button" class="btn btn-primary" onclick="handleRestoreInvoice(${inv.id}, '${inv.invoice_number}')" style="background:#16a34a; border:none;">
+          Restore Invoice
+        </button>
+      </div>
+    `;
+  } catch (err) {
+    console.error('[View Deleted Invoice Error]', err);
+    body.innerHTML = `
+      <div style="text-align:center; padding:2.5rem 1rem;">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">⚠️</div>
+        <h4 style="color:#b91c1c; margin:0 0 0.5rem 0;">Unable to Load Details</h4>
+        <p style="color:#64748b; font-size:0.9rem; margin:0 0 1.25rem 0;">${err.message || 'This invoice may have already been restored or purged.'}</p>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeDeletedDetailsModal(); loadDeletedInvoices();">Refresh Delete History</button>
+      </div>
+    `;
+    footer.innerHTML = '<button type="button" class="btn btn-secondary" onclick="closeDeletedDetailsModal()">Close</button>';
+  }
+}
+
+function printDeletedInvoiceModal() {
+  const printEl = document.getElementById('deletedPrintableInvoice');
+  if (!printEl) return;
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Archived Invoice - Print</title>
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/invoice.css">
+        <style>
+          body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+          .invoice-sheet { box-shadow: none !important; margin: 0 auto !important; width: 100% !important; max-width: 210mm !important; }
+          @page { size: A4; margin: 10mm; }
+        </style>
+      </head>
+      <body>
+        ${printEl.outerHTML}
+        <script>
+          window.onload = function() { window.print(); window.close(); }
+        </script>
+      </body>
+    </html>
+  `);
+  printWin.document.close();
+}
+
+function closeDeletedDetailsModal() {
+  const modal = document.getElementById('deletedInvoiceDetailsModal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.pointerEvents = 'none';
+  }
+}
+
+async function handleRestoreInvoice(id, invoiceNumber) {
+  if (!confirm(`Are you sure you want to RESTORE Invoice "${invoiceNumber}" back to Active Invoices?\n\nIt will be restored with all its line items and appear in the active invoice register.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/invoices/deleted-history/${id}/restore`, {
+      method: 'POST'
+    });
+
+    if (res && res.success) {
+      showToast(res.message || `Invoice ${invoiceNumber} restored successfully!`, 'success');
+      closeDeletedDetailsModal();
+      loadDeletedInvoices();
+      updateDeletedBadgeCount();
+    } else {
+      showToast(res?.message || 'Failed to restore invoice.', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to restore invoice: ' + err.message, 'error');
+  }
+}
+
+async function handlePurgeInvoice(id, invoiceNumber) {
+  if (!confirm(`Are you sure you want to PERMANENTLY PURGE Invoice "${invoiceNumber}"?\n\nWARNING: This will completely remove it from Delete History forever. This action cannot be reversed.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/invoices/deleted-history/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (res && res.success) {
+      showToast(res.message || `Invoice ${invoiceNumber} permanently purged.`, 'success');
+      closeDeletedDetailsModal();
+      loadDeletedInvoices();
+      updateDeletedBadgeCount();
+    } else {
+      showToast(res?.message || 'Failed to purge invoice.', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to purge invoice: ' + err.message, 'error');
+  }
+}
+
 // --- DELETE INVOICE ACTIONS (ADMIN ONLY) ---
 async function handleDeleteInvoice(invoiceId, invoiceNumber) {
-  if (!confirm(`Are you sure you want to permanently delete Invoice "${invoiceNumber}"?\n\nThis will delete the invoice, its line items, and any payment records linked to it. This action cannot be reversed.`)) {
+  if (!confirm(`Are you sure you want to delete Invoice "${invoiceNumber}"?\n\nThis invoice will be moved to Delete History where you can review its details or restore it at any time.`)) {
     return;
   }
 
@@ -1569,10 +2123,11 @@ async function handleDeleteInvoice(invoiceId, invoiceNumber) {
     });
 
     if (res && res.success) {
-      showToast(res.message || `Invoice ${invoiceNumber} deleted successfully.`, 'success');
+      showToast(res.message || `Invoice ${invoiceNumber} moved to Delete History.`, 'success');
       if (typeof loadInvoicesList === 'function') {
         loadInvoicesList();
       }
+      updateDeletedBadgeCount();
     } else {
       showToast(res?.message || 'Failed to delete invoice.', 'error');
     }
@@ -1588,7 +2143,7 @@ async function handleDeleteInvoiceFromView(invoiceId, invoiceNumber) {
   }
   const displayNum = invoiceNumber || document.querySelector('.inv-top-num-highlight')?.textContent || 'this invoice';
 
-  if (!confirm(`Are you sure you want to permanently delete ${displayNum}?\n\nThis will permanently remove the invoice from the system.`)) {
+  if (!confirm(`Are you sure you want to delete ${displayNum}?\n\nThis invoice will be archived in Delete History where you can review or restore it.`)) {
     return;
   }
 
@@ -1598,7 +2153,7 @@ async function handleDeleteInvoiceFromView(invoiceId, invoiceNumber) {
     });
 
     if (res && res.success) {
-      showToast(res.message || 'Invoice deleted successfully.', 'success');
+      showToast(res.message || 'Invoice moved to Delete History.', 'success');
       setTimeout(() => {
         window.location.href = 'invoices.html';
       }, 700);
@@ -1609,4 +2164,5 @@ async function handleDeleteInvoiceFromView(invoiceId, invoiceNumber) {
     showToast('Failed to delete invoice: ' + err.message, 'error');
   }
 }
+
 

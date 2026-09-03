@@ -586,7 +586,7 @@ async function cancelInvoice(req, res) {
   }
 }
 
-// Permanently Delete Invoice (Admin Only)
+// Delete Invoice with Archive to Delete History (Admin Only)
 async function deleteInvoice(req, res) {
   try {
     const { id } = req.params;
@@ -597,6 +597,75 @@ async function deleteInvoice(req, res) {
 
     const invoice = oldInv[0];
     const invoiceId = invoice.id;
+
+    // Fetch line items
+    const items = await db.query('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY item_order ASC, id ASC', [invoiceId]);
+
+    // Fetch payments
+    const payments = await db.query('SELECT * FROM payments WHERE invoice_id = ? ORDER BY payment_date ASC, created_at ASC', [invoiceId]);
+    const paidAmount = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+
+    // Fetch client company name
+    let clientName = '';
+    if (invoice.client_id) {
+      const clientRow = await db.query('SELECT company_name FROM clients WHERE id = ?', [invoice.client_id]);
+      if (clientRow && clientRow[0]) {
+        clientName = clientRow[0].company_name;
+      }
+    }
+    if (!clientName && invoice.client_snapshot_json) {
+      try {
+        const snap = JSON.parse(invoice.client_snapshot_json);
+        clientName = snap.company_name || snap.contact_person || '';
+      } catch (e) {}
+    }
+
+    const deletionReason = req.body?.reason || 'Moved to delete history by admin';
+    const deletedByName = req.user?.name || req.user?.email || 'Admin';
+    const deletedById = req.user?.id || null;
+
+    // Archive complete snapshot to deleted_invoices history table
+    await db.query(`
+      INSERT INTO deleted_invoices (
+        original_invoice_id, invoice_number, invoice_type, client_id, client_name, client_snapshot_json,
+        place_of_supply, invoice_date, due_date, payment_terms_text, subtotal, discount, taxable_amount,
+        cgst_rate, cgst_amount, sgst_rate, sgst_amount, igst_rate, igst_amount, round_off, grand_total,
+        paid_amount, amount_in_words, status_at_deletion, notes, items_json, payments_json,
+        invoice_snapshot_json, deleted_by, deleted_by_name, deletion_reason
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      invoiceId,
+      invoice.invoice_number,
+      invoice.invoice_type || 'GST',
+      invoice.client_id || null,
+      clientName,
+      invoice.client_snapshot_json || '{}',
+      invoice.place_of_supply || 'Tamil Nadu (33)',
+      invoice.invoice_date,
+      invoice.due_date,
+      invoice.payment_terms_text,
+      invoice.subtotal || 0,
+      invoice.discount || 0,
+      invoice.taxable_amount || 0,
+      invoice.cgst_rate || 0,
+      invoice.cgst_amount || 0,
+      invoice.sgst_rate || 0,
+      invoice.sgst_amount || 0,
+      invoice.igst_rate || 0,
+      invoice.igst_amount || 0,
+      invoice.round_off || 0,
+      invoice.grand_total || 0,
+      paidAmount,
+      invoice.amount_in_words || '',
+      invoice.status || 'ISSUED',
+      invoice.notes || '',
+      JSON.stringify(items || []),
+      JSON.stringify(payments || []),
+      JSON.stringify(invoice),
+      deletedById,
+      deletedByName,
+      deletionReason
+    ]);
 
     // Delete associated payments first to respect foreign keys
     await db.query('DELETE FROM payments WHERE invoice_id = ?', [invoiceId]);
@@ -619,11 +688,229 @@ async function deleteInvoice(req, res) {
 
     res.json({
       success: true,
-      message: `Invoice ${invoice.invoice_number} deleted successfully.`
+      message: `Invoice ${invoice.invoice_number} has been moved to Delete History.`
     });
   } catch (err) {
     console.error('[Delete Invoice Error]', err);
     res.status(500).json({ success: false, message: err.message || 'Failed to delete invoice.' });
+  }
+}
+
+// List all deleted invoices from archive (Admin Only)
+async function getDeletedInvoices(req, res) {
+  try {
+    const { search = '' } = req.query;
+    let sql = 'SELECT * FROM deleted_invoices WHERE 1=1';
+    const params = [];
+
+    if (search) {
+      sql += ' AND (invoice_number LIKE ? OR client_name LIKE ?)';
+      const term = `%${search}%`;
+      params.push(term, term);
+    }
+
+    sql += ' ORDER BY deleted_at DESC';
+
+    const deletedInvoices = await db.query(sql, params);
+
+    res.json({
+      success: true,
+      deleted_invoices: deletedInvoices,
+      count: deletedInvoices.length
+    });
+  } catch (err) {
+    console.error('[Get Deleted Invoices Error]', err);
+    res.status(500).json({ success: false, message: err.message || 'Failed to fetch delete history.' });
+  }
+}
+
+// Get single deleted invoice details with items (Admin Only)
+async function getDeletedInvoiceById(req, res) {
+  try {
+    const { id } = req.params;
+    const rows = await db.query('SELECT * FROM deleted_invoices WHERE id = ?', [id]);
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Deleted invoice record not found.' });
+    }
+
+    const inv = rows[0];
+    inv.items = [];
+    inv.payments = [];
+    inv.client_snapshot = {};
+
+    try { inv.items = JSON.parse(inv.items_json || '[]'); } catch (e) {}
+    try { inv.payments = JSON.parse(inv.payments_json || '[]'); } catch (e) {}
+    try { inv.client_snapshot = JSON.parse(inv.client_snapshot_json || '{}'); } catch (e) {}
+    const company = await db.query('SELECT * FROM company_settings WHERE id = 1');
+    const terms = await db.query('SELECT * FROM invoice_terms WHERE id = 1');
+
+    res.json({
+      success: true,
+      invoice: inv,
+      items: inv.items,
+      company: company[0] || {},
+      terms: terms[0] || {}
+    });
+  } catch (err) {
+    console.error('[Get Deleted Invoice By ID Error]', err);
+    res.status(500).json({ success: false, message: err.message || 'Failed to fetch invoice details.' });
+  }
+}
+
+// Restore invoice from Delete History back to active invoices (Admin Only)
+async function restoreInvoice(req, res) {
+  try {
+    const { id } = req.params;
+    const rows = await db.query('SELECT * FROM deleted_invoices WHERE id = ?', [id]);
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Deleted invoice not found in history.' });
+    }
+
+    const delInv = rows[0];
+
+    // Check if an active invoice already uses this invoice number
+    const conflict = await db.query('SELECT id, invoice_number FROM invoices WHERE invoice_number = ?', [delInv.invoice_number]);
+    if (conflict && conflict.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot restore: an active invoice with number "${delInv.invoice_number}" already exists.`
+      });
+    }
+
+    // Resolve or fallback client_id
+    let clientId = delInv.client_id;
+    if (clientId) {
+      const clientCheck = await db.query('SELECT id FROM clients WHERE id = ?', [clientId]);
+      if (!clientCheck || clientCheck.length === 0) {
+        clientId = null;
+      }
+    }
+    if (!clientId) {
+      const found = await db.query('SELECT id FROM clients WHERE company_name = ? LIMIT 1', [delInv.client_name]);
+      if (found && found.length > 0) {
+        clientId = found[0].id;
+      } else {
+        const firstClient = await db.query('SELECT id FROM clients ORDER BY id ASC LIMIT 1');
+        clientId = firstClient[0]?.id || 1;
+      }
+    }
+
+    // Insert back into active invoices table
+    const invRes = await db.query(`
+      INSERT INTO invoices (
+        invoice_number, invoice_type, client_id, client_snapshot_json, place_of_supply,
+        invoice_date, due_date, payment_terms_text, subtotal, discount, taxable_amount,
+        cgst_rate, cgst_amount, sgst_rate, sgst_amount, igst_rate, igst_amount,
+        round_off, grand_total, amount_in_words, status, notes, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      delInv.invoice_number,
+      delInv.invoice_type || 'GST',
+      clientId,
+      delInv.client_snapshot_json || '{}',
+      delInv.place_of_supply || 'Tamil Nadu (33)',
+      delInv.invoice_date,
+      delInv.due_date,
+      delInv.payment_terms_text || '100% payment in advance',
+      delInv.subtotal || 0,
+      delInv.discount || 0,
+      delInv.taxable_amount || 0,
+      delInv.cgst_rate || 0,
+      delInv.cgst_amount || 0,
+      delInv.sgst_rate || 0,
+      delInv.sgst_amount || 0,
+      delInv.igst_rate || 0,
+      delInv.igst_amount || 0,
+      delInv.round_off || 0,
+      delInv.grand_total || 0,
+      delInv.amount_in_words || '',
+      delInv.status_at_deletion || 'ISSUED',
+      delInv.notes || '',
+      req.user?.id || 1
+    ]);
+
+    const newInvoiceId = invRes.insertId;
+
+    // Restore line items
+    let items = [];
+    try { items = JSON.parse(delInv.items_json || '[]'); } catch (e) {}
+
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      await db.query(`
+        INSERT INTO invoice_items (
+          invoice_id, service_id, description, hsn_sac, quantity, rate, discount,
+          gst_rate, taxable_amount, tax_amount, total_amount, item_order
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        newInvoiceId,
+        it.service_id || null,
+        it.description || 'Restored Item',
+        it.hsn_sac || '998311',
+        it.quantity || 1,
+        it.rate || 0,
+        it.discount || 0,
+        it.gst_rate || 0,
+        it.taxable_amount || 0,
+        it.tax_amount || 0,
+        it.total_amount || 0,
+        it.item_order || (i + 1)
+      ]);
+    }
+
+    // Delete record from deleted_invoices archive
+    await db.query('DELETE FROM deleted_invoices WHERE id = ?', [id]);
+
+    // Log audit trail
+    await logAudit({
+      user: req.user,
+      action: 'RESTORE',
+      entity_type: 'INVOICE',
+      entity_id: String(newInvoiceId),
+      new_data: { invoice_number: delInv.invoice_number, from_deleted_id: id },
+      req
+    });
+
+    res.json({
+      success: true,
+      message: `Invoice ${delInv.invoice_number} has been restored successfully to active invoices.`,
+      restored_invoice_id: newInvoiceId
+    });
+  } catch (err) {
+    console.error('[Restore Invoice Error]', err);
+    res.status(500).json({ success: false, message: err.message || 'Failed to restore invoice.' });
+  }
+}
+
+// Permanently purge deleted invoice from history (Admin Only)
+async function purgeDeletedInvoice(req, res) {
+  try {
+    const { id } = req.params;
+    const rows = await db.query('SELECT * FROM deleted_invoices WHERE id = ?', [id]);
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Deleted invoice not found in history.' });
+    }
+
+    const inv = rows[0];
+    await db.query('DELETE FROM deleted_invoices WHERE id = ?', [id]);
+
+    // Log audit trail
+    await logAudit({
+      user: req.user,
+      action: 'PERMANENT_DELETE',
+      entity_type: 'INVOICE',
+      entity_id: String(id),
+      old_data: inv,
+      req
+    });
+
+    res.json({
+      success: true,
+      message: `Invoice ${inv.invoice_number} has been permanently purged from Delete History.`
+    });
+  } catch (err) {
+    console.error('[Purge Deleted Invoice Error]', err);
+    res.status(500).json({ success: false, message: err.message || 'Failed to purge record.' });
   }
 }
 
@@ -635,6 +922,11 @@ module.exports = {
   createInvoice,
   updateInvoice,
   cancelInvoice,
-  deleteInvoice
+  deleteInvoice,
+  getDeletedInvoices,
+  getDeletedInvoiceById,
+  restoreInvoice,
+  purgeDeletedInvoice
 };
+
 

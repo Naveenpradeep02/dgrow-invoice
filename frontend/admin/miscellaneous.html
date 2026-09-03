@@ -493,7 +493,8 @@
 
             <!-- Billing Month Selector for Day 1 to 30 Monthly Bills -->
             <select id="miscBillingMonth" class="form-select" style="flex:1.3; min-width:180px; font-weight:700; color:#1e293b; background:#f8fafc;" onchange="onBillingMonthChange(this.value)">
-              <option value="2026-08">August 2026 (Active Bill)</option>
+              <option value="2026-09">September 2026 (Active Bill)</option>
+              <option value="2026-08">August 2026 (Closed Bill)</option>
               <option value="2026-07">July 2026 (Closed Bill)</option>
               <option value="2026-06">June 2026 (Archived)</option>
               <option value="__NEW_MONTH__" style="color:var(--primary); font-weight:800;">+ Start New Month Bill...</option>
@@ -679,13 +680,25 @@
             <input type="text" id="modalMiscTitle" class="form-input" placeholder="e.g. Petrol for client shoot / Meta Ads for TechNova" required>
           </div>
 
-          <!-- EMI & Loan Due Date Box (Shown for EMI & Loans) -->
-          <div class="form-group" id="modalMiscDueDateGroup" style="display:none; margin:0; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:0.65rem 0.75rem;">
-            <label class="form-label" style="font-size:0.78rem; font-weight:700; color:#15803d; display:flex; align-items:center; gap:0.35rem; margin-bottom:0.35rem;">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              EMI Due Date / Recurring Monthly Day
+          <!-- EMI Due Dates: Due Start Date & End Date (Visible ONLY for EMI & Loans) -->
+          <div class="form-group" id="modalMiscDueDateGroup" style="display:none; margin:0; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.75rem 0.85rem;">
+            <label class="form-label" style="font-size:0.78rem; font-weight:700; color:#15803d; display:flex; align-items:center; gap:0.35rem; margin-bottom:0.45rem;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              EMI Due Period (Due Start & End Date)
             </label>
-            <input type="text" id="modalMiscDueDate" class="form-input" placeholder="e.g. 14th of every month / Due Date: 20 Aug 2026" style="font-size:0.84rem; border-color:#86efac; background:#ffffff;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.65rem;">
+              <div>
+                <label class="form-label" style="font-size:0.72rem; color:#166534; font-weight:700; margin-bottom:0.25rem;">Due Start Date</label>
+                <input type="date" id="modalMiscDueStartDate" class="form-input" style="font-size:0.82rem; border-color:#86efac; background:#ffffff;" onchange="syncEmiDateFromDueStart(this.value)">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.72rem; color:#166534; font-weight:700; margin-bottom:0.25rem;">Due End Date</label>
+                <input type="date" id="modalMiscDueEndDate" class="form-input" style="font-size:0.82rem; border-color:#86efac; background:#ffffff;" onchange="updateEmiTenurePreviewInModal()">
+              </div>
+            </div>
+            <!-- Live tenure calculation preview -->
+            <div id="modalEmiTenurePreview" style="display:none; font-size:0.74rem; color:#15803d; font-weight:700; margin-top:0.45rem; padding:0.35rem 0.55rem; background:#ffffff; border:1px solid #bbf7d0; border-radius:5px; align-items:center; gap:0.35rem;"></div>
+            <input type="hidden" id="modalMiscDueDate" value="">
           </div>
 
           <!-- Special Client Picker (Visible for Client-Related Expenses or Ad Funds) -->
@@ -797,7 +810,7 @@
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1.2fr 1.2fr 1fr auto; gap:0.65rem; align-items:flex-end;">
+        <div style="display:grid; grid-template-columns: 1.1fr 1fr 1fr 1.1fr 1fr auto; gap:0.65rem; align-items:flex-end;">
           <div class="form-group" style="margin:0;">
             <label class="form-label required" style="font-size:0.75rem;">Due Day of Month</label>
             <select id="loanDueDaySelect" class="form-select" style="font-weight:700;">
@@ -813,6 +826,16 @@
               <option value="25">25th of every month</option>
               <option value="28">28th of every month</option>
             </select>
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.75rem; font-weight:700; color:#15803d;">Due Start Date</label>
+            <input type="date" id="loanStartDateInput" class="form-input" style="font-size:0.78rem;">
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:0.75rem; font-weight:700; color:#15803d;">Due End Date</label>
+            <input type="date" id="loanEndDateInput" class="form-input" style="font-size:0.78rem;">
           </div>
 
           <div class="form-group" style="margin:0;">
@@ -922,10 +945,11 @@
             </div>
           </div>
           <!-- Note Box -->
-          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:0.65rem 0.85rem; display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:0.75rem; color:#166534; font-weight:700;">Status will be updated to:</span>
-            <span class="badge badge-paid">PAID / CLEARED</span>
+          <div id="payEmiStatusBox" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:0.65rem 0.85rem; display:flex; justify-content:space-between; align-items:center;">
+            <span id="payEmiStatusLabel" style="font-size:0.75rem; color:#166534; font-weight:700;">Status will be updated to:</span>
+            <span id="payEmiStatusBadge" class="badge badge-paid">PAID / CLEARED</span>
           </div>
+          <div id="payEmiFinalNotice" style="display:none; background:#fef3c7; border:1px solid #fde68a; border-radius:6px; padding:0.65rem 0.85rem; color:#92400e; font-size:0.75rem; font-weight:800; display:flex; align-items:center; gap:0.4rem;"></div>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
           <button type="button" class="btn btn-secondary" onclick="closePayEmiModal()">Cancel</button>
@@ -1800,6 +1824,90 @@
       setTimeout(() => toast.remove(), 3500);
     }
 
+    // --- EMI TENURE & REMAINING MONTHS CALCULATOR ---
+    function getEmiTenureDetails(r) {
+      if (!r || !r.dueStartDate || !r.dueEndDate) return null;
+      const s = new Date(r.dueStartDate);
+      const e = new Date(r.dueEndDate);
+      if (isNaN(s.getTime()) || isNaN(e.getTime())) return null;
+
+      const startYear = s.getFullYear();
+      const startMonth = s.getMonth();
+      const endYear = e.getFullYear();
+      const endMonth = e.getMonth();
+
+      // Total months tenure
+      const totalMonths = Math.max(1, (endYear - startYear) * 12 + (endMonth - startMonth) + 1);
+
+      // Current record month
+      const recDate = new Date(r.date || r.dueStartDate);
+      const curYear = isNaN(recDate.getTime()) ? startYear : recDate.getFullYear();
+      const curMonth = isNaN(recDate.getTime()) ? startMonth : recDate.getMonth();
+
+      // Current installment month index (1-based)
+      let currentMonthIndex = (curYear - startYear) * 12 + (curMonth - startMonth) + 1;
+      if (currentMonthIndex < 1) currentMonthIndex = 1;
+      if (currentMonthIndex > totalMonths) currentMonthIndex = totalMonths;
+
+      const remainingMonths = Math.max(0, totalMonths - currentMonthIndex);
+      const isFinalMonth = (currentMonthIndex === totalMonths || remainingMonths === 0);
+
+      return {
+        totalMonths,
+        currentMonthIndex,
+        remainingMonths,
+        isFinalMonth
+      };
+    }
+
+    function checkAndAutoCloseFinalEmi(record) {
+      const tenure = getEmiTenureDetails(record);
+      if (tenure && tenure.isFinalMonth) {
+        record.status = 'CLOSED';
+
+        // Auto-close matching master loan preset as well
+        loadEmiPresets();
+        const matchedPreset = emiPresets.find(p => p.provider === record.subCategory || p.title === record.title || p.id === record.loanPresetId);
+        if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+          matchedPreset.status = 'CLOSED';
+          saveEmiPresetsStorage();
+        }
+        return true;
+      }
+      return false;
+    }
+
+    function syncEmiDateFromDueStart(val) {
+      if (!val) return;
+      const dateInput = document.getElementById('modalMiscDate');
+      if (dateInput) {
+        dateInput.value = val;
+        updateModalDateHint(val);
+      }
+      updateEmiTenurePreviewInModal();
+    }
+
+    function updateEmiTenurePreviewInModal() {
+      const preview = document.getElementById('modalEmiTenurePreview');
+      const sVal = document.getElementById('modalMiscDueStartDate')?.value;
+      const eVal = document.getElementById('modalMiscDueEndDate')?.value;
+      if (!preview) return;
+
+      if (sVal && eVal) {
+        const dummy = { dueStartDate: sVal, dueEndDate: eVal, date: sVal };
+        const t = getEmiTenureDetails(dummy);
+        if (t) {
+          preview.style.display = 'flex';
+          preview.innerHTML = `
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Tenure: <strong>${t.totalMonths} Months</strong> • <strong>${t.remainingMonths} Months Remaining</strong> after 1st installment • Auto-closes in <strong>${new Date(eVal).toLocaleString('default', {month:'short', year:'numeric'})}</strong></span>
+          `;
+          return;
+        }
+      }
+      preview.style.display = 'none';
+    }
+
     // Topbar & Global Navigation Fallbacks
     function toggleNotificationDropdown(e) {
       if (e) e.stopPropagation();
@@ -1909,11 +2017,25 @@
         try { 
           miscRecords = JSON.parse(stored);
           // Sanitize legacy entries
+          let healedAny = false;
           miscRecords.forEach(r => {
             if (!r.date || !r.date.includes('-') || r.date.startsWith('2001')) {
               r.date = todayISO;
             }
+            // Auto-align EMI date with dueStartDate if date was mistakenly assigned to an earlier month
+            if ((r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') && r.dueStartDate) {
+              if (r.date && r.date < r.dueStartDate && r.date.substring(0, 7) < r.dueStartDate.substring(0, 7)) {
+                r.date = r.dueStartDate;
+                r.month = r.dueStartDate.substring(0, 7);
+                healedAny = true;
+              }
+            }
             r.month = r.date.substring(0, 7);
+            if (r.month && !customBillingMonths.includes(r.month)) {
+              customBillingMonths.push(r.month);
+              customBillingMonths.sort();
+              localStorage.setItem('dgrow_billing_months', JSON.stringify(customBillingMonths));
+            }
             if (!r.status) r.status = 'PAID';
             if (!r.flowType) {
               if (r.subCategory === 'Client Wallet Deposit' || r.title.toLowerCase().includes('deposit') || r.title.toLowerCase().includes('top-up')) r.flowType = 'DEPOSIT';
@@ -1922,11 +2044,17 @@
               else r.flowType = 'SPEND';
             }
           });
+          if (healedAny) saveMiscStorage();
+          renderBillingMonthSelect();
         } catch(e){}
       }
 
-      // Auto sync monthly EMI roster for active billing month (August 2026)
-      syncMonthlyEmiRoster(activeBillingMonth || '2026-08');
+      // Auto sync monthly EMI roster for the current active billing month (e.g. September 2026)
+      const currentRealMonthKey = todayISO.substring(0, 7);
+      syncMonthlyEmiRoster(currentRealMonthKey);
+      if (activeBillingMonth && activeBillingMonth !== currentRealMonthKey) {
+        syncMonthlyEmiRoster(activeBillingMonth);
+      }
 
       document.getElementById('modalMiscDate').value = todayISO;
       updateModalDateHint(todayISO);
@@ -1984,6 +2112,10 @@
         // If loan is CLOSED or INACTIVE, DO NOT SYNC OR GENERATE ANY RECORDS FOR THIS OR NEXT MONTHS!
         if (ep.status === 'CLOSED' || ep.status === 'INACTIVE') return;
 
+        // Strictly check start date & end date bounds for this billing month!
+        if (ep.startDate && monthKey < ep.startDate.substring(0, 7)) return;
+        if (ep.endDate && monthKey > ep.endDate.substring(0, 7)) return;
+
         // Check if record already exists for this provider in this month
         const existing = miscRecords.find(r => 
           (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
@@ -1994,13 +2126,25 @@
         if (!existing) {
           const dayPad = String(ep.defaultDateDay || 5).padStart(2, '0');
           const dateStr = `${monthKey}-${dayPad}`;
+          let metricsStr = `Due Date: ${ep.dueDay || '5th of every month'}`;
+          if (ep.startDate && ep.endDate) {
+            metricsStr = `Due: ${formatDate(ep.startDate)} - ${formatDate(ep.endDate)}`;
+          } else if (ep.startDate) {
+            metricsStr = `Due From: ${formatDate(ep.startDate)}`;
+          } else if (ep.endDate) {
+            metricsStr = `Due Until: ${formatDate(ep.endDate)}`;
+          }
+
           const newRec = {
             id: Date.now() + Math.floor(Math.random() * 10000),
             title: ep.title,
             category: 'EMI & Loans',
             subCategory: ep.provider,
             client: '',
-            metrics: `Due Date: ${ep.dueDay || '5th of every month'}`,
+            metrics: metricsStr,
+            dueStartDate: ep.startDate || '',
+            dueEndDate: ep.endDate || '',
+            dueDate: (ep.startDate && ep.endDate) ? `${ep.startDate} to ${ep.endDate}` : (ep.dueDay || ''),
             mode: ep.mode || 'Bank Transfer / Auto-Debit',
             amount: ep.amount || 5000,
             receipt: `${ep.provider.toUpperCase().replace(/\s+/g, '')}-${ep.amount}`,
@@ -2044,6 +2188,8 @@
     function resetLoanAccountForm() {
       document.getElementById('loanAccountForm').reset();
       document.getElementById('loanAccountEditId').value = '';
+      if (document.getElementById('loanStartDateInput')) document.getElementById('loanStartDateInput').value = '';
+      if (document.getElementById('loanEndDateInput')) document.getElementById('loanEndDateInput').value = '';
       document.getElementById('loanAccountFormHeading').textContent = '+ Register New Loan / EMI Account';
       document.getElementById('loanSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> + Save Loan Account';
       document.getElementById('loanCancelEditBtn').style.display = 'none';
@@ -2056,6 +2202,8 @@
       const title = document.getElementById('loanTitleInput').value.trim();
       const amount = parseFloat(document.getElementById('loanAmountInput').value) || 0;
       const dueDayNum = parseInt(document.getElementById('loanDueDaySelect').value) || 5;
+      const startDate = document.getElementById('loanStartDateInput')?.value || '';
+      const endDate = document.getElementById('loanEndDateInput')?.value || '';
       const mode = document.getElementById('loanModeSelect').value;
       const status = document.getElementById('loanStatusSelect').value || 'ACTIVE';
 
@@ -2081,6 +2229,8 @@
             amount,
             defaultDateDay: dueDayNum,
             dueDay: `${dueDayNum}th of every month`,
+            startDate,
+            endDate,
             mode,
             status
           };
@@ -2094,6 +2244,8 @@
           amount,
           defaultDateDay: dueDayNum,
           dueDay: `${dueDayNum}th of every month`,
+          startDate,
+          endDate,
           mode,
           status,
           notes: 'Registered Loan Account'
@@ -2122,6 +2274,12 @@
       document.getElementById('loanTitleInput').value = preset.title || '';
       document.getElementById('loanAmountInput').value = preset.amount || 0;
       document.getElementById('loanDueDaySelect').value = preset.defaultDateDay || 5;
+      if (document.getElementById('loanStartDateInput')) {
+        document.getElementById('loanStartDateInput').value = preset.startDate || '';
+      }
+      if (document.getElementById('loanEndDateInput')) {
+        document.getElementById('loanEndDateInput').value = preset.endDate || '';
+      }
       document.getElementById('loanModeSelect').value = preset.mode || 'Bank Transfer / Auto-Debit';
       document.getElementById('loanStatusSelect').value = preset.status || 'ACTIVE';
 
@@ -2189,7 +2347,14 @@
               <span style="font-size:0.7rem; color:#64748b;">${escapeHtml(p.mode || 'Bank Transfer')}</span>
             </td>
             <td style="padding:0.6rem 0.75rem; vertical-align:middle; font-size:0.78rem; color:#475569; font-weight:600;">
-              ${escapeHtml(p.dueDay || '5th of every month')}
+              <div>${escapeHtml(p.dueDay || '5th of every month')}</div>
+              ${(p.startDate || p.endDate) ? `
+                <div style="font-size:0.7rem; color:#15803d; font-weight:700; margin-top:0.15rem; display:flex; align-items:center; gap:0.25rem;">
+                  <span style="background:#f0fdf4; border:1px solid #bbf7d0; padding:0.1rem 0.35rem; border-radius:3px;">
+                    ${p.startDate ? formatDate(p.startDate) : 'Start'} → ${p.endDate ? formatDate(p.endDate) : 'Ongoing'}
+                  </span>
+                </div>
+              ` : ''}
             </td>
             <td style="padding:0.6rem 0.75rem; vertical-align:middle; text-align:right;">
               <strong style="color:${isClosed ? '#64748b' : '#be185d'}; font-size:0.92rem;">₹${Number(p.amount || 0).toLocaleString('en-IN')}</strong>
@@ -3587,7 +3752,7 @@
     }
 
     // --- PERIOD TOGGLE FILTER LOGIC: DAILY, WEEKLY, MONTHLY, OVERALL, CUSTOM ---
-    function switchMiscPeriod(period) {
+    function switchMiscPeriod(period, explicitMonth = null) {
       currentMiscPeriod = period;
       document.querySelectorAll('.period-toggle-btn').forEach(b => {
         if (b.id && b.id.startsWith('btnMiscPeriod')) b.classList.remove('active');
@@ -3633,7 +3798,23 @@
       } else if (period === 'MONTHLY') {
         const btn = document.getElementById('btnMiscPeriodMonthly');
         if (btn) btn.classList.add('active');
-        const selectedMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
+
+        // WHILE CLICKING MONTHLY: ALWAYS SHOW CURRENT MONTH!
+        const currentRealMonth = todayISO.substring(0, 7);
+        const selectedMonth = explicitMonth || currentRealMonth;
+        activeBillingMonth = selectedMonth;
+
+        const billingSelect = document.getElementById('miscBillingMonth');
+        if (billingSelect) {
+          if (!customBillingMonths.includes(selectedMonth)) {
+            customBillingMonths.unshift(selectedMonth);
+            localStorage.setItem('dgrow_billing_months', JSON.stringify(customBillingMonths));
+            renderBillingMonthSelect();
+          }
+          billingSelect.value = selectedMonth;
+        }
+        syncMonthlyEmiRoster(selectedMonth);
+
         const mDate = new Date(selectedMonth + '-01');
         const mName = isNaN(mDate.getTime()) ? selectedMonth : mDate.toLocaleString('default', { month: 'long', year: 'numeric' });
         badgeEl.textContent = 'Monthly (' + mName + ')';
@@ -3694,14 +3875,31 @@
     }
 
     // --- BILLING MONTH MANAGEMENT & DAY 1 TO 30 LEDGER ---
-    let activeBillingMonth = '2026-08'; // Default YYYY-MM
-    let customBillingMonths = ['2026-08', '2026-07', '2026-06'];
+    const currentRealMonth = todayISO.substring(0, 7); // Dynamic current month, e.g. "2026-09"
+    let activeBillingMonth = currentRealMonth;
+    let customBillingMonths = [currentRealMonth, '2026-08', '2026-07', '2026-06'];
 
     function loadBillingMonths() {
+      const currentRealMonth = todayISO.substring(0, 7);
       const stored = localStorage.getItem('dgrow_billing_months');
       if (stored) {
-        try { customBillingMonths = JSON.parse(stored); } catch(e){}
+        try { 
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            customBillingMonths = parsed;
+          }
+        } catch(e){}
       }
+      // Ensure the current real month (e.g. September 2026) is always present at the top!
+      if (!customBillingMonths.includes(currentRealMonth)) {
+        customBillingMonths.unshift(currentRealMonth);
+      }
+      ['2026-08', '2026-07', '2026-06'].forEach(m => {
+        if (!customBillingMonths.includes(m)) customBillingMonths.push(m);
+      });
+      localStorage.setItem('dgrow_billing_months', JSON.stringify(customBillingMonths));
+
+      activeBillingMonth = currentRealMonth;
       renderBillingMonthSelect();
     }
 
@@ -3709,19 +3907,28 @@
       const select = document.getElementById('miscBillingMonth');
       if (!select) return;
 
-      const currentVal = select.value || activeBillingMonth;
+      const currentRealMonth = todayISO.substring(0, 7);
+      const currentVal = activeBillingMonth || select.value || currentRealMonth;
+
       let opts = customBillingMonths.map(m => {
         const d = new Date(m + '-01');
         const monthName = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const isCurrent = (m === currentRealMonth);
         const isActive = (m === activeBillingMonth);
-        return `<option value="${m}">${monthName} ${isActive ? '(Active Bill)' : '(Closed Bill)'}`;
+        let tag = '(Closed Bill)';
+        if (isCurrent) tag = '(Active Bill)';
+        else if (isActive) tag = '(Selected)';
+        return `<option value="${m}">${monthName} ${tag}</option>`;
       }).join('');
 
-      opts += `<option value="__NEW_MONTH__" style="color:var(--primary); font-weight:800;">+ Start New Month Bill...`;
+      opts += `<option value="__NEW_MONTH__" style="color:var(--primary); font-weight:800;">+ Start New Month Bill...</option>`;
       select.innerHTML = opts;
 
-      if (customBillingMonths.includes(currentVal)) select.value = currentVal;
-      else if (customBillingMonths.length > 0) select.value = customBillingMonths[0];
+      if (customBillingMonths.includes(currentVal)) {
+        select.value = currentVal;
+      } else {
+        select.value = currentRealMonth;
+      }
     }
 
     function onBillingMonthChange(val) {
@@ -3755,8 +3962,8 @@
       } else {
         activeBillingMonth = val;
         syncMonthlyEmiRoster(val);
+        switchMiscPeriod('MONTHLY', val);
       }
-      applyAllMiscFilters();
     }
 
     function updateModalDateHint(dateVal) {
@@ -3887,8 +4094,9 @@
       if (dueGrp) {
         dueGrp.style.display = (catToSet === 'EMI & Loans' || catToSet === 'EMI & Monthly Dues') ? 'block' : 'none';
       }
-      const dueInput = document.getElementById('modalMiscDueDate');
-      if (dueInput) dueInput.value = '';
+      if (document.getElementById('modalMiscDueStartDate')) document.getElementById('modalMiscDueStartDate').value = '';
+      if (document.getElementById('modalMiscDueEndDate')) document.getElementById('modalMiscDueEndDate').value = '';
+      if (document.getElementById('modalMiscDueDate')) document.getElementById('modalMiscDueDate').value = '';
 
       const statusSelect = document.getElementById('modalMiscStatus');
       if (statusSelect) {
@@ -3907,7 +4115,7 @@
     }
 
     function openEditMiscModal(id) {
-      const record = miscRecords.find(r => r.id === id);
+      const record = miscRecords.find(r => String(r.id) === String(id));
       if (!record) return;
 
       // If editing an Ad Funds transaction, route to the Daily Process flow modal with wallet math & action switcher
@@ -3917,17 +4125,23 @@
       }
 
       document.getElementById('modalMiscEditId').value = record.id;
-      document.getElementById('miscModalTitle').textContent = (record.category === 'EMI & Loans') ? 'Edit EMI / Loan Entry' : 'Edit Expense Entry';
+      document.getElementById('miscModalTitle').textContent = (record.category === 'EMI & Loans' || record.category === 'EMI & Monthly Dues') ? 'Edit EMI / Loan Entry' : 'Edit Expense Entry';
       document.getElementById('modalMiscCategory').value = record.category;
       populateSubCategories(record.category, record.subCategory);
 
+      const isEmi = (record.category === 'EMI & Loans' || record.category === 'EMI & Monthly Dues');
       const dueGrp = document.getElementById('modalMiscDueDateGroup');
       if (dueGrp) {
-        dueGrp.style.display = (record.category === 'EMI & Loans' || record.category === 'EMI & Monthly Dues') ? 'block' : 'none';
+        dueGrp.style.display = isEmi ? 'block' : 'none';
       }
-      const dueInput = document.getElementById('modalMiscDueDate');
-      if (dueInput) {
-        dueInput.value = record.dueDate || (record.metrics && record.metrics.includes('Due Date:') ? record.metrics.replace('Due Date: ', '') : '');
+      if (document.getElementById('modalMiscDueStartDate')) {
+        document.getElementById('modalMiscDueStartDate').value = record.dueStartDate || '';
+      }
+      if (document.getElementById('modalMiscDueEndDate')) {
+        document.getElementById('modalMiscDueEndDate').value = record.dueEndDate || '';
+      }
+      if (document.getElementById('modalMiscDueDate')) {
+        document.getElementById('modalMiscDueDate').value = record.dueDate || (record.metrics && record.metrics.includes('Due Date:') ? record.metrics.replace('Due Date: ', '') : '');
       }
 
       document.getElementById('modalMiscTitle').value = record.title;
@@ -3941,7 +4155,7 @@
 
       const statusSelect = document.getElementById('modalMiscStatus');
       if (statusSelect) {
-        statusSelect.value = record.status || ((record.category === 'EMI & Loans') ? 'PENDING' : 'PAID');
+        statusSelect.value = record.status || (isEmi ? 'PENDING' : 'PAID');
       }
 
       document.getElementById('miscModal').classList.add('active');
@@ -3955,21 +4169,54 @@
       const subCategory = document.getElementById('modalMiscSubCategory').value;
       const amount = parseFloat(document.getElementById('modalMiscAmount').value) || 0;
       const mode = document.getElementById('modalMiscPaymentMode').value;
-      const date = document.getElementById('modalMiscDate').value;
+      let date = document.getElementById('modalMiscDate').value;
       const receipt = document.getElementById('modalMiscReceipt').value.trim() || 'Attached';
       const client = document.getElementById('modalMiscClient').value;
       let metrics = document.getElementById('modalMiscMetrics').value.trim();
-      const dueDate = document.getElementById('modalMiscDueDate')?.value.trim() || '';
-      const status = document.getElementById('modalMiscStatus')?.value || ((category === 'EMI & Loans') ? 'PENDING' : 'PAID');
+      const dueStartDate = document.getElementById('modalMiscDueStartDate')?.value || '';
+      const dueEndDate = document.getElementById('modalMiscDueEndDate')?.value || '';
+      let dueDate = document.getElementById('modalMiscDueDate')?.value.trim() || '';
+      let status = document.getElementById('modalMiscStatus')?.value || ((category === 'EMI & Loans' || category === 'EMI & Monthly Dues') ? 'PENDING' : 'PAID');
 
-      if ((category === 'EMI & Loans' || category === 'EMI & Monthly Dues') && dueDate) {
-        metrics = dueDate.startsWith('Due Date:') ? dueDate : `Due Date: ${dueDate}`;
+      if (category === 'EMI & Loans' || category === 'EMI & Monthly Dues') {
+        // Assign date based on Due Start Date if date is before dueStartDate or in an earlier month
+        if (dueStartDate) {
+          if (!date || date < dueStartDate || date.substring(0, 7) < dueStartDate.substring(0, 7)) {
+            date = dueStartDate;
+          }
+        }
+
+        if (dueStartDate && dueEndDate) {
+          metrics = `Due: ${formatDate(dueStartDate)} - ${formatDate(dueEndDate)}`;
+          dueDate = `${dueStartDate} to ${dueEndDate}`;
+        } else if (dueStartDate) {
+          metrics = `Due From: ${formatDate(dueStartDate)}`;
+          dueDate = dueStartDate;
+        } else if (dueEndDate) {
+          metrics = `Due Until: ${formatDate(dueEndDate)}`;
+          dueDate = dueEndDate;
+        } else if (dueDate) {
+          metrics = dueDate.startsWith('Due Date:') ? dueDate : `Due Date: ${dueDate}`;
+        }
       }
 
       const monthCode = (date && date.length >= 7) ? date.substring(0, 7) : activeBillingMonth;
+      if (!customBillingMonths.includes(monthCode)) {
+        customBillingMonths.push(monthCode);
+        customBillingMonths.sort();
+        localStorage.setItem('dgrow_billing_months', JSON.stringify(customBillingMonths));
+        renderBillingMonthSelect();
+      }
+
+      // Check if this record is in the final month and marked PAID -> auto close!
+      const dummyRecord = { date, dueStartDate, dueEndDate, status };
+      const tenure = getEmiTenureDetails(dummyRecord);
+      if (status === 'PAID' && tenure && tenure.isFinalMonth) {
+        status = 'CLOSED';
+      }
 
       if (editId) {
-        const index = miscRecords.findIndex(r => r.id === parseInt(editId));
+        const index = miscRecords.findIndex(r => String(r.id) === String(editId));
         if (index !== -1) {
           miscRecords[index] = {
             ...miscRecords[index],
@@ -3979,6 +4226,8 @@
             client,
             metrics,
             dueDate,
+            dueStartDate,
+            dueEndDate,
             amount,
             mode,
             date,
@@ -3986,7 +4235,14 @@
             month: monthCode,
             status: status
           };
-          showToast('Expense entry updated', 'success');
+          if (status === 'CLOSED' && tenure && tenure.isFinalMonth) {
+            checkAndAutoCloseFinalEmi(miscRecords[index]);
+            showToast(`🎉 Final installment (${tenure.totalMonths}/${tenure.totalMonths}) completed! Loan "${title}" is now CLOSED.`, 'success');
+          } else {
+            showToast((category === 'EMI & Loans' || category === 'EMI & Monthly Dues') ? 'EMI entry updated successfully!' : 'Expense entry updated successfully!', 'success');
+          }
+        } else {
+          showToast('Error: Record to update was not found.', 'error');
         }
       } else {
         const newRecord = {
@@ -3997,6 +4253,8 @@
           client,
           metrics,
           dueDate,
+          dueStartDate,
+          dueEndDate,
           amount,
           mode,
           date,
@@ -4005,7 +4263,12 @@
           status: status
         };
         miscRecords.unshift(newRecord);
-        showToast(`Expense entry saved as ${status}!`, 'success');
+        if (status === 'CLOSED' && tenure && tenure.isFinalMonth) {
+          checkAndAutoCloseFinalEmi(newRecord);
+          showToast(`🎉 Final installment completed! Loan "${title}" saved and CLOSED.`, 'success');
+        } else {
+          showToast(`Entry saved successfully as ${status}!`, 'success');
+        }
       }
 
       saveMiscStorage();
@@ -4030,7 +4293,7 @@
 
     // --- EMI PAY MODAL & STATUS TRANSITION ACTIONS ---
     function openPayEmiModal(recordId) {
-      const record = miscRecords.find(r => r.id === recordId);
+      const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
       currentEditingEmiRecordId = record.id;
@@ -4040,6 +4303,43 @@
       document.getElementById('payEmiDate').value = todayISO;
       document.getElementById('payEmiMode').value = record.mode || 'Bank Transfer / Auto-Debit';
       document.getElementById('payEmiReceipt').value = record.receipt && !record.receipt.includes('Auto') ? record.receipt : `EMI-PAID-${record.amount}`;
+
+      // Check tenure and if this is final month
+      const tenure = getEmiTenureDetails(record);
+      const notice = document.getElementById('payEmiFinalNotice');
+      const badge = document.getElementById('payEmiStatusBadge');
+      if (tenure && tenure.isFinalMonth) {
+        if (badge) {
+          badge.textContent = 'CLOSED / COMPLETED';
+          badge.className = 'badge';
+          badge.style.background = '#fef3c7';
+          badge.style.color = '#92400e';
+          badge.style.border = '1px solid #fde68a';
+        }
+        if (notice) {
+          notice.style.display = 'flex';
+          notice.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span><strong>Final Installment (${tenure.currentMonthIndex} of ${tenure.totalMonths})</strong>: Paying this will automatically complete and <strong>CLOSE</strong> this loan.</span>`;
+        }
+      } else {
+        if (badge) {
+          badge.textContent = 'PAID / CLEARED';
+          badge.className = 'badge badge-paid';
+          badge.style.background = '';
+          badge.style.color = '';
+          badge.style.border = '';
+        }
+        if (notice) {
+          if (tenure) {
+            notice.style.display = 'flex';
+            notice.style.background = '#eff6ff';
+            notice.style.color = '#1d4ed8';
+            notice.style.borderColor = '#bfdbfe';
+            notice.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span>Installment <strong>${tenure.currentMonthIndex} of ${tenure.totalMonths}</strong> • <strong>${tenure.remainingMonths} Months Remaining</strong></span>`;
+          } else {
+            notice.style.display = 'none';
+          }
+        }
+      }
 
       document.getElementById('payEmiModal').classList.add('active');
     }
@@ -4051,8 +4351,8 @@
 
     function handleSaveEmiPayment(e) {
       e.preventDefault();
-      const recordId = parseInt(document.getElementById('payEmiRecordId').value);
-      const record = miscRecords.find(r => r.id === recordId);
+      const recordId = document.getElementById('payEmiRecordId').value;
+      const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
       const amount = parseFloat(document.getElementById('payEmiAmount').value) || record.amount;
@@ -4064,30 +4364,47 @@
       record.date = date;
       record.mode = mode;
       record.receipt = receipt;
-      record.status = 'PAID';
       record.month = date.substring(0, 7);
 
-      saveMiscStorage();
-      applyAllMiscFilters();
-      closePayEmiModal();
-      showToast(`Payment recorded for ${record.title}! Status updated to PAID.`, 'success');
+      const tenure = getEmiTenureDetails(record);
+      const isFinalClosed = checkAndAutoCloseFinalEmi(record);
+      if (isFinalClosed) {
+        saveMiscStorage();
+        applyAllMiscFilters();
+        closePayEmiModal();
+        showToast(`🎉 Final installment (${tenure?.totalMonths}/${tenure?.totalMonths}) completed! Loan "${record.title}" is now officially CLOSED.`, 'success');
+      } else {
+        record.status = 'PAID';
+        saveMiscStorage();
+        applyAllMiscFilters();
+        closePayEmiModal();
+        showToast(`Payment recorded for ${record.title}! Status updated to PAID (${tenure ? tenure.remainingMonths + ' months remaining' : ''}).`, 'success');
+      }
     }
 
     function quickMarkEmiPaid(recordId) {
-      const record = miscRecords.find(r => r.id === recordId);
+      const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
-      record.status = 'PAID';
       record.date = todayISO;
       if (!record.receipt) record.receipt = `PAID-${record.amount}`;
 
-      saveMiscStorage();
-      applyAllMiscFilters();
-      showToast(`Marked ${record.title} as PAID!`, 'success');
+      const tenure = getEmiTenureDetails(record);
+      const isFinalClosed = checkAndAutoCloseFinalEmi(record);
+      if (isFinalClosed) {
+        saveMiscStorage();
+        applyAllMiscFilters();
+        showToast(`🎉 Final installment paid! Loan "${record.title}" is now officially CLOSED.`, 'success');
+      } else {
+        record.status = 'PAID';
+        saveMiscStorage();
+        applyAllMiscFilters();
+        showToast(`Marked ${record.title} as PAID! (${tenure ? tenure.remainingMonths + ' months remaining' : ''})`, 'success');
+      }
     }
 
     function markEmiRecordClosed(recordId) {
-      const record = miscRecords.find(r => r.id === recordId);
+      const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
       record.status = 'CLOSED';
@@ -4109,7 +4426,7 @@
     }
 
     function reopenEmiRecord(recordId) {
-      const record = miscRecords.find(r => r.id === recordId);
+      const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
       record.status = 'PENDING';
@@ -4127,20 +4444,27 @@
     }
 
     function toggleEmiStatus(recordId) {
-      const record = miscRecords.find(r => r.id === recordId);
+      const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
       if (record.status === 'PENDING') {
-        record.status = 'PAID';
+        const tenure = getEmiTenureDetails(record);
+        if (checkAndAutoCloseFinalEmi(record)) {
+          showToast(`🎉 Final month due completed! Loan "${record.title}" is now officially CLOSED.`, 'success');
+        } else {
+          record.status = 'PAID';
+          showToast(`Status updated to PAID (${tenure ? tenure.remainingMonths + ' months remaining' : ''})!`, 'info');
+        }
       } else if (record.status === 'PAID') {
         record.status = 'CLOSED';
+        showToast(`Status updated to CLOSED!`, 'info');
       } else {
         record.status = 'PENDING';
+        showToast(`Status re-opened as PENDING!`, 'info');
       }
 
       saveMiscStorage();
       applyAllMiscFilters();
-      showToast(`EMI status toggled to ${record.status}!`, 'info');
     }
 
     // --- CLIENT MONTHLY DATE-WISE BILLS LEDGER (PAGE & MODAL) ---
@@ -4809,12 +5133,34 @@
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; width:28%; min-width:240px;">' +
                   '<div style="font-weight:700; color:' + (isClosed ? '#64748b' : 'var(--text-main)') + '; font-size:0.88rem; line-height:1.35;">' + escapeHtml(r.title) + '</div>' +
-                  (isEmi ? (
-                    '<div class="metrics-snippet" style="white-space:nowrap; display:inline-flex; align-items:center; gap:0.3rem; font-size:0.74rem; margin-top:0.35rem; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700;">' +
-                      '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ' +
-                      escapeHtml(r.metrics && r.metrics.includes('Due Date:') ? r.metrics : (r.dueDate ? ('Due Date: ' + r.dueDate) : ('Due Date: ' + (dayNum ? (dayNum.replace('Day ', '').trim() + 'th of every month') : formatDate(r.date))))) +
-                    '</div>'
-                  ) : (
+                  (isEmi ? (() => {
+                    const tenure = getEmiTenureDetails(r);
+                    let tenureBadge = '';
+                    if (tenure) {
+                      tenureBadge = tenure.isFinalMonth
+                        ? ('<span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; font-weight:800; font-size:0.72rem; padding:0.18rem 0.5rem; border-radius:4px; display:inline-flex; align-items:center; gap:0.25rem;">' +
+                            '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' +
+                            'Final Month (' + tenure.currentMonthIndex + '/' + tenure.totalMonths + ') • 0 Left' +
+                          '</span>')
+                        : ('<span class="badge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:800; font-size:0.72rem; padding:0.18rem 0.5rem; border-radius:4px; display:inline-flex; align-items:center; gap:0.25rem;">' +
+                            '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' +
+                            'Month ' + tenure.currentMonthIndex + ' of ' + tenure.totalMonths + ' • ' + tenure.remainingMonths + (tenure.remainingMonths === 1 ? ' Month' : ' Months') + ' Remaining' +
+                          '</span>');
+                    }
+                    const dueRangeText = (r.dueStartDate && r.dueEndDate)
+                      ? ('Due: ' + formatDate(r.dueStartDate) + ' → ' + formatDate(r.dueEndDate))
+                      : (r.dueStartDate ? ('Due From: ' + formatDate(r.dueStartDate)) : (r.dueEndDate ? ('Due Until: ' + formatDate(r.dueEndDate)) : (r.metrics && r.metrics.includes('Due Date:') ? r.metrics : (r.dueDate ? ('Due Date: ' + r.dueDate) : ('Due Date: ' + (dayNum ? (dayNum.replace('Day ', '').trim() + 'th of every month') : formatDate(r.date)))))));
+
+                    return (
+                      '<div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem; margin-top:0.35rem;">' +
+                        '<div class="metrics-snippet" style="white-space:nowrap; display:inline-flex; align-items:center; gap:0.3rem; font-size:0.74rem; background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; padding:0.18rem 0.5rem; border-radius:4px; font-weight:700;">' +
+                          '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ' +
+                          escapeHtml(dueRangeText) +
+                        '</div>' +
+                        tenureBadge +
+                      '</div>'
+                    );
+                  })() : (
                     r.metrics ? '<div class="metrics-snippet" style="white-space:nowrap; display:inline-flex; align-items:center; gap:0.25rem; font-size:0.74rem; margin-top:0.3rem;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> ' + escapeHtml(r.metrics) + '</div>' : ''
                   )) +
                 '</td>' +

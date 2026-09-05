@@ -954,7 +954,7 @@
         </div>
         <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem; padding-top:0.75rem; border-top:1px solid #e2e8f0;">
           <button type="button" class="btn btn-secondary" onclick="closePayEmiModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary" style="background:#16a34a; border-color:#16a34a;">Confirm & Mark as Paid</button>
+          <button type="submit" id="savePayEmiBtn" class="btn btn-primary" style="background:#16a34a; border-color:#16a34a;">Confirm & Mark as Paid</button>
         </div>
       </form>
     </div>
@@ -4120,7 +4120,19 @@
         const recDate = r.date || todayISO;
         if (currentMiscPeriod === 'DAILY') return (recDate === todayISO);
         if (currentMiscPeriod === 'WEEKLY') return (recDate >= sevenDaysAgo && recDate <= todayISO);
-        if (currentMiscPeriod === 'MONTHLY') return recDate.startsWith(selectedMonth);
+        if (currentMiscPeriod === 'MONTHLY') {
+          if (!recDate.startsWith(selectedMonth)) return false;
+          // Crucial: Do not show pending dues in this month if loan is CLOSED or past its dueEndDate!
+          if ((r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') && r.status === 'PENDING') {
+            if (r.dueEndDate && selectedMonth > r.dueEndDate.substring(0, 7)) return false;
+            loadEmiPresets();
+            const matched = emiPresets.find(p => (r.loanPresetId && p.id === r.loanPresetId) || (r.subCategory && p.provider === r.subCategory) || (r.title && p.title === r.title));
+            if (matched && (matched.status === 'CLOSED' || (matched.endDate && selectedMonth > matched.endDate.substring(0, 7)))) {
+              return false;
+            }
+          }
+          return true;
+        }
         if (currentMiscPeriod === 'CUSTOM') {
           if (miscCustomFromDate && recDate < miscCustomFromDate) return false;
           if (miscCustomToDate && recDate > miscCustomToDate) return false;
@@ -4131,9 +4143,9 @@
 
       // Filter EMI Records for status tab badges
       const emiPeriodRecords = periodRecords.filter(r => (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues'));
-      const emiPaidCount = emiPeriodRecords.filter(r => (r.status || 'PAID') === 'PAID').length;
+      const emiPaidCount = emiPeriodRecords.filter(r => (r.status || 'PAID') === 'PAID' || r.status === 'PAID_AND_CLOSED' || r.loanClosed === true).length;
       const emiPendingCount = emiPeriodRecords.filter(r => r.status === 'PENDING').length;
-      const emiClosedCount = emiPeriodRecords.filter(r => r.status === 'CLOSED').length;
+      const emiClosedCount = emiPeriodRecords.filter(r => r.loanClosed === true || r.status === 'CLOSED').length;
 
       const badgeAll = document.getElementById('badgeEmiCountAll');
       const badgePaid = document.getElementById('badgeEmiCountPaid');
@@ -4189,8 +4201,13 @@
         } else if (currentMiscSubView === 'EMI_LOANS') {
           matchesSubView = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues');
           if (matchesSubView && currentMiscStatusFilter) {
-            const recStatus = r.status || 'PAID';
-            matchesSubView = (recStatus === currentMiscStatusFilter);
+            if (currentMiscStatusFilter === 'PAID') {
+              matchesSubView = ((r.status || 'PAID') === 'PAID' || r.status === 'PAID_AND_CLOSED' || r.loanClosed === true);
+            } else if (currentMiscStatusFilter === 'PENDING') {
+              matchesSubView = (r.status === 'PENDING');
+            } else if (currentMiscStatusFilter === 'CLOSED') {
+              matchesSubView = (r.loanClosed === true || r.status === 'CLOSED');
+            }
           }
         } else if (currentMiscSubView === 'OTHER_EXPENSES') {
           matchesSubView = (r.category !== 'Ad Funds' && r.category !== 'EMI & Loans' && r.category !== 'EMI & Monthly Dues');
@@ -4337,18 +4354,27 @@
         renderBillingMonthSelect();
       }
 
-      // Check if this record is in the final month and marked PAID -> auto close!
+      // Check if this record is in the final month or closed
+      const isEmiCat = (category === 'EMI & Loans' || category === 'EMI & Monthly Dues');
       const dummyRecord = { date, dueStartDate, dueEndDate, status };
       const tenure = getEmiTenureDetails(dummyRecord);
-      if (status === 'PAID' && tenure && tenure.isFinalMonth) {
-        status = 'CLOSED';
+      let isClosedLoanFlag = false;
+      if (isEmiCat) {
+        if (status === 'CLOSED') {
+          status = 'PAID'; // Keep current month payment recorded
+          isClosedLoanFlag = true;
+        } else if (status === 'PAID' && tenure && tenure.isFinalMonth) {
+          isClosedLoanFlag = true;
+        }
       }
 
       if (editId) {
         const index = miscRecords.findIndex(r => String(r.id) === String(editId));
         if (index !== -1) {
+          const prevRec = miscRecords[index];
+          const finalClosed = isClosedLoanFlag || (isEmiCat && prevRec.loanClosed && status === 'PAID');
           miscRecords[index] = {
-            ...miscRecords[index],
+            ...prevRec,
             title,
             category,
             subCategory,
@@ -4362,11 +4388,19 @@
             date,
             receipt,
             month: monthCode,
-            status: status
+            status: status,
+            loanClosed: isEmiCat ? finalClosed : false
           };
-          if (status === 'CLOSED' && tenure && tenure.isFinalMonth) {
-            checkAndAutoCloseFinalEmi(miscRecords[index]);
-            showToast(`🎉 Final installment (${tenure.totalMonths}/${tenure.totalMonths}) completed! Loan "${title}" is now CLOSED.`, 'success');
+
+          if (isEmiCat && finalClosed) {
+            loadEmiPresets();
+            const matchedPreset = emiPresets.find(p => (prevRec.loanPresetId && p.id === prevRec.loanPresetId) || (p.provider === subCategory) || (p.title === title));
+            if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+              matchedPreset.status = 'CLOSED';
+              saveEmiPresetsStorage();
+            }
+            cleanupFutureEmiRecords(miscRecords[index]);
+            showToast(`🎉 Installment paid & Loan "${title}" is officially CLOSED for future months!`, 'success');
           } else {
             showToast((category === 'EMI & Loans' || category === 'EMI & Monthly Dues') ? 'EMI entry updated successfully!' : 'Expense entry updated successfully!', 'success');
           }
@@ -4389,12 +4423,19 @@
           date,
           receipt,
           month: monthCode,
-          status: status
+          status: status,
+          loanClosed: isEmiCat ? isClosedLoanFlag : false
         };
         miscRecords.unshift(newRecord);
-        if (status === 'CLOSED' && tenure && tenure.isFinalMonth) {
-          checkAndAutoCloseFinalEmi(newRecord);
-          showToast(`🎉 Final installment completed! Loan "${title}" saved and CLOSED.`, 'success');
+        if (isEmiCat && isClosedLoanFlag) {
+          loadEmiPresets();
+          const matchedPreset = emiPresets.find(p => p.provider === subCategory || p.title === title);
+          if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+            matchedPreset.status = 'CLOSED';
+            saveEmiPresetsStorage();
+          }
+          cleanupFutureEmiRecords(newRecord);
+          showToast(`🎉 Loan "${title}" saved as PAID and officially CLOSED for future months!`, 'success');
         } else {
           showToast(`Entry saved successfully as ${status}!`, 'success');
         }
@@ -4412,11 +4453,28 @@
     }
 
     function deleteMiscRecord(id) {
-      if (confirm('Are you sure you want to delete this entry?')) {
-        miscRecords = miscRecords.filter(r => r.id !== id);
+      const record = miscRecords.find(r => String(r.id) === String(id));
+      if (!record) return;
+
+      const isEmi = (record.category === 'EMI & Loans' || record.category === 'EMI & Monthly Dues');
+      const confirmMsg = isEmi
+        ? `Are you sure you want to delete this EMI entry "${record.title}" for this month?`
+        : 'Are you sure you want to delete this entry?';
+
+      if (confirm(confirmMsg)) {
+        if (isEmi) {
+          // Record deleted key so auto-sync does not regenerate it for this month
+          const mKey = (record.date || record.month || activeBillingMonth || todayISO).substring(0, 7);
+          const pId = record.loanPresetId || record.subCategory;
+          if (pId) {
+            deletedEmiMonthKeys.add(`${mKey}_${pId}`);
+            saveDeletedEmiMonthKeys();
+          }
+        }
+        miscRecords = miscRecords.filter(r => String(r.id) !== String(id));
         saveMiscStorage();
         applyAllMiscFilters();
-        showToast('Entry deleted', 'info');
+        showToast('Entry deleted successfully.', 'info');
       }
     }
 
@@ -4439,7 +4497,7 @@
       const badge = document.getElementById('payEmiStatusBadge');
       if (tenure && tenure.isFinalMonth) {
         if (badge) {
-          badge.textContent = 'CLOSED / COMPLETED';
+          badge.textContent = 'FINAL MONTH (WILL CLOSE)';
           badge.className = 'badge';
           badge.style.background = '#fef3c7';
           badge.style.color = '#92400e';
@@ -4447,7 +4505,10 @@
         }
         if (notice) {
           notice.style.display = 'flex';
-          notice.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span><strong>Final Installment (${tenure.currentMonthIndex} of ${tenure.totalMonths})</strong>: Paying this will automatically complete and <strong>CLOSE</strong> this loan.</span>`;
+          notice.style.background = '#fef3c7';
+          notice.style.color = '#92400e';
+          notice.style.borderColor = '#fde68a';
+          notice.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span><strong>Final Installment (${tenure.currentMonthIndex} of ${tenure.totalMonths})</strong>: Paying this will record the payment in current month expenses and automatically <strong>CLOSE</strong> this loan so it won't appear next month.</span>`;
         }
       } else {
         if (badge) {
@@ -4494,16 +4555,26 @@
       record.mode = mode;
       record.receipt = receipt;
       record.month = date.substring(0, 7);
+      record.status = 'PAID';
 
       const tenure = getEmiTenureDetails(record);
-      const isFinalClosed = checkAndAutoCloseFinalEmi(record);
-      if (isFinalClosed) {
+      const isFinal = tenure && tenure.isFinalMonth;
+      if (isFinal) {
+        record.loanClosed = true;
+        // Auto-close matching master loan preset
+        loadEmiPresets();
+        const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
+        if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+          matchedPreset.status = 'CLOSED';
+          saveEmiPresetsStorage();
+        }
+        cleanupFutureEmiRecords(record);
         saveMiscStorage();
         applyAllMiscFilters();
         closePayEmiModal();
-        showToast(`🎉 Final installment (${tenure?.totalMonths}/${tenure?.totalMonths}) completed! Loan "${record.title}" is now officially CLOSED.`, 'success');
+        showToast(`🎉 Final installment (${tenure?.totalMonths}/${tenure?.totalMonths}) paid! Loan "${record.title}" is officially CLOSED and will NOT generate next month.`, 'success');
       } else {
-        record.status = 'PAID';
+        record.loanClosed = false;
         saveMiscStorage();
         applyAllMiscFilters();
         closePayEmiModal();
@@ -4517,15 +4588,24 @@
 
       record.date = todayISO;
       if (!record.receipt) record.receipt = `PAID-${record.amount}`;
+      record.status = 'PAID';
 
       const tenure = getEmiTenureDetails(record);
-      const isFinalClosed = checkAndAutoCloseFinalEmi(record);
-      if (isFinalClosed) {
+      const isFinal = tenure && tenure.isFinalMonth;
+      if (isFinal) {
+        record.loanClosed = true;
+        loadEmiPresets();
+        const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
+        if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+          matchedPreset.status = 'CLOSED';
+          saveEmiPresetsStorage();
+        }
+        cleanupFutureEmiRecords(record);
         saveMiscStorage();
         applyAllMiscFilters();
-        showToast(`🎉 Final installment paid! Loan "${record.title}" is now officially CLOSED.`, 'success');
+        showToast(`🎉 Final installment paid! Loan "${record.title}" is officially CLOSED and will NOT generate next month.`, 'success');
       } else {
-        record.status = 'PAID';
+        record.loanClosed = false;
         saveMiscStorage();
         applyAllMiscFilters();
         showToast(`Marked ${record.title} as PAID! (${tenure ? tenure.remainingMonths + ' months remaining' : ''})`, 'success');
@@ -4536,22 +4616,23 @@
       const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
-      record.status = 'CLOSED';
-      saveMiscStorage();
+      // Keep status as PAID so payment is preserved and counted in current month expenses!
+      record.status = 'PAID';
+      record.loanClosed = true;
+      if (!record.date) record.date = todayISO;
+      if (!record.receipt) record.receipt = `CLOSED-${record.amount}`;
 
-      // Check if matching preset exists and ask to close preset as well
       loadEmiPresets();
-      const matchedPreset = emiPresets.find(p => p.provider === record.subCategory || p.title === record.title || p.id === record.loanPresetId);
+      const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
       if (matchedPreset && matchedPreset.status !== 'CLOSED') {
-        if (confirm(`Do you also want to mark the master loan "${matchedPreset.title}" as CLOSED so it will NOT auto-create dues next month?`)) {
-          matchedPreset.status = 'CLOSED';
-          saveEmiPresetsStorage();
-          showToast(`Master loan "${matchedPreset.title}" is now CLOSED and will not generate next month.`, 'info');
-        }
+        matchedPreset.status = 'CLOSED';
+        saveEmiPresetsStorage();
       }
 
+      cleanupFutureEmiRecords(record);
+      saveMiscStorage();
       applyAllMiscFilters();
-      showToast(`Marked ${record.title} as CLOSED / FINISHED!`, 'info');
+      showToast(`🎉 Loan "${record.title}" is officially CLOSED! Payment counted in current month & future dues removed.`, 'success');
     }
 
     function reopenEmiRecord(recordId) {
@@ -4559,10 +4640,11 @@
       if (!record) return;
 
       record.status = 'PENDING';
+      record.loanClosed = false;
       saveMiscStorage();
 
       loadEmiPresets();
-      const matchedPreset = emiPresets.find(p => p.provider === record.subCategory || p.title === record.title || p.id === record.loanPresetId);
+      const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
       if (matchedPreset && matchedPreset.status === 'CLOSED') {
         matchedPreset.status = 'ACTIVE';
         saveEmiPresetsStorage();
@@ -4576,19 +4658,45 @@
       const record = miscRecords.find(r => String(r.id) === String(recordId));
       if (!record) return;
 
+      const tenure = getEmiTenureDetails(record);
+      const isFinal = tenure && tenure.isFinalMonth;
+
       if (record.status === 'PENDING') {
-        const tenure = getEmiTenureDetails(record);
-        if (checkAndAutoCloseFinalEmi(record)) {
-          showToast(`🎉 Final month due completed! Loan "${record.title}" is now officially CLOSED.`, 'success');
+        record.status = 'PAID';
+        if (isFinal) {
+          record.loanClosed = true;
+          loadEmiPresets();
+          const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
+          if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+            matchedPreset.status = 'CLOSED';
+            saveEmiPresetsStorage();
+          }
+          cleanupFutureEmiRecords(record);
+          showToast(`🎉 Final month due completed! Loan "${record.title}" is officially CLOSED.`, 'success');
         } else {
-          record.status = 'PAID';
+          record.loanClosed = false;
           showToast(`Status updated to PAID (${tenure ? tenure.remainingMonths + ' months remaining' : ''})!`, 'info');
         }
-      } else if (record.status === 'PAID') {
-        record.status = 'CLOSED';
-        showToast(`Status updated to CLOSED!`, 'info');
+      } else if (record.status === 'PAID' && !record.loanClosed) {
+        // Mark as closed (preserve payment in this month)
+        record.loanClosed = true;
+        loadEmiPresets();
+        const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
+        if (matchedPreset && matchedPreset.status !== 'CLOSED') {
+          matchedPreset.status = 'CLOSED';
+          saveEmiPresetsStorage();
+        }
+        cleanupFutureEmiRecords(record);
+        showToast(`Loan "${record.title}" marked as CLOSED for future months! Current payment preserved.`, 'info');
       } else {
         record.status = 'PENDING';
+        record.loanClosed = false;
+        loadEmiPresets();
+        const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
+        if (matchedPreset && matchedPreset.status === 'CLOSED') {
+          matchedPreset.status = 'ACTIVE';
+          saveEmiPresetsStorage();
+        }
         showToast(`Status re-opened as PENDING!`, 'info');
       }
 
@@ -5226,7 +5334,8 @@
 
             const isEmi = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues');
             const isPending = (r.status === 'PENDING');
-            const isClosed = (r.status === 'CLOSED');
+            const isClosed = (r.status === 'CLOSED' || r.loanClosed === true);
+            const isPaid = (r.status === 'PAID' || r.status === 'PAID_AND_CLOSED' || r.loanClosed === true);
             const isRefund = (r.flowType === 'REFUND' || r.subCategory === 'Refund / Balance Return' || r.category === 'Refund / Balance Return' || r.category === 'Refund');
             const isDeposit = (r.flowType === 'DEPOSIT' || r.subCategory === 'Client Wallet Deposit');
             const catBadgeClass = isRefund ? 'cat-refund' : getCategoryBadgeClass(r.category);
@@ -5235,10 +5344,10 @@
             const monthStr = isNaN(d.getTime()) ? 'August 2026' : d.toLocaleString('default', { month: 'long', year: 'numeric' });
 
             renderedRows.push(
-              '<tr style="border-bottom:1px solid #f1f5f9; ' + (isClosed ? 'background:#f8fafc; opacity:0.85;' : (isPending ? 'background:#fffbf5;' : (isRefund ? 'background:#fffbfb;' : ''))) + '">' +
+              '<tr style="border-bottom:1px solid #f1f5f9; ' + (isClosed && !isPaid ? 'background:#f8fafc; opacity:0.85;' : (isPending ? 'background:#fffbf5;' : (isRefund ? 'background:#fffbfb;' : ''))) + '">' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; white-space:nowrap; width:15%;">' +
                   (isEmi ? (
-                    '<span style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:700; font-size:0.84rem; ' + (isClosed ? 'color:#64748b; background:#f1f5f9; border:1px solid #cbd5e1;' : 'color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8;') + ' padding:0.2rem 0.55rem; border-radius:4px;">' +
+                    '<span style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:700; font-size:0.84rem; ' + (isClosed ? 'color:#15803d; background:#f0fdf4; border:1px solid #86efac;' : 'color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8;') + ' padding:0.2rem 0.55rem; border-radius:4px;">' +
                       '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> ' +
                       escapeHtml(r.subCategory || 'EMI Account') +
                     '</span>'
@@ -5254,14 +5363,14 @@
                   (dayNum ? '<span style="font-size:0.7rem; color:#16a34a; font-weight:800; margin-left:0.2rem;">(' + dayNum + ')</span>' : '') +
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; white-space:nowrap; width:11%;">' +
-                  '<strong style="color:' + (isClosed ? '#64748b' : (isPending ? '#d97706' : (isRefund ? '#dc2626' : (isDeposit ? '#16a34a' : '#0f172a')))) + '; font-size:1.05rem; font-weight:800;">' +
+                  '<strong style="color:' + (isPending ? '#d97706' : (isRefund ? '#dc2626' : (isDeposit ? '#16a34a' : (isClosed && isPaid ? '#15803d' : '#0f172a')))) + '; font-size:1.05rem; font-weight:800;">' +
                     (isRefund ? '-₹' : (isDeposit ? '+₹' : '₹')) + amt.toLocaleString('en-IN') +
                   '</strong>' +
                   (isRefund ? '<span style="font-size:0.7rem; color:#dc2626; font-weight:700; display:block;">Refund</span>' : '') +
-                  (isClosed ? '<span style="font-size:0.7rem; color:#64748b; font-weight:700; display:block;">Closed Loan</span>' : '') +
+                  (isClosed && isPaid ? '<span style="font-size:0.7rem; color:#16a34a; font-weight:700; display:block;">Paid (Closed)</span>' : (isClosed ? '<span style="font-size:0.7rem; color:#64748b; font-weight:700; display:block;">Closed Loan</span>' : '')) +
                 '</td>' +
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; width:28%; min-width:240px;">' +
-                  '<div style="font-weight:700; color:' + (isClosed ? '#64748b' : 'var(--text-main)') + '; font-size:0.88rem; line-height:1.35;">' + escapeHtml(r.title) + '</div>' +
+                  '<div style="font-weight:700; color:' + (isClosed && !isPaid ? '#64748b' : 'var(--text-main)') + '; font-size:0.88rem; line-height:1.35;">' + escapeHtml(r.title) + '</div>' +
                   (isEmi ? (() => {
                     const tenure = getEmiTenureDetails(r);
                     let tenureBadge = '';
@@ -5269,7 +5378,7 @@
                       tenureBadge = tenure.isFinalMonth
                         ? ('<span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; font-weight:800; font-size:0.72rem; padding:0.18rem 0.5rem; border-radius:4px; display:inline-flex; align-items:center; gap:0.25rem;">' +
                             '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' +
-                            'Final Month (' + tenure.currentMonthIndex + '/' + tenure.totalMonths + ') • 0 Left' +
+                            'Final Month (' + tenure.currentMonthIndex + '/' + tenure.totalMonths + ') • Closes Loan' +
                           '</span>')
                         : ('<span class="badge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:800; font-size:0.72rem; padding:0.18rem 0.5rem; border-radius:4px; display:inline-flex; align-items:center; gap:0.25rem;">' +
                             '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' +
@@ -5296,11 +5405,11 @@
                 '<td style="padding:0.9rem 0.85rem; vertical-align:middle; text-align:center; white-space:nowrap; width:10%;">' +
                   (isEmi ? (
                     isPending ? (
-                      '<span class="badge badge-pending" style="cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to cycle status (Pending -> Paid -> Closed)">⏱ PENDING</span>'
+                      '<span class="badge badge-pending" style="cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to Pay">⏱ PENDING</span>'
                     ) : (isClosed ? (
-                      '<span class="badge" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to cycle status (Closed -> Pending)">🔒 CLOSED</span>'
+                      '<span class="badge" style="background:#f0fdf4; color:#15803d; border:1px solid #86efac; cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Installment Paid & Loan Closed (Click to Re-open)">✓ PAID (CLOSED)</span>'
                     ) : (
-                      '<span class="badge badge-paid" style="cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Click to cycle status (Paid -> Closed)">✓ PAID</span>'
+                      '<span class="badge badge-paid" style="cursor:pointer; font-weight:800;" onclick="toggleEmiStatus(' + r.id + ')" title="Paid (Click to mark Closed)">✓ PAID</span>'
                     ))
                   ) : (
                     '<span class="cat-badge ' + catBadgeClass + '">' + (isRefund ? '↩️ REFUND' : escapeHtml(r.category)) + '</span>'
@@ -5425,11 +5534,10 @@
         }
       } else if (currentMiscSubView === 'EMI_LOANS') {
         const emiPeriodRecords = allPeriodRecords.filter(r => (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues'));
-        const activeNonClosedEmi = emiPeriodRecords.filter(r => r.status !== 'CLOSED');
-        const totalEmiObligation = activeNonClosedEmi.reduce((sum, r) => sum + Number(r.amount || 0), 0);
-        const paidEmiRecords = emiPeriodRecords.filter(r => (r.status || 'PAID') === 'PAID');
+        const totalEmiObligation = emiPeriodRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+        const paidEmiRecords = emiPeriodRecords.filter(r => (r.status || 'PAID') === 'PAID' || r.status === 'PAID_AND_CLOSED' || r.loanClosed === true);
         const pendingEmiRecords = emiPeriodRecords.filter(r => r.status === 'PENDING');
-        const closedEmiRecords = emiPeriodRecords.filter(r => r.status === 'CLOSED');
+        const closedEmiRecords = emiPeriodRecords.filter(r => r.loanClosed === true || r.status === 'CLOSED');
         
         const paidEmiAmount = paidEmiRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
         const pendingEmiAmount = pendingEmiRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
@@ -5439,7 +5547,7 @@
         document.getElementById('statTotalMisc').textContent = '₹' + totalEmiObligation.toLocaleString('en-IN');
         document.getElementById('statTotalMisc').style.color = 'var(--text-main)';
         const card1Sub = document.getElementById('statMiscCycleLabel');
-        if (card1Sub) card1Sub.textContent = `${activeNonClosedEmi.length} Active EMIs (${closedEmiRecords.length} Closed)`;
+        if (card1Sub) card1Sub.textContent = `${emiPeriodRecords.length} Month EMIs (${closedEmiRecords.length} Closed Loans)`;
 
         document.getElementById('statAdFundsMisc').textContent = '₹' + paidEmiAmount.toLocaleString('en-IN');
         document.getElementById('statAdFundsMisc').style.color = '#16a34a';

@@ -1827,9 +1827,21 @@
 
     // --- EMI TENURE & REMAINING MONTHS CALCULATOR ---
     function getEmiTenureDetails(r) {
-      if (!r || !r.dueStartDate || !r.dueEndDate) return null;
-      const s = new Date(r.dueStartDate);
-      const e = new Date(r.dueEndDate);
+      if (!r) return null;
+      let sDateStr = r.dueStartDate;
+      let eDateStr = r.dueEndDate;
+      if (!sDateStr || !eDateStr) {
+        loadEmiPresets();
+        const matched = emiPresets.find(p => (r.loanPresetId && p.id === r.loanPresetId) || (r.subCategory && p.provider === r.subCategory) || (r.title && p.title === r.title));
+        if (matched) {
+          if (!sDateStr) sDateStr = matched.startDate;
+          if (!eDateStr) eDateStr = matched.endDate;
+        }
+      }
+      if (!sDateStr || !eDateStr) return null;
+
+      const s = new Date(sDateStr);
+      const e = new Date(eDateStr);
       if (isNaN(s.getTime()) || isNaN(e.getTime())) return null;
 
       const startYear = s.getFullYear();
@@ -1841,38 +1853,69 @@
       const totalMonths = Math.max(1, (endYear - startYear) * 12 + (endMonth - startMonth) + 1);
 
       // Current record month
-      const recDate = new Date(r.date || r.dueStartDate);
+      const recDate = new Date(r.date || sDateStr);
       const curYear = isNaN(recDate.getTime()) ? startYear : recDate.getFullYear();
       const curMonth = isNaN(recDate.getTime()) ? startMonth : recDate.getMonth();
 
-      // Current installment month index (1-based)
-      let currentMonthIndex = (curYear - startYear) * 12 + (curMonth - startMonth) + 1;
-      if (currentMonthIndex < 1) currentMonthIndex = 1;
-      if (currentMonthIndex > totalMonths) currentMonthIndex = totalMonths;
-
-      const remainingMonths = Math.max(0, totalMonths - currentMonthIndex);
-      const isFinalMonth = (currentMonthIndex === totalMonths || remainingMonths === 0);
+      // Raw 1-based month index in tenure timeline
+      const rawMonthIndex = (curYear - startYear) * 12 + (curMonth - startMonth) + 1;
+      const isPastTenure = rawMonthIndex > totalMonths;
+      const isBeforeStart = rawMonthIndex < 1;
+      const currentMonthIndex = Math.min(Math.max(1, rawMonthIndex), totalMonths);
+      const remainingMonths = Math.max(0, totalMonths - rawMonthIndex);
+      const isFinalMonth = (rawMonthIndex === totalMonths);
 
       return {
         totalMonths,
+        rawMonthIndex,
         currentMonthIndex,
         remainingMonths,
-        isFinalMonth
+        isFinalMonth,
+        isPastTenure,
+        isBeforeStart
       };
+    }
+
+    // Purge future pending dues for a closed loan so they never appear in subsequent months
+    function cleanupFutureEmiRecords(record) {
+      if (!record) return;
+      const curMonth = (record.date || record.month || activeBillingMonth || todayISO).substring(0, 7);
+      const targetPresetId = record.loanPresetId;
+      const targetProvider = record.subCategory;
+      const targetTitle = record.title;
+
+      miscRecords = miscRecords.filter(r => {
+        const isSameEmi = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
+          ((targetPresetId && r.loanPresetId === targetPresetId) ||
+           (targetProvider && r.subCategory === targetProvider) ||
+           (targetTitle && r.title === targetTitle));
+
+        if (!isSameEmi) return true;
+
+        const rMonth = (r.date || r.month || '').substring(0, 7);
+        // If it's a pending due in a future month, remove it
+        if (rMonth > curMonth && r.status === 'PENDING') {
+          return false;
+        }
+        return true;
+      });
+      saveMiscStorage();
     }
 
     function checkAndAutoCloseFinalEmi(record) {
       const tenure = getEmiTenureDetails(record);
       if (tenure && tenure.isFinalMonth) {
-        record.status = 'CLOSED';
+        record.status = 'PAID';
+        record.loanClosed = true;
 
         // Auto-close matching master loan preset as well
         loadEmiPresets();
-        const matchedPreset = emiPresets.find(p => p.provider === record.subCategory || p.title === record.title || p.id === record.loanPresetId);
+        const matchedPreset = emiPresets.find(p => (record.loanPresetId && p.id === record.loanPresetId) || (record.subCategory && p.provider === record.subCategory) || (record.title && p.title === record.title));
         if (matchedPreset && matchedPreset.status !== 'CLOSED') {
           matchedPreset.status = 'CLOSED';
           saveEmiPresetsStorage();
         }
+        cleanupFutureEmiRecords(record);
         return true;
       }
       return false;
@@ -1997,6 +2040,18 @@
       localStorage.setItem('dgrow_emi_presets_v2', JSON.stringify(emiPresets));
     }
 
+    // Explicitly deleted EMI dues tracking per month (prevents sync from re-adding deleted dues)
+    let deletedEmiMonthKeys = new Set();
+    function loadDeletedEmiMonthKeys() {
+      try {
+        const raw = localStorage.getItem('dgrow_deleted_emi_keys_v1');
+        if (raw) deletedEmiMonthKeys = new Set(JSON.parse(raw));
+      } catch(e){}
+    }
+    function saveDeletedEmiMonthKeys() {
+      localStorage.setItem('dgrow_deleted_emi_keys_v1', JSON.stringify([...deletedEmiMonthKeys]));
+    }
+
     // Today's date string helper
     const todayISO = new Date().toISOString().split('T')[0];
     function getPastDateISO(daysAgo) {
@@ -2009,6 +2064,7 @@
     let miscRecords = [];
 
     document.addEventListener('DOMContentLoaded', () => {
+      loadDeletedEmiMonthKeys();
       loadCategoryHierarchy();
       loadBillingMonths();
       initAdCampaigns();
@@ -2104,7 +2160,7 @@
 
     // Auto-sync active EMI presets into the current month cycle (Strictly skip CLOSED or INACTIVE loans!)
     function syncMonthlyEmiRoster(targetYearMonth) {
-      const monthKey = targetYearMonth || activeBillingMonth || '2026-08';
+      const monthKey = targetYearMonth || activeBillingMonth || todayISO.substring(0, 7);
       let addedCount = 0;
 
       loadEmiPresets();
@@ -2117,10 +2173,15 @@
         if (ep.startDate && monthKey < ep.startDate.substring(0, 7)) return;
         if (ep.endDate && monthKey > ep.endDate.substring(0, 7)) return;
 
+        // Check if user has explicitly deleted this loan's due for this month
+        const deletedKey = `${monthKey}_${ep.id}`;
+        if (deletedEmiMonthKeys.has(deletedKey)) return;
+
         // Check if record already exists for this provider in this month
         const existing = miscRecords.find(r => 
           (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
-          (r.subCategory === ep.provider || (r.title && r.title.includes(ep.provider)) || r.loanPresetId === ep.id) &&
+          ((r.loanPresetId && r.loanPresetId === ep.id) ||
+           (r.subCategory === ep.provider || (r.title && r.title === ep.title))) &&
           (r.date && r.date.startsWith(monthKey))
         );
 
@@ -2151,7 +2212,8 @@
             receipt: `${ep.provider.toUpperCase().replace(/\s+/g, '')}-${ep.amount}`,
             date: dateStr,
             month: monthKey,
-            status: 'PENDING', // Default to PENDING as requested
+            status: 'PENDING',
+            loanClosed: false,
             flowType: 'SPEND',
             loanPresetId: ep.id
           };
@@ -2220,11 +2282,21 @@
         renderCategoryDropdowns();
       }
 
+      let metricsStr = `Due Date: ${dueDayNum}th of every month`;
+      if (startDate && endDate) {
+        metricsStr = `Due: ${formatDate(startDate)} - ${formatDate(endDate)}`;
+      } else if (startDate) {
+        metricsStr = `Due From: ${formatDate(startDate)}`;
+      } else if (endDate) {
+        metricsStr = `Due Until: ${formatDate(endDate)}`;
+      }
+
       if (editId) {
         const idx = emiPresets.findIndex(p => p.id === editId);
         if (idx !== -1) {
+          const oldPreset = emiPresets[idx];
           emiPresets[idx] = {
-            ...emiPresets[idx],
+            ...oldPreset,
             provider,
             title,
             amount,
@@ -2235,7 +2307,44 @@
             mode,
             status
           };
-          showToast(`Loan account "${title}" updated!`, 'success');
+
+          // Cascade updates to pending records in miscRecords
+          miscRecords.forEach(r => {
+            const isThisLoan = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
+              (r.loanPresetId === editId || r.subCategory === oldPreset.provider || r.title === oldPreset.title);
+            if (isThisLoan) {
+              r.loanPresetId = editId;
+              r.subCategory = provider;
+              r.title = title;
+              r.mode = mode;
+              r.dueStartDate = startDate;
+              r.dueEndDate = endDate;
+              r.dueDate = (startDate && endDate) ? `${startDate} to ${endDate}` : `${dueDayNum}th of every month`;
+              r.metrics = metricsStr;
+              if (r.status === 'PENDING') {
+                r.amount = amount;
+                const mKey = (r.date || activeBillingMonth || todayISO).substring(0, 7);
+                const dayPad = String(dueDayNum).padStart(2, '0');
+                r.date = `${mKey}-${dayPad}`;
+              }
+            }
+          });
+
+          // If marked CLOSED, purge any future pending dues
+          if (status === 'CLOSED') {
+            const curM = (activeBillingMonth || todayISO).substring(0, 7);
+            miscRecords = miscRecords.filter(r => {
+              const isThisLoan = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
+                (r.loanPresetId === editId || r.subCategory === provider || r.title === title);
+              if (isThisLoan && r.status === 'PENDING' && (r.date || '').substring(0, 7) > curM) {
+                return false;
+              }
+              return true;
+            });
+          }
+
+          saveMiscStorage();
+          showToast(`Loan account "${title}" updated successfully!`, 'success');
         }
       } else {
         const newPreset = {
@@ -2297,7 +2406,18 @@
       saveEmiPresetsStorage();
 
       if (preset.status === 'CLOSED') {
-        showToast(`Loan "${preset.title}" marked as CLOSED. It will not auto-sync dues into future months!`, 'info');
+        // Clear future pending records for this loan
+        const curM = (activeBillingMonth || todayISO).substring(0, 7);
+        miscRecords = miscRecords.filter(r => {
+          const isThisLoan = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
+            (r.loanPresetId === id || r.subCategory === preset.provider || r.title === preset.title);
+          if (isThisLoan && r.status === 'PENDING' && (r.date || '').substring(0, 7) > curM) {
+            return false;
+          }
+          return true;
+        });
+        saveMiscStorage();
+        showToast(`Loan "${preset.title}" marked as CLOSED. It will not show or sync dues into future months!`, 'info');
       } else {
         showToast(`Loan "${preset.title}" re-opened as ACTIVE.`, 'success');
         syncMonthlyEmiRoster(activeBillingMonth);
@@ -2308,12 +2428,27 @@
     }
 
     function deleteLoanAccount(id) {
-      if (!confirm('Are you sure you want to delete this master loan account preset?')) return;
+      const preset = emiPresets.find(p => p.id === id);
+      if (!preset) return;
+
+      if (!confirm(`Are you sure you want to delete the master loan account "${preset.title}"? This will also remove any pending dues for this loan.`)) return;
+
       emiPresets = emiPresets.filter(p => p.id !== id);
       saveEmiPresetsStorage();
+
+      // Clean up any pending records for this loan preset in miscRecords
+      miscRecords = miscRecords.filter(r => {
+        const isThisLoan = (r.category === 'EMI & Loans' || r.category === 'EMI & Monthly Dues') &&
+          (r.loanPresetId === id || r.subCategory === preset.provider || r.title === preset.title);
+        // Only keep if already PAID (historical record) - remove if PENDING
+        if (isThisLoan && r.status === 'PENDING') return false;
+        return true;
+      });
+      saveMiscStorage();
+
       renderLoanAccountsList();
       applyAllMiscFilters();
-      showToast('Loan account preset deleted.', 'info');
+      showToast(`Loan account "${preset.title}" deleted and pending dues removed.`, 'info');
     }
 
     function renderLoanAccountsList() {
@@ -2377,13 +2512,6 @@
           </tr>
         `;
       }).join('');
-    }
-
-    function triggerMonthlyEmiRosterSync() {
-      const selectedMonth = document.getElementById('miscBillingMonth')?.value || activeBillingMonth;
-      syncMonthlyEmiRoster(selectedMonth);
-      applyAllMiscFilters();
-      showToast(`Monthly EMI roster synchronized for ${selectedMonth}!`, 'success');
     }
 
     // Sub-view switcher: ALL / AD_FUNDS / EMI_LOANS / OTHER_EXPENSES

@@ -1729,14 +1729,46 @@ body.sidebar-collapsed .main-content {
   color: #ffffff;
 }
 
-/* Marketing Role UI Restrictions (Field Marketers) */
-body.role-marketing .sidebar .nav-item:has(a[href*="clients.html"]),
+/* Marketing Role UI Restrictions (Field Marketers) - Hide Clients Master & Services, but ALLOW Assigned Clients */
+body.role-marketing .sidebar .nav-item:has(a[href="clients.html"]),
+body.role-marketing .sidebar .nav-item:has(a[href="./clients.html"]),
+body.role-marketing .sidebar .nav-item:has(a[href="/admin/clients.html"]),
+body.role-marketing .sidebar .nav-item:has(a[href$="/clients.html"]),
 body.role-marketing .sidebar .nav-item:has(a[href*="services.html"]),
-body.role-marketing a[href*="clients.html"],
+body.role-marketing a[href="clients.html"]:not([href*="assigned-clients"]),
+body.role-marketing a[href="./clients.html"]:not([href*="assigned-clients"]),
+body.role-marketing a[href="/admin/clients.html"]:not([href*="assigned-clients"]),
+body.role-marketing a[href$="/clients.html"]:not([href*="assigned-clients"]),
 body.role-marketing a[href*="services.html"],
 body.role-marketing a[href*="client-view.html"],
 body.role-marketing a[href*="client-edit.html"],
 body.role-marketing .profile-dropdown-body {
+  display: none !important;
+}
+
+/* Ensure Assigned Clients is explicitly visible in sidebar */
+body.role-marketing .nav-item-assigned-clients,
+body.role-marketing .sidebar .nav-item:has(a[href*="assigned-clients.html"]),
+body.role-marketing .sidebar .nav-item:has(a[href*="assigned-clients"]) {
+  display: list-item !important;
+}
+body.role-marketing a[href*="assigned-clients.html"],
+body.role-marketing a[href*="assigned-clients"] {
+  display: flex !important;
+}
+
+/* Marketing Role: Hide Proposal Sidebar Option and Views */
+body.role-marketing #sidebarNavProposals,
+body.role-marketing .sidebar .nav-item:has(a[href*="tab=proposals"]),
+body.role-marketing .sidebar .nav-item:has(a[href*="create-proposal"]),
+body.role-marketing .sidebar .nav-item:has(a[href*="proposal.html"]),
+body.role-marketing a[href*="tab=proposals"],
+body.role-marketing a[href*="create-proposal.html"],
+body.role-marketing a[href*="proposal.html"],
+body.role-marketing #tabNavProposals,
+body.role-marketing #proposalsViewSection,
+body.role-marketing #btnCreateProposalTop,
+body.role-marketing a[href="create-proposal.html"] {
   display: none !important;
 }
 

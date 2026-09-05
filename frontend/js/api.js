@@ -228,3 +228,16 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+function escapeAttr(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+window.escapeHtml = escapeHtml;
+window.escapeAttr = escapeAttr;
+
+

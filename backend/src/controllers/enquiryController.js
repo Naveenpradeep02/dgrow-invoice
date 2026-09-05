@@ -32,23 +32,31 @@ async function getAllEnquiries(req, res) {
       search = '',
       source = '',
       status = '',
+      assigned_to = '',
       time_filter = '',
       from_date = '',
       to_date = ''
     } = req.query;
 
     let sql = `
-      SELECT e.*, c.company_name as onboarded_client_name
+      SELECT e.*, c.company_name as onboarded_client_name, u.name as assigned_marketer_name, u.email as assigned_marketer_email,
+        (SELECT COUNT(*) FROM enquiry_timeline WHERE enquiry_id = e.id AND event_type = 'CALL') as total_calls,
+        (SELECT COUNT(*) FROM enquiry_timeline WHERE enquiry_id = e.id AND event_type = 'NEGOTIATION') as total_negotiations,
+        (SELECT COUNT(*) FROM enquiry_timeline WHERE enquiry_id = e.id AND event_type = 'QUOTATION') as total_quotations,
+        (SELECT details FROM enquiry_timeline WHERE enquiry_id = e.id ORDER BY created_at DESC, id DESC LIMIT 1) as latest_timeline_detail,
+        (SELECT event_type FROM enquiry_timeline WHERE enquiry_id = e.id ORDER BY created_at DESC, id DESC LIMIT 1) as latest_timeline_type,
+        (SELECT created_at FROM enquiry_timeline WHERE enquiry_id = e.id ORDER BY created_at DESC, id DESC LIMIT 1) as latest_activity_at
       FROM enquiries e
       LEFT JOIN clients c ON e.converted_client_id = c.id
+      LEFT JOIN users u ON e.assigned_to = u.id
       WHERE 1=1
     `;
     const params = [];
 
     if (search) {
-      sql += ` AND (e.name LIKE ? OR e.business_name LIKE ? OR e.email LIKE ? OR e.mobile LIKE ? OR e.services_interested LIKE ?)`;
+      sql += ` AND (e.name LIKE ? OR e.business_name LIKE ? OR e.email LIKE ? OR e.mobile LIKE ? OR e.services_interested LIKE ? OR u.name LIKE ? OR e.marketing_person LIKE ?)`;
       const term = `%${search}%`;
-      params.push(term, term, term, term, term);
+      params.push(term, term, term, term, term, term, term);
     }
 
     if (source && source !== 'ALL') {
@@ -61,11 +69,22 @@ async function getAllEnquiries(req, res) {
       params.push(status);
     }
 
+    if (assigned_to && assigned_to !== 'ALL') {
+      if (assigned_to === 'unassigned') {
+        sql += ` AND e.assigned_to IS NULL`;
+      } else if (assigned_to === 'assigned') {
+        sql += ` AND e.assigned_to IS NOT NULL`;
+      } else {
+        sql += ` AND e.assigned_to = ?`;
+        params.push(parseInt(assigned_to, 10));
+      }
+    }
+
     // Marketing Profile Isolation:
     // Marketers only see their own assigned/referred enquiries
     if (req.user && req.user.role === 'MARKETING') {
-      sql += ` AND (e.created_by = ? OR LOWER(e.marketing_person) = LOWER(?) OR LOWER(e.marketing_person) LIKE LOWER(?))`;
-      params.push(req.user.id, req.user.name, `%${req.user.name}%`);
+      sql += ` AND (e.assigned_to = ? OR e.created_by = ? OR LOWER(e.marketing_person) = LOWER(?) OR LOWER(e.marketing_person) LIKE LOWER(?))`;
+      params.push(req.user.id, req.user.id, req.user.name, `%${req.user.name}%`);
     }
 
     const { start, end } = getDateRange(time_filter, from_date, to_date);
@@ -94,9 +113,11 @@ async function getEnquiryById(req, res) {
     const { id } = req.params;
 
     const enquiries = await db.query(
-      `SELECT e.*, c.company_name as onboarded_client_name, c.mobile as client_mobile, c.email as client_email
+      `SELECT e.*, c.company_name as onboarded_client_name, c.mobile as client_mobile, c.email as client_email,
+              u.name as assigned_marketer_name, u.email as assigned_marketer_email
        FROM enquiries e
        LEFT JOIN clients c ON e.converted_client_id = c.id
+       LEFT JOIN users u ON e.assigned_to = u.id
        WHERE e.id = ?`,
       [id]
     );
@@ -108,7 +129,8 @@ async function getEnquiryById(req, res) {
 
     // Access check for field marketer
     if (req.user && req.user.role === 'MARKETING') {
-      const isOwner = (enquiry.created_by === req.user.id) ||
+      const isOwner = (enquiry.assigned_to === req.user.id) ||
+        (enquiry.created_by === req.user.id) ||
         (enquiry.marketing_person && (
           enquiry.marketing_person.toLowerCase().trim() === req.user.name.toLowerCase().trim() ||
           enquiry.marketing_person.toLowerCase().includes(req.user.name.toLowerCase().trim()) ||
@@ -117,7 +139,7 @@ async function getEnquiryById(req, res) {
       if (!isOwner) {
         return res.status(403).json({
           success: false,
-          message: 'Access Denied: You do not have permission to view this enquiry. Only your own leads are accessible.',
+          message: 'Access Denied: You do not have permission to view this enquiry. Only your own or assigned leads are accessible.',
           errorCode: 'FORBIDDEN_ENQUIRY_ACCESS'
         });
       }
@@ -148,6 +170,7 @@ async function createEnquiry(req, res) {
       business_name,
       source = 'WEBSITE',
       marketing_person = '',
+      assigned_to = null,
       services_interested = '',
       estimated_budget = 0,
       status = 'NEW',
@@ -161,26 +184,32 @@ async function createEnquiry(req, res) {
       });
     }
 
+    let finalAssignedTo = assigned_to ? parseInt(assigned_to, 10) : null;
     let finalMarketingPerson = (marketing_person || '').trim();
-    if (req.user && req.user.role === 'MARKETING' && !finalMarketingPerson) {
-      finalMarketingPerson = req.user.name;
+
+    if (req.user && req.user.role === 'MARKETING') {
+      finalAssignedTo = req.user.id;
+      if (source === 'MARKETING_PERSON' && !finalMarketingPerson) {
+        finalMarketingPerson = req.user.name;
+      }
     }
 
     const result = await db.query(
       `INSERT INTO enquiries 
-       (name, email, mobile, business_name, source, marketing_person, services_interested, estimated_budget, status, notes, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (name, email, mobile, business_name, source, marketing_person, services_interested, estimated_budget, status, notes, assigned_to, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name.trim(),
         (email || '').trim(),
         mobile.trim(),
         business_name.trim(),
         source,
-        finalMarketingPerson,
+        finalMarketingPerson || null,
         (services_interested || '').trim(),
         parseFloat(estimated_budget || 0),
         status,
         (notes || '').trim(),
+        finalAssignedTo || null,
         req.user ? req.user.id : 1
       ]
     );
@@ -193,17 +222,30 @@ async function createEnquiry(req, res) {
        VALUES (?, 'NOTE', 'Enquiry Created', ?, ?)`,
       [
         enquiryId,
-        `Lead created from source: ${source}. Initial status set to ${status}. ${notes ? `Notes: ${notes}` : ''}`,
+        `Lead created from source: ${source}. Initial status set to ${status}.${finalMarketingPerson ? ` Assigned to marketing executive: ${finalMarketingPerson}.` : ''} ${notes ? `Notes: ${notes}` : ''}`,
         req.user ? req.user.name : 'Admin'
       ]
     );
+
+    if (finalAssignedTo && finalMarketingPerson) {
+      await db.query(
+        `INSERT INTO enquiry_timeline (enquiry_id, event_type, title, details, created_by_name)
+         VALUES (?, 'NOTE', ?, ?, ?)`,
+        [
+          enquiryId,
+          `Assigned to Marketing Employee: ${finalMarketingPerson}`,
+          `Enquiry assigned to marketing executive ${finalMarketingPerson} to follow up with client.`,
+          req.user ? req.user.name : 'Admin'
+        ]
+      );
+    }
 
     await logAudit({
       user: req.user,
       action: 'CREATE',
       entity_type: 'ENQUIRY',
       entity_id: enquiryId,
-      new_data: { id: enquiryId, name, business_name, source, status },
+      new_data: { id: enquiryId, name, business_name, source, status, assigned_to: finalAssignedTo, marketing_person: finalMarketingPerson },
       req
     });
 
@@ -229,7 +271,8 @@ async function updateEnquiry(req, res) {
     }
 
     if (req.user && req.user.role === 'MARKETING') {
-      const isOwner = (oldEnquiry.created_by === req.user.id) ||
+      const isOwner = (oldEnquiry.assigned_to === req.user.id) ||
+        (oldEnquiry.created_by === req.user.id) ||
         (oldEnquiry.marketing_person && (
           oldEnquiry.marketing_person.toLowerCase().trim() === req.user.name.toLowerCase().trim() ||
           oldEnquiry.marketing_person.toLowerCase().includes(req.user.name.toLowerCase().trim()) ||
@@ -251,16 +294,27 @@ async function updateEnquiry(req, res) {
       business_name = oldEnquiry.business_name,
       source = oldEnquiry.source,
       marketing_person = oldEnquiry.marketing_person,
+      assigned_to = oldEnquiry.assigned_to,
       services_interested = oldEnquiry.services_interested,
       estimated_budget = oldEnquiry.estimated_budget,
       status = oldEnquiry.status,
       notes = oldEnquiry.notes
     } = req.body;
 
+    let finalAssignedTo = oldEnquiry.assigned_to;
+    let finalMarketingPerson = (marketing_person !== undefined ? marketing_person : oldEnquiry.marketing_person) || '';
+
+    // Admin can assign/reassign
+    if (req.user && req.user.role === 'ADMIN') {
+      if (assigned_to !== undefined) {
+        finalAssignedTo = assigned_to ? parseInt(assigned_to, 10) : null;
+      }
+    }
+
     await db.query(
       `UPDATE enquiries SET
         name = ?, email = ?, mobile = ?, business_name = ?, source = ?, marketing_person = ?,
-        services_interested = ?, estimated_budget = ?, status = ?, notes = ?
+        assigned_to = ?, services_interested = ?, estimated_budget = ?, status = ?, notes = ?
        WHERE id = ?`,
       [
         name.trim(),
@@ -268,7 +322,8 @@ async function updateEnquiry(req, res) {
         mobile.trim(),
         business_name.trim(),
         source,
-        (marketing_person || '').trim(),
+        finalMarketingPerson ? finalMarketingPerson.trim() : null,
+        finalAssignedTo || null,
         (services_interested || '').trim(),
         parseFloat(estimated_budget || 0),
         status,
@@ -276,6 +331,27 @@ async function updateEnquiry(req, res) {
         id
       ]
     );
+
+    // If assigned marketer changed, record timeline event
+    if (finalAssignedTo !== oldEnquiry.assigned_to) {
+      let assignedUserName = '';
+      if (finalAssignedTo) {
+        const u = await db.query('SELECT name FROM users WHERE id = ?', [finalAssignedTo]);
+        if (u[0]) assignedUserName = u[0].name;
+      }
+      await db.query(
+        `INSERT INTO enquiry_timeline (enquiry_id, event_type, title, details, created_by_name)
+         VALUES (?, 'NOTE', ?, ?, ?)`,
+        [
+          id,
+          finalAssignedTo ? `Lead Reassigned to: ${assignedUserName}` : 'Lead Unassigned',
+          finalAssignedTo 
+            ? `Lead assigned to marketing executive ${assignedUserName} by Admin to follow up with client.`
+            : `Lead unassigned by Admin.`,
+          req.user ? req.user.name : 'Admin'
+        ]
+      );
+    }
 
     // If status changed, record timeline event automatically
     if (status !== oldEnquiry.status) {
@@ -380,7 +456,7 @@ async function convertToClient(req, res) {
     }
 
     // Determine assigned marketer from enquiry
-    let marketerId = enq.created_by;
+    let marketerId = enq.assigned_to || enq.created_by;
     let marketerName = enq.marketing_person;
     if (!marketerId && marketerName) {
       const mUser = await db.query('SELECT id FROM users WHERE LOWER(name) = LOWER(?) LIMIT 1', [marketerName.trim()]);
@@ -489,7 +565,87 @@ async function deleteEnquiry(req, res) {
   }
 }
 
-// 8. Lead & Conversion Metrics (Weekly, Monthly, Custom Range Analytics)
+// 8. Admin 1-Click Enquiry Assignment to Marketing Employee
+async function assignEnquiry(req, res) {
+  try {
+    const { id } = req.params;
+    const rawId = req.body.marketer_id !== undefined ? req.body.marketer_id : req.body.assigned_to;
+
+    const enquiries = await db.query('SELECT * FROM enquiries WHERE id = ?', [id]);
+    if (!enquiries[0]) {
+      return res.status(404).json({ success: false, message: 'Enquiry not found.' });
+    }
+
+    let marketerName = null;
+    const mId = (rawId !== null && rawId !== undefined && rawId !== '') ? parseInt(rawId, 10) : null;
+
+    if (mId) {
+      const users = await db.query('SELECT id, name, email FROM users WHERE id = ?', [mId]);
+      if (!users[0]) {
+        return res.status(400).json({ success: false, message: 'Selected marketing employee not found.' });
+      }
+      marketerName = users[0].name;
+    }
+
+    // ONLY update assigned_to. DO NOT touch marketing_person (which stores original lead source person/rep)!
+    await db.query(
+      'UPDATE enquiries SET assigned_to = ? WHERE id = ?',
+      [mId, id]
+    );
+
+    // Record timeline event
+    await db.query(
+      `INSERT INTO enquiry_timeline (enquiry_id, event_type, title, details, created_by_name)
+       VALUES (?, 'NOTE', ?, ?, ?)`,
+      [
+        id,
+        mId ? `Lead Assigned to ${marketerName}` : 'Lead Unassigned',
+        mId 
+          ? `Enquiry assigned to marketing executive ${marketerName} by ${req.user ? req.user.name : 'Admin'} to follow up with client.`
+          : `Enquiry unassigned by ${req.user ? req.user.name : 'Admin'}.`,
+        req.user ? req.user.name : 'Admin'
+      ]
+    );
+
+    // Also update converted client if already onboarded
+    if (enquiries[0].converted_client_id) {
+      await db.query(
+        'UPDATE clients SET assigned_to = ? WHERE id = ?',
+        [mId, enquiries[0].converted_client_id]
+      );
+    }
+
+    await logAudit({
+      user: req.user,
+      action: 'UPDATE',
+      entity_type: 'ENQUIRY',
+      entity_id: id,
+      new_data: { assigned_to: mId },
+      old_data: { assigned_to: enquiries[0].assigned_to },
+      req
+    });
+
+    res.json({
+      success: true,
+      message: mId 
+        ? `Enquiry assigned to ${marketerName} successfully. They can now follow up with the client.`
+        : 'Enquiry unassigned successfully.',
+      assigned_to: mId,
+      assigned_marketer_name: marketerName,
+      enquiry: {
+        id: parseInt(id, 10),
+        assigned_to: mId,
+        assigned_marketer_name: marketerName,
+        source: enquiries[0].source,
+        marketing_person: enquiries[0].marketing_person
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+// 9. Lead & Conversion Metrics (Weekly, Monthly, Custom Range Analytics)
 async function getEnquiryMetrics(req, res) {
   try {
     const { time_filter = 'monthly', from_date = '', to_date = '' } = req.query;
@@ -500,8 +656,8 @@ async function getEnquiryMetrics(req, res) {
 
     // Marketing Role Isolation for metrics
     if (req.user && req.user.role === 'MARKETING') {
-      whereClause += ' AND (created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?))';
-      params.push(req.user.id, req.user.name, `%${req.user.name}%`);
+      whereClause += ' AND (assigned_to = ? OR created_by = ? OR LOWER(marketing_person) = LOWER(?) OR LOWER(marketing_person) LIKE LOWER(?))';
+      params.push(req.user.id, req.user.id, req.user.name, `%${req.user.name}%`);
     }
 
     if (start && end) {
@@ -594,6 +750,7 @@ module.exports = {
   getEnquiryById,
   createEnquiry,
   updateEnquiry,
+  assignEnquiry,
   addTimelineEvent,
   convertToClient,
   deleteEnquiry,

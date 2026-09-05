@@ -17,6 +17,9 @@ router.delete('/:id', authenticateToken, authorizeRoles('ADMIN'), enquiryControl
 // Timeline event endpoint
 router.post('/:id/timeline', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), enquiryController.addTimelineEvent);
 
+// 1-Click Assign Marketer endpoint
+router.put('/:id/assign', authenticateToken, authorizeRoles('ADMIN'), enquiryController.assignEnquiry);
+
 // Convert to onboarded client
 router.post('/:id/convert', authenticateToken, authorizeRoles('ADMIN', 'MARKETING'), enquiryController.convertToClient);
 

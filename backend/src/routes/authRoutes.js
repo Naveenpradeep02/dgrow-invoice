@@ -8,8 +8,8 @@ router.post('/login', authController.login);
 router.get('/me', authenticateToken, authController.getMe);
 router.post('/change-password', authenticateToken, authController.changePassword);
 
-// Admin-only User Management
-router.get('/users', authenticateToken, authorizeRoles('ADMIN'), authController.getAllStaffUsers);
+// User Management
+router.get('/users', authenticateToken, authorizeRoles('ADMIN', 'MARKETING', 'AUDITOR'), authController.getAllStaffUsers);
 router.post('/users', authenticateToken, authorizeRoles('ADMIN'), authController.createStaffUser);
 router.put('/users/:id', authenticateToken, authorizeRoles('ADMIN'), authController.updateStaffUser);
 router.delete('/users/:id', authenticateToken, authorizeRoles('ADMIN'), authController.deleteStaffUser);

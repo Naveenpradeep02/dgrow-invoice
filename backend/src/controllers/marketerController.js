@@ -82,10 +82,11 @@ async function getMarketerMetrics(req, res) {
     const marketerStats = marketers.map(m => {
       const marketerNameLower = m.name.toLowerCase().trim();
 
-      // Match enquiries by marketing_person name or created_by id
+      // Match enquiries by assigned_to, marketing_person name, or created_by id
       const mktEnquiries = enquiries.filter(e => {
         const empName = (e.marketing_person || '').toLowerCase().trim();
-        return (empName && (empName === marketerNameLower || marketerNameLower.includes(empName) || empName.includes(marketerNameLower))) ||
+        return (e.assigned_to === m.id) ||
+               (empName && (empName === marketerNameLower || marketerNameLower.includes(empName) || empName.includes(marketerNameLower))) ||
                (e.created_by === m.id);
       });
 
@@ -189,7 +190,8 @@ async function getMarketerActivity(req, res) {
     const allEnquiries = await db.query(enqSql, enqParams);
     const marketerEnquiries = allEnquiries.filter(e => {
       const empName = (e.marketing_person || '').toLowerCase().trim();
-      return (empName && (empName === marketerNameLower || marketerNameLower.includes(empName) || empName.includes(marketerNameLower))) ||
+      return (e.assigned_to === marketerId) ||
+             (empName && (empName === marketerNameLower || marketerNameLower.includes(empName) || empName.includes(marketerNameLower))) ||
              (e.created_by === marketerId);
     });
 

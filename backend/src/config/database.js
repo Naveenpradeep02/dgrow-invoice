@@ -164,6 +164,14 @@ async function initDatabase() {
         await connection.query("ALTER TABLE enquiries MODIFY COLUMN source VARCHAR(50) NOT NULL DEFAULT 'WEBSITE'");
       } catch (e) {}
 
+      try {
+        await connection.query("ALTER TABLE enquiries ADD COLUMN assigned_to INT NULL");
+      } catch (e) {}
+
+      try {
+        await connection.query("ALTER TABLE enquiries ADD INDEX idx_enq_assigned (assigned_to)");
+      } catch (e) {}
+
       await connection.query(`
         CREATE TABLE IF NOT EXISTS enquiry_timeline (
           id INT AUTO_INCREMENT PRIMARY KEY,

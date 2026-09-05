@@ -289,13 +289,16 @@ CREATE TABLE IF NOT EXISTS enquiries (
   status ENUM('NEW', 'IN_DISCUSSION', 'QUOTATION_SENT', 'NEGOTIATION', 'ONBOARDED', 'LOST') NOT NULL DEFAULT 'NEW',
   notes TEXT NULL,
   converted_client_id INT NULL,
+  assigned_to INT NULL,
   onboarded_at DATETIME NULL,
   created_by INT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (converted_client_id) REFERENCES clients(id) ON DELETE SET NULL,
+  FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
   INDEX idx_enq_status (status),
   INDEX idx_enq_source (source),
+  INDEX idx_enq_assigned (assigned_to),
   INDEX idx_enq_date (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

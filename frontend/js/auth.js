@@ -129,13 +129,12 @@ function redirectUserByRole(role) {
 const MARKETING_ALLOWED_PAGES = [
   'enquiries.html',
   'enquiry-view.html',
+  'assigned-clients.html',
   'meetings.html',
   'clients.html',
   'client-view.html',
   'client-edit.html',
-  'quotations.html',
-  'create-proposal.html',
-  'proposal.html'
+  'quotations.html'
 ];
 
 function checkAuthGuard() {
@@ -173,7 +172,7 @@ function checkAuthGuard() {
     if (isMarketing) {
       const currentPage = path.split('/').pop().split('?')[0];
       if (!MARKETING_ALLOWED_PAGES.includes(currentPage)) {
-        showToast('Field Marketer role: Access restricted to enquiries, meetings, and proposals.', 'warning');
+        showToast('Field Marketer role: Access restricted to enquiries, meetings, and quotations.', 'warning');
         window.location.href = `${prefix}/admin/enquiries.html`;
         return;
       }
@@ -216,18 +215,94 @@ function applyRolePermissionsUI(user) {
   if (isMarketing) {
     document.body.classList.add('role-marketing');
 
-    // Hide sidebar links not in MARKETING_ALLOWED_PAGES
+    // Ensure Assigned Clients is present in the sidebar
+    let assignedItem = Array.from(document.querySelectorAll('.sidebar .nav-list .nav-item')).find(el => {
+      const a = el.querySelector('a');
+      return a && (a.getAttribute('href') || '').includes('assigned-clients');
+    });
+
+    if (!assignedItem) {
+      const navList = document.querySelector('.sidebar .nav-list');
+      if (navList) {
+        const enquiriesItem = Array.from(navList.querySelectorAll('.nav-item')).find(el => {
+          const a = el.querySelector('a');
+          return a && (a.getAttribute('href') || '').includes('enquiries.html');
+        });
+
+        assignedItem = document.createElement('li');
+        assignedItem.className = 'nav-item' + (window.location.pathname.includes('assigned-clients.html') ? ' active' : '');
+        assignedItem.innerHTML = `
+          <a href="assigned-clients.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+            Assigned Clients
+          </a>
+        `;
+        if (enquiriesItem && enquiriesItem.nextSibling) {
+          navList.insertBefore(assignedItem, enquiriesItem.nextSibling);
+        } else if (enquiriesItem) {
+          enquiriesItem.insertAdjacentElement('afterend', assignedItem);
+        } else {
+          navList.prepend(assignedItem);
+        }
+      }
+    }
+
+    if (assignedItem) {
+      assignedItem.style.display = 'list-item';
+      const aLink = assignedItem.querySelector('a');
+      if (aLink) aLink.style.display = 'flex';
+      if (window.location.pathname.includes('assigned-clients.html')) {
+        assignedItem.classList.add('active');
+      }
+    }
+
+    // Hide sidebar links not in MARKETING_ALLOWED_PAGES or Proposals links
     const navItems = document.querySelectorAll('.sidebar .nav-list .nav-item');
     navItems.forEach(item => {
       const link = item.querySelector('a');
       if (link) {
         const href = link.getAttribute('href') || '';
         const page = href.split('/').pop().split('?')[0];
+        const linkText = (link.textContent || '').trim().toLowerCase();
+
+        // Always show Assigned Clients
+        if (href.includes('assigned-clients') || page === 'assigned-clients.html') {
+          item.style.display = 'list-item';
+          link.style.display = 'flex';
+          return;
+        }
+
+        // Strictly hide Proposal navigation option for marketers
+        if (
+          item.id === 'sidebarNavProposals' ||
+          href.includes('tab=proposals') ||
+          href.includes('proposal') ||
+          linkText.includes('proposal')
+        ) {
+          item.style.display = 'none';
+          return;
+        }
+
         if (!MARKETING_ALLOWED_PAGES.includes(page)) {
           item.style.display = 'none';
         }
       }
     });
+
+    // Also hide any proposals tab / buttons / views on quotations page if present
+    const propNavTab = document.getElementById('tabNavProposals');
+    if (propNavTab) propNavTab.style.display = 'none';
+    const propViewSec = document.getElementById('proposalsViewSection');
+    if (propViewSec) propViewSec.style.display = 'none';
+    const createPropBtn = document.getElementById('btnCreateProposalTop') || document.querySelector('a[href*="create-proposal"]');
+    if (createPropBtn) createPropBtn.style.display = 'none';
+
+    // If currently on quotations.html, auto-switch to standard quotations tab
+    if (window.location.pathname.includes('quotations.html')) {
+      if (typeof switchMainQuotationsTab === 'function') {
+        switchMainQuotationsTab('STANDARD_QUOTES');
+      }
+    }
 
     // Hide all delete buttons across all tables & pages
     const hideDeleteButtons = () => {

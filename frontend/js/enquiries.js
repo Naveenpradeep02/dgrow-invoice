@@ -3,6 +3,7 @@
 let currentEnquiries = [];
 let activePeriod = 'monthly';
 let currentEnquiryData = null;
+let cachedMarketersList = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('enquiriesTableBody')) {
@@ -10,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function initEnquiriesPage() {
+async function initEnquiriesPage() {
   // Set default custom date pickers
   const today = new Date();
   const thirtyDaysAgo = new Date();
@@ -21,8 +22,56 @@ function initEnquiriesPage() {
   if (fromEl) fromEl.value = thirtyDaysAgo.toISOString().split('T')[0];
   if (toEl) toEl.value = today.toISOString().split('T')[0];
 
+  await loadMarketersList();
   loadEnquiryMetrics();
   loadEnquiries();
+}
+
+async function loadMarketersList() {
+  try {
+    const res = await apiFetch('/auth/users');
+    if (res && res.success && Array.isArray(res.users)) {
+      cachedMarketersList = res.users.filter(u => 
+        u.role === 'MARKETING' || 
+        u.role_id === 4 || 
+        String(u.role).toUpperCase() === 'MARKETING' ||
+        (typeof isMarketingRole === 'function' && isMarketingRole(u.role))
+      );
+
+      // 1. Populate Table Filter Dropdown
+      const filterSelect = document.getElementById('filterEnquiryMarketer');
+      if (filterSelect) {
+        const currVal = filterSelect.value || 'ALL';
+        filterSelect.innerHTML = '<option value="ALL">All Marketers</option>' +
+          '<option value="unassigned">Direct / Unassigned</option>' +
+          cachedMarketersList.map(m => `<option value="${m.id}">Marketer: ${escapeHtml(m.name)}</option>`).join('');
+        filterSelect.value = currVal;
+      }
+
+      // 2. Populate 1-Click Modal Dropdown
+      const modalSelect = document.getElementById('modalEnquiryMarketerSelect');
+      if (modalSelect) {
+        modalSelect.innerHTML = '<option value="">-- Unassigned (Direct / No Field Rep Assigned) --</option>' +
+          cachedMarketersList.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.email)})</option>`).join('');
+      }
+
+      // 3. Populate Add Modal Dropdown
+      const newSelect = document.getElementById('newEnqAssignedTo');
+      if (newSelect) {
+        newSelect.innerHTML = '<option value="">-- Unassigned (Direct / No Field Rep Assigned) --</option>' +
+          cachedMarketersList.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.email)})</option>`).join('');
+      }
+
+      // 4. Populate Edit Modal Dropdown
+      const editSelect = document.getElementById('editEnqAssignedTo');
+      if (editSelect) {
+        editSelect.innerHTML = '<option value="">-- Unassigned (Direct / No Field Rep Assigned) --</option>' +
+          cachedMarketersList.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.email)})</option>`).join('');
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load marketers list for enquiry assignment:', err);
+  }
 }
 
 function setPeriodFilter(period) {
@@ -227,6 +276,10 @@ async function loadEnquiries() {
   const search = document.getElementById('filterEnquirySearch')?.value || '';
   const status = document.getElementById('filterEnquiryStatus')?.value || '';
   const source = document.getElementById('filterEnquirySource')?.value || '';
+  const marketer = document.getElementById('filterEnquiryMarketer')?.value || 'ALL';
+
+  const user = typeof getUser === 'function' ? getUser() : null;
+  const isAdmin = user && user.role === 'ADMIN';
 
   try {
     tbody.innerHTML = renderTableLoader(8, 'Loading enquiries & leads...');
@@ -235,6 +288,7 @@ async function loadEnquiries() {
     if (search) params.append('search', search);
     if (status) params.append('status', status);
     if (source) params.append('source', source);
+    if (marketer && marketer !== 'ALL') params.append('assigned_to', marketer);
     params.append('time_filter', activePeriod);
 
     if (activePeriod === 'custom') {
@@ -269,6 +323,37 @@ async function loadEnquiries() {
       const sourceBadge = getEnquirySourceBadge(enq.source, enq.marketing_person);
       const budgetFormatted = parseFloat(enq.estimated_budget || 0) > 0 ? formatINR(enq.estimated_budget) : '<span class="text-muted">-</span>';
 
+      const assignedMarketer = enq.assigned_to ? (enq.assigned_marketer_name || 'Assigned Marketer') : null;
+      let assignedBadge = '';
+      if (assignedMarketer) {
+        assignedBadge = `
+          <div style="display:flex; flex-direction:column; gap:2px; align-items:flex-start;">
+            <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-weight:700; border:1px solid #bfdbfe; font-size:0.75rem; display:inline-flex; align-items:center; gap:3px;">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              ${escapeHtml(assignedMarketer)}
+            </span>
+            ${isAdmin ? `
+              <button type="button" onclick="openAssignEnquiryModal(${enq.id})" class="btn btn-secondary btn-sm" title="Reassign Marketing Employee" style="padding:0.12rem 0.4rem; font-size:0.68rem; color:#0369a1; border-color:#bae6fd; background:#f0f9ff; margin-top:2px; display:inline-flex; align-items:center; gap:2px; cursor:pointer;">
+                Reassign
+              </button>
+            ` : ''}
+          </div>
+        `;
+      } else {
+        assignedBadge = `
+          <div style="display:flex; flex-direction:column; gap:2px; align-items:flex-start;">
+            <span class="badge" style="background:#f8fafc; color:#94a3b8; font-weight:600; border:1px solid #e2e8f0; font-size:0.72rem;">
+              Unassigned
+            </span>
+            ${isAdmin ? `
+              <button type="button" onclick="openAssignEnquiryModal(${enq.id})" class="btn btn-secondary btn-sm" title="Assign Marketing Employee" style="padding:0.12rem 0.45rem; font-size:0.68rem; color:#2563eb; border-color:#bfdbfe; background:#eff6ff; font-weight:700; margin-top:2px; display:inline-flex; align-items:center; gap:2px; cursor:pointer;">
+                + Assign
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }
+
       return `
         <tr>
           <td>
@@ -287,6 +372,7 @@ async function loadEnquiries() {
             ${enq.services_interested ? `<div style="font-size:0.75rem; color:#475569; margin-top:2px;" title="${escapeAttr(enq.services_interested)}">${truncateStr(enq.services_interested, 30)}</div>` : ''}
           </td>
           <td>${sourceBadge}</td>
+          <td>${assignedBadge}</td>
           <td><strong style="color:var(--text-main); font-size:0.88rem;">${budgetFormatted}</strong></td>
           <td>${statusBadge}</td>
           <td>
@@ -295,6 +381,11 @@ async function loadEnquiries() {
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 View
               </a>
+              ${isAdmin ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openAssignEnquiryModal(${enq.id})" title="Assign / Reassign Marketer" style="padding:0.3rem 0.45rem; color:#2563eb; border-color:#bfdbfe; background:#eff6ff;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                </button>
+              ` : ''}
               <button type="button" class="btn btn-secondary btn-sm" onclick="openEditEnquiryModal(${enq.id})" title="Edit Enquiry" style="padding:0.3rem 0.45rem;">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
@@ -309,9 +400,11 @@ async function loadEnquiries() {
               ` : `
                 <span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.7rem; padding:0.25rem 0.5rem; font-weight:700;">Won</span>
               `}
-              <button type="button" class="btn btn-secondary btn-sm" onclick="handleDeleteEnquiry(${enq.id}, '${escapeAttr(enq.name)}')" title="Remove / Delete Enquiry" style="padding:0.3rem 0.45rem; color:#dc2626; border-color:#fecaca; background:#fffbfb;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fffbfb'">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-              </button>
+              ${isAdmin ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="handleDeleteEnquiry(${enq.id}, '${escapeAttr(enq.name)}')" title="Remove / Delete Enquiry" style="padding:0.3rem 0.45rem; color:#dc2626; border-color:#fecaca; background:#fffbfb;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fffbfb'">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+              ` : ''}
             </div>
           </td>
         </tr>
@@ -368,6 +461,17 @@ function openNewEnquiryModal() {
 
   const user = typeof getUser === 'function' ? getUser() : null;
   const isMarketing = user && user.role === 'MARKETING';
+
+  const assignedSelect = document.getElementById('newEnqAssignedTo');
+  if (assignedSelect) {
+    if (isMarketing) {
+      assignedSelect.value = String(user.id || '');
+      assignedSelect.disabled = true;
+    } else {
+      assignedSelect.value = '';
+      assignedSelect.disabled = false;
+    }
+  }
 
   if (isMarketing) {
     document.getElementById('newEnqSource').value = 'MARKETING_PERSON';
@@ -434,6 +538,7 @@ async function submitNewEnquiry(e) {
   const business_name = document.getElementById('newEnqBusiness').value.trim();
   const source = document.getElementById('newEnqSource').value;
   const marketing_person = document.getElementById('newEnqMarketingPerson')?.value.trim() || '';
+  const assigned_to = document.getElementById('newEnqAssignedTo')?.value ? parseInt(document.getElementById('newEnqAssignedTo').value, 10) : null;
   const services_interested = document.getElementById('newEnqServices').value.trim();
   const estimated_budget = parseFloat(document.getElementById('newEnqBudget').value) || 0;
   const status = document.getElementById('newEnqStatus').value;
@@ -458,6 +563,7 @@ async function submitNewEnquiry(e) {
         business_name,
         source,
         marketing_person,
+        assigned_to,
         services_interested,
         estimated_budget,
         status,
@@ -592,6 +698,11 @@ async function openEditEnquiryModal(id) {
     document.getElementById('editEnqStatus').value = enq.status || 'NEW';
     document.getElementById('editEnqNotes').value = enq.notes || '';
 
+    const editAssigned = document.getElementById('editEnqAssignedTo');
+    if (editAssigned) {
+      editAssigned.value = enq.assigned_to ? String(enq.assigned_to) : '';
+    }
+
     toggleMarketingPersonField('editEnqSource', 'editEnqRepContainer');
     document.getElementById('editEnquiryModal').classList.add('active');
   } catch (err) {
@@ -613,6 +724,7 @@ async function submitEditEnquiry(e) {
   const business_name = document.getElementById('editEnqBusiness').value.trim();
   const source = document.getElementById('editEnqSource').value;
   const marketing_person = document.getElementById('editEnqMarketingPerson')?.value.trim() || '';
+  const assigned_to = document.getElementById('editEnqAssignedTo')?.value ? parseInt(document.getElementById('editEnqAssignedTo').value, 10) : null;
   const services_interested = document.getElementById('editEnqServices').value.trim();
   const estimated_budget = parseFloat(document.getElementById('editEnqBudget').value) || 0;
   const status = document.getElementById('editEnqStatus').value;
@@ -632,6 +744,7 @@ async function submitEditEnquiry(e) {
         business_name,
         source,
         marketing_person,
+        assigned_to,
         services_interested,
         estimated_budget,
         status,
@@ -650,6 +763,70 @@ async function submitEditEnquiry(e) {
     btn.textContent = 'Save Changes';
   }
 }
+
+// --- 1-CLICK ASSIGN ENQUIRY MODAL (ADMIN ONLY) ---
+function openAssignEnquiryModal(enquiryId, optionalBusinessName, optionalMarketerId) {
+  const modal = document.getElementById('assignEnquiryModal');
+  if (!modal) return;
+
+  const enq = currentEnquiries.find(e => String(e.id) === String(enquiryId));
+  const businessName = optionalBusinessName || (enq ? (enq.business_name || enq.name) : `Enquiry #${enquiryId}`);
+  const currentMarketerId = (optionalMarketerId !== undefined && optionalMarketerId !== null)
+    ? optionalMarketerId
+    : (enq ? enq.assigned_to : null);
+
+  const idInput = document.getElementById('modalEnquiryId');
+  if (idInput) idInput.value = enquiryId;
+
+  const nameEl = document.getElementById('modalEnquiryBusinessName');
+  if (nameEl) nameEl.textContent = businessName;
+
+  const select = document.getElementById('modalEnquiryMarketerSelect');
+  if (select) {
+    select.value = currentMarketerId ? String(currentMarketerId) : '';
+  }
+
+  modal.classList.add('active');
+}
+
+function closeAssignEnquiryModal() {
+  const modal = document.getElementById('assignEnquiryModal');
+  if (modal) modal.classList.remove('active');
+}
+
+async function submitEnquiryAssignment() {
+  const enquiryId = document.getElementById('modalEnquiryId').value;
+  const marketerId = document.getElementById('modalEnquiryMarketerSelect').value;
+  const btn = document.getElementById('btnSaveEnquiryAssignment');
+
+  if (!enquiryId) return;
+
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    const res = await apiFetch(`/enquiries/${enquiryId}/assign`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        assigned_to: marketerId ? parseInt(marketerId, 10) : null,
+        marketer_id: marketerId ? parseInt(marketerId, 10) : null
+      })
+    });
+
+    if (!res.success) throw new Error(res.message || 'Failed to update assignment.');
+
+    showToast(res.message, 'success');
+    closeAssignEnquiryModal();
+    loadEnquiryMetrics();
+    loadEnquiries();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save & Assign'; }
+  }
+}
+
+window.openAssignEnquiryModal = openAssignEnquiryModal;
+window.closeAssignEnquiryModal = closeAssignEnquiryModal;
+window.submitEnquiryAssignment = submitEnquiryAssignment;
 
 // --- 1-CLICK CONVERT TO ONBOARDED CLIENT ---
 async function handleConvertToClient(enquiryId, businessName) {

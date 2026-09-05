@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,15 @@
   <link rel="icon" type="image/png" href="assets/Logosym.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
     * {
       box-sizing: border-box;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
+
     body {
       background: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 60%, #e2e8f0 100%);
       min-height: 100vh;
@@ -24,31 +27,36 @@
       padding: 1.5rem;
       color: #0f172a;
     }
+
     .login-wrapper {
       width: 100%;
       max-width: 460px;
     }
+
     .login-card {
       background: #ffffff;
       border-radius: 16px;
-      box-shadow: 0 20px 40px -15px rgba(220, 38, 38, 0.12), 0 0 25px rgba(0,0,0,0.04);
+      box-shadow: 0 20px 40px -15px rgba(220, 38, 38, 0.12), 0 0 25px rgba(0, 0, 0, 0.04);
       border: 1px solid #e2e8f0;
       border-top: 5px solid #dc2626;
       padding: 2.25rem 2rem;
       text-align: center;
     }
+
     .logo-container {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-bottom: 1rem;
     }
+
     .logo-img {
       max-height: 90px;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.12));
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12));
     }
+
     .login-title {
       font-size: 1.4rem;
       font-weight: 900;
@@ -56,16 +64,19 @@
       letter-spacing: -0.02em;
       margin: 0;
     }
+
     .login-subtitle {
       font-size: 0.82rem;
       color: #64748b;
       margin-top: 0.25rem;
       margin-bottom: 1.25rem;
     }
+
     .form-group {
       text-align: left;
       margin-bottom: 1.1rem;
     }
+
     .form-label {
       display: block;
       font-size: 0.8rem;
@@ -73,6 +84,7 @@
       color: #334155;
       margin-bottom: 0.35rem;
     }
+
     .form-input {
       width: 100%;
       padding: 0.75rem 0.85rem;
@@ -84,11 +96,13 @@
       outline: none;
       transition: all 0.2s ease;
     }
+
     .form-input:focus {
       background: #ffffff;
       border-color: #dc2626;
       box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
     }
+
     .btn-submit {
       width: 100%;
       padding: 0.85rem;
@@ -103,11 +117,13 @@
       transition: all 0.2s ease;
       margin-top: 0.35rem;
     }
+
     .btn-submit:hover {
       background: linear-gradient(135deg, #b91c1c, #991b1b);
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
     }
+
     .company-footer-details {
       margin-top: 1.5rem;
       text-align: center;
@@ -116,17 +132,21 @@
       line-height: 1.5;
       max-width: 480px;
     }
+
     .company-footer-details strong {
       color: #334155;
     }
   </style>
 </head>
+
 <body>
   <div class="login-wrapper">
     <div class="login-card">
       <div class="logo-container">
         <!-- Logo with fallbacks for Live Server and Express -->
-        <img src="assets/Logosym.png" onerror="this.onerror=null; this.src='./assets/Logosym.png'; if(!this.complete) this.src='/assets/Logosym.png';" alt="D-GROW Marketing Agency Logo" class="logo-img">
+        <img src="assets/Logosym.png"
+          onerror="this.onerror=null; this.src='./assets/Logosym.png'; if(!this.complete) this.src='/assets/Logosym.png';"
+          alt="D-GROW Marketing Agency Logo" class="logo-img">
       </div>
       <h2 class="login-title">D-GROW MARKETING</h2>
       <p class="login-subtitle">Invoice & Financial Management Portal</p>
@@ -153,8 +173,8 @@
       <div><strong>D-GROW MARKETING AGENCY</strong></div>
       <div>SF No: 14/3, Plot No. 141, Radha Ave Main Rd, Valasaravakkam, Chennai - 600087</div>
       <div style="margin-top: 0.2rem;">
-        <span><strong>GSTIN:</strong> 33OUUPS5195G1ZJ</span> &bull; 
-        <span><strong>Phone:</strong> +91 97901 23456</span> &bull; 
+        <span><strong>GSTIN:</strong> 33OUUPS5195G1ZJ</span> &bull;
+        <span><strong>Phone:</strong> +91 97901 23456</span> &bull;
         <span><strong>Email:</strong> contact@dgrow.in</span>
       </div>
       <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.4rem;">
@@ -166,4 +186,5 @@
   <script src="js/api.js?v=3.3"></script>
   <script src="js/auth.js?v=3.3"></script>
 </body>
+
 </html>

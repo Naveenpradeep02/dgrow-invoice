@@ -23,9 +23,45 @@ const SVG_ICONS = {
   DOLLAR: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:2px;"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`
 };
 
+let allMarketersForView = [];
+
+async function loadMarketersForView() {
+  try {
+    const res = await apiFetch('/auth/users');
+    const users = (res && res.users) ? res.users : (Array.isArray(res) ? res : []);
+    allMarketersForView = users.filter(u => {
+      const roleStr = String(u.role || '').toUpperCase();
+      return roleStr === 'MARKETING' || roleStr.includes('MARKET');
+    });
+
+    populateMarketerDropdownsForView();
+  } catch (err) {
+    console.warn('Could not load marketing users for view:', err);
+  }
+}
+
+function populateMarketerDropdownsForView() {
+  const selects = ['editEnqAssignedTo', 'viewModalEnquiryMarketerSelect'];
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const currentVal = el.value;
+    el.innerHTML = '<option value="">-- Unassigned (Direct / No Field Rep Assigned) --</option>';
+    allMarketersForView.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.name || m.username || 'Marketer'} (${m.email || 'Marketing'})`;
+      el.appendChild(opt);
+    });
+    if (currentVal) el.value = currentVal;
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const enquiryId = params.get('id');
+
+  loadMarketersForView();
 
   if (!enquiryId) {
     document.getElementById('enquiryNestedPageContent').innerHTML = `
@@ -97,6 +133,8 @@ function renderEnquiryHero(enq, timeline = []) {
   const budgetFormatted = parseFloat(enq.estimated_budget || 0) > 0 ? formatINR(enq.estimated_budget) : 'Flexible / TBD';
   const negCount = countNegotiationRounds(timeline);
   const callCount = countTotalCalls(timeline);
+  const assignedMarketerName = enq.assigned_to ? (enq.assigned_marketer_name || 'Assigned Marketer') : null;
+  const canAssign = (typeof isAdmin === 'function' && isAdmin()) || getUser()?.role === 'ADMIN';
 
   return `
     <!-- Top Hero Banner (Clean D-GROW White Theme with Vector Icons) -->
@@ -110,6 +148,16 @@ function renderEnquiryHero(enq, timeline = []) {
               <h1 style="margin:0; font-size:1.45rem; font-weight:800; color:var(--text-main, #0f172a);">${escapeAttr(enq.business_name)}</h1>
               ${getEnquiryStatusBadge(enq.status)}
               ${getEnquirySourceBadge(enq.source, enq.marketing_person)}
+              ${assignedMarketerName ? `
+                <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-weight:700; border:1px solid #bfdbfe; display:inline-flex; align-items:center; gap:0.35rem;" title="Assigned Marketer">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                  Assigned: ${escapeAttr(assignedMarketerName)}
+                </span>
+              ` : `
+                <span class="badge" style="background:#f8fafc; color:#64748b; font-weight:600; border:1px solid #e2e8f0;" title="No marketing employee assigned">
+                  Unassigned
+                </span>
+              `}
             </div>
             <div class="hero-clean-meta-list">
               <span>${SVG_ICONS.USER} <strong>${escapeAttr(enq.name)}</strong></span>
@@ -172,6 +220,13 @@ function renderEnquiryHero(enq, timeline = []) {
         </div>
 
         <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+          ${canAssign ? `
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openAssignMarketerModalFromView()" style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:700; color:#2563eb; border-color:#bfdbfe; background:#eff6ff;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+              ${enq.assigned_to ? 'Reassign Marketer' : '+ Assign Marketer'}
+            </button>
+          ` : ''}
+
           <button type="button" class="btn btn-secondary btn-sm" onclick="handleCreateQuotationFromCurrentEnquiry()" style="display:inline-flex; align-items:center; gap:0.35rem; font-weight:700; color:#7e22ce; border-color:#e9d5ff; background:#faf5ff;">
             ${SVG_ICONS.QUOTE} Create Quotation Proposal
           </button>
@@ -212,6 +267,8 @@ function renderNestedEnquiryPage(enq, timeline) {
   const heroHtml = renderEnquiryHero(enq, timeline);
   const negCount = countNegotiationRounds(timeline);
   const callCount = countTotalCalls(timeline);
+  const assignedMarketerName = enq.assigned_to ? (enq.assigned_marketer_name || 'Assigned Marketer') : null;
+  const canAssign = (typeof isAdmin === 'function' && isAdmin()) || getUser()?.role === 'ADMIN';
 
   container.innerHTML = `
     ${heroHtml}
@@ -256,6 +313,22 @@ function renderNestedEnquiryPage(enq, timeline) {
           <div class="info-row">
             <span class="info-label">Lead Source:</span>
             <span class="info-val">${getEnquirySourceBadge(enq.source, enq.marketing_person)}</span>
+          </div>
+          <div class="info-row" style="background:#f8fafc; padding:0.4rem 0.6rem; border-radius:6px; margin:0.35rem 0; border:1px solid #e2e8f0;">
+            <span class="info-label" style="font-weight:700; color:#1e293b;">Assigned Marketer:</span>
+            <span class="info-val" style="display:inline-flex; align-items:center; gap:0.45rem;">
+              ${assignedMarketerName ? `
+                <strong style="color:#2563eb; display:inline-flex; align-items:center; gap:0.3rem;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                  ${escapeAttr(assignedMarketerName)}
+                </strong>
+              ` : `<span class="text-muted" style="font-style:italic;">Unassigned</span>`}
+              ${canAssign ? `
+                <button type="button" onclick="openAssignMarketerModalFromView()" class="btn btn-secondary btn-sm" style="padding:0.15rem 0.5rem; font-size:0.7rem; font-weight:700; color:#2563eb; border-color:#bfdbfe; background:#ffffff; margin-left:0.25rem;">
+                  ${enq.assigned_to ? 'Change' : '+ Assign'}
+                </button>
+              ` : ''}
+            </span>
           </div>
           ${enq.marketing_person ? `
             <div class="info-row">
@@ -778,6 +851,11 @@ function openEditModalFromNested() {
   document.getElementById('editEnqStatus').value = enq.status || 'NEW';
   document.getElementById('editEnqNotes').value = enq.notes || '';
 
+  const assignedEl = document.getElementById('editEnqAssignedTo');
+  if (assignedEl) {
+    assignedEl.value = enq.assigned_to || '';
+  }
+
   toggleMarketingPersonField('editEnqSource', 'editEnqRepContainer');
   document.getElementById('editEnquiryModal').classList.add('active');
 }
@@ -813,6 +891,9 @@ async function submitEditEnquiry(e) {
   const status = document.getElementById('editEnqStatus').value;
   const notes = document.getElementById('editEnqNotes').value.trim();
 
+  const assigned_to_val = document.getElementById('editEnqAssignedTo')?.value;
+  const assigned_to = assigned_to_val ? parseInt(assigned_to_val) : null;
+
   const btn = document.getElementById('btnSubmitEditEnquiry');
   btn.disabled = true;
   btn.textContent = 'Updating...';
@@ -827,6 +908,7 @@ async function submitEditEnquiry(e) {
         business_name,
         source,
         marketing_person,
+        assigned_to,
         services_interested,
         estimated_budget,
         status,
@@ -918,3 +1000,69 @@ async function handleDeleteEnquiryFromNested() {
   }
 }
 window.handleDeleteEnquiryFromNested = handleDeleteEnquiryFromNested;
+
+// --- 1-CLICK ASSIGN MARKETER FROM 360 VIEW ---
+function openAssignMarketerModalFromView() {
+  if (!currentEnquiry) return;
+  const nameSpan = document.getElementById('viewModalEnquiryBusinessName');
+  if (nameSpan) {
+    nameSpan.textContent = currentEnquiry.business_name || currentEnquiry.name || `#${currentEnquiry.id}`;
+  }
+  const sel = document.getElementById('viewModalEnquiryMarketerSelect');
+  if (sel) {
+    sel.value = currentEnquiry.assigned_to ? String(currentEnquiry.assigned_to) : '';
+  }
+  const modal = document.getElementById('assignEnquiryModalView');
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+function closeAssignEnquiryModalFromView() {
+  const modal = document.getElementById('assignEnquiryModalView');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+async function submitEnquiryAssignmentFromView() {
+  if (!currentEnquiry) return;
+  const sel = document.getElementById('viewModalEnquiryMarketerSelect');
+  const assigned_to_val = sel ? sel.value : '';
+  const assigned_to = assigned_to_val ? parseInt(assigned_to_val) : null;
+
+  const btn = document.getElementById('btnSaveEnquiryAssignmentView');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+  }
+
+  try {
+    const res = await apiFetch(`/enquiries/${currentEnquiry.id}/assign`, {
+      method: 'PUT',
+      body: JSON.stringify({ assigned_to })
+    });
+
+    if (res && res.success) {
+      showToast(res.message || '✓ Marketer assigned successfully!', 'success');
+      closeAssignEnquiryModalFromView();
+      await loadEnquiryNestedPage(currentEnquiry.id);
+    } else {
+      showToast(res?.message || 'Failed to update assignment', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to assign marketer: ' + err.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Save & Assign';
+    }
+  }
+}
+
+window.openAssignMarketerModalFromView = openAssignMarketerModalFromView;
+window.closeAssignEnquiryModalFromView = closeAssignEnquiryModalFromView;
+window.submitEnquiryAssignmentFromView = submitEnquiryAssignmentFromView;
+window.openEditModalFromNested = openEditModalFromNested;
+window.closeEditEnquiryModal = closeEditEnquiryModal;
+window.submitEditEnquiry = submitEditEnquiry;

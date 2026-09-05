@@ -132,7 +132,7 @@ async function loadStaffUsers() {
       } else if (u.role === 'MARKETING') {
         roleBadgeColor = '#059669';
         roleBg = '#d1fae5';
-        accessScope = 'Enquiries, Meetings, Quotes & Proposals (No Delete)';
+        accessScope = 'Enquiries, Meetings & Quotations (No Delete)';
       } else if (u.role === 'AUDITOR') {
         roleBadgeColor = '#d97706';
         roleBg = '#fef3c7';

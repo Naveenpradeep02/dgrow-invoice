@@ -112,14 +112,29 @@ const DEFAULT_CANVA_PRESETS = [
 let modalPackages = JSON.parse(JSON.stringify(DEFAULT_CANVA_PRESETS));
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadPackageProposals();
-  loadServiceMasterOptions();
+  const user = (typeof getUser === 'function') ? getUser() : null;
+  const isMarketing = user && (typeof isMarketingRole === 'function') && isMarketingRole(user.role);
+
+  if (!isMarketing) {
+    loadPackageProposals();
+    loadServiceMasterOptions();
+  }
 
   // Check URL parameters for active tab
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
-    if (tabParam === 'quotes' || tabParam === 'standard') {
+    if (isMarketing) {
+      switchMainQuotationsTab('STANDARD_QUOTES');
+      const tabProposals = document.getElementById('tabNavProposals');
+      if (tabProposals) tabProposals.style.display = 'none';
+      const sidebarProposals = document.getElementById('sidebarNavProposals');
+      if (sidebarProposals) sidebarProposals.style.display = 'none';
+      const viewProposals = document.getElementById('proposalsViewSection');
+      if (viewProposals) viewProposals.style.display = 'none';
+      const createPropBtn = document.getElementById('btnCreateProposalTop') || document.querySelector('a[href*="create-proposal"]');
+      if (createPropBtn) createPropBtn.style.display = 'none';
+    } else if (tabParam === 'quotes' || tabParam === 'standard') {
       switchMainQuotationsTab('STANDARD_QUOTES');
     } else {
       switchMainQuotationsTab('PROPOSALS');
@@ -740,6 +755,12 @@ async function handleDeleteProposal(proposalId, proposalCode) {
 
 // Tab Switcher between 3-Tier Proposals and Standard Quotations
 function switchMainQuotationsTab(tabKey) {
+  const user = (typeof getUser === 'function') ? getUser() : null;
+  const isMarketing = user && (typeof isMarketingRole === 'function') && isMarketingRole(user.role);
+  if (isMarketing && tabKey === 'PROPOSALS') {
+    tabKey = 'STANDARD_QUOTES';
+  }
+
   const tabProposals = document.getElementById('tabNavProposals');
   const tabStandard = document.getElementById('tabNavStandard');
   const viewProposals = document.getElementById('proposalsViewSection');
